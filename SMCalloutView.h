@@ -154,6 +154,8 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 /// Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.
 /// Accessories are masked by the shape of the callout (including the arrow itself).
 @interface SMCalloutMaskedBackgroundView : SMCalloutBackgroundView
+
+/// NOTE: this is a custom method i added
 - (void)arrowImageColor:(UIColor *)newColor;
 @end
 

@@ -642,6 +642,7 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
     return self;
 }
 
+/// sets the arrow pointing down at the pin to be the same color as the last cell in the callout
 - (void)arrowImageColor:(UIColor * __nonnull)newColor
 {
     blackArrowImage = [self image:blackArrowImage withColor:newColor];

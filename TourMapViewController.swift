@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  new phishtour navbar test
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/26/15.
 //  Copyright © 2015 AaronJ. All rights reserved.
@@ -14,27 +14,27 @@ class TourMapViewController: UIViewController,
 {
     var tourMap: MKMapView!
     
-    // impermanent UI elements
+    /// impermanent UI elements
     var tourSelecter: UIVisualEffectView?
     var tourNavControls: TourNavControls?
     var tourTitleLabel: UILabel?
     var tourList: UIVisualEffectView?
     var progressBar: UIProgressView?
     
-    // nav bar buttons
+    /// nav bar buttons
     var resetButton: UIButton!
     var selectTourButton: UIButton!
     
-    // the region to reset the map to
+    /// the region to reset the map to
     let defaultRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 39.8282, longitude: -98.5795), span: MKCoordinateSpan(latitudeDelta: 50.0, longitudeDelta: 50.0))
     
-    // the pin callout that is currently showing
+    /// the pin callout that is currently showing
     var currentCallout: SMCalloutView?
     
-    // use this to prevent the map from dismissing the callout when it sets a new center on the selected annotation
+    /// use this to prevent the map from dismissing the callout when it sets a new center on the selected annotation
     var didSelectAnnotationView: Bool = false
     
-    // flag to indicate the map is being reloaded from the song history
+    /// flag to indicate the map is being reloaded from the song history
     var isComingFromSongHistory: Bool = false
     var didComeFromSongHistory: Bool = false
     
@@ -48,17 +48,16 @@ class TourMapViewController: UIViewController,
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        // UIApplication.sharedApplication().statusBarStyle = .LightContent
-        // self.restorationIdentifier = "TourMapViewController"
         setupNavBar()
         addMap()
     }
     
+    /// this part of the setup will happen when returning from the song history, or upon app re-launch
     override func viewWillAppear(animated: Bool)
     {
         setupNavBar()
         
-        // if a show/tour was selected from the song history, reset the map, and show the tour
+        /// if a show/tour was selected from the song history, reset the map, and show the tour
         if self.isComingFromSongHistory
         {
             self.isComingFromSongHistory = false
@@ -68,12 +67,13 @@ class TourMapViewController: UIViewController,
         }
         else
         {
+            /// we might need to re-launch to the setlist view controller
             if let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
             {
-                // self.shouldGoToSetlist = true
                 if let previousShowIDData = previousSetlistSettings["previousShow"] as? NSData
                 {
-                    print("Got the setlist from NSUserDefaults...")
+                    /// the previous show was saved as a showID. get the showID and use it to retrieve a PhishShow object,
+                    /// then segue to the setlist view controller
                     let previousShowID = NSKeyedUnarchiver.unarchiveObjectWithData(previousShowIDData) as! Int
                     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
                     let documentsURL = NSURL(string: documentsPath)!
@@ -88,29 +88,25 @@ class TourMapViewController: UIViewController,
                 }
             }
             
+            /// there might be a previous tour to load;
+            /// the information is saved as IDs which can be used to retrieve model objects
             if let previousSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSettings")
             {
-                print("Got the previous settings!!!")
                 if let previousYearData = previousSettings["previousYear"] as? NSData
                 {
                     let previousYear = NSKeyedUnarchiver.unarchiveObjectWithData(previousYearData) as! Int
-                    print("previousYear: \(previousYear)")
                     PhishModel.sharedInstance().previousYear = previousYear
-                    print("Set previousYear!!!")
                 }
                 
-                print("Checking previousTourData...")
                 if let previousTourData = previousSettings["previousTour"] as? NSData
                 {
                     let previousTour = NSKeyedUnarchiver.unarchiveObjectWithData(previousTourData) as! Int
-                    print("previousTour: \(previousTour)")
                     PhishModel.sharedInstance().previousTour = previousTour
                 }
                 
                 if let selectedTourIDData = previousSettings["selectedTourID"] as? NSData
                 {                
                     let selectedTourID = NSKeyedUnarchiver.unarchiveObjectWithData(selectedTourIDData) as! Int
-                    print("selectedTour: \(selectedTourID)")
                     
                     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
                     let documentsURL = NSURL(string: documentsPath)!
@@ -133,33 +129,9 @@ class TourMapViewController: UIViewController,
         }
     }
     
-//    override func viewDidAppear(animated: Bool)
-//    {
-//        if self.shouldGoToSetlist
-//        {
-//            let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")!
-//            
-//            if let previousShowIDData = previousSetlistSettings["previousShow"] as? NSData
-//            {
-//                print("Got the setlist from NSUserDefaults...")
-//                let previousShowID = NSKeyedUnarchiver.unarchiveObjectWithData(previousShowIDData) as! Int
-//                let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-//                let documentsURL = NSURL(string: documentsPath)!
-//                let filename = "show\(previousShowID)"
-//                let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-//                let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(fileURL.path!) as! PhishShow
-//                
-//                let setlistViewController = SetlistViewController()
-//                setlistViewController.show = savedShow
-//                setlistViewController.isRelaunchingApp = true
-//                self.showViewController(setlistViewController, sender: self)
-//            }
-//        }
-//    }
-    
     func setupNavBar()
     {
-        // create a reset button for the navigation bar
+        /// create a reset button for the navigation bar
         let resetButton = UIButton()
         resetButton.titleLabel?.font = UIFont(name: "AppleSDGothicNeo-SemiBold", size: 16)
         let resetButtonColor: UIColor = (PhishModel.sharedInstance().selectedTour == nil) ? UIColor.lightGrayColor() : UIColor.whiteColor()
@@ -170,7 +142,7 @@ class TourMapViewController: UIViewController,
         resetButton.enabled = (PhishModel.sharedInstance().selectedTour == nil) ? false : true
         let navResetButton = UIBarButtonItem(customView: resetButton)
         
-        // the select tour button
+        /// the select tour button
         let selectTourButton = UIButton()
         selectTourButton.titleLabel?.font = UIFont(name: "AppleSDGothicNeo-SemiBold", size: 16)
         selectTourButton.setTitle("Select Tour", forState: .Normal)
@@ -178,16 +150,18 @@ class TourMapViewController: UIViewController,
         selectTourButton.addTarget(self, action: "showTourSelecter", forControlEvents: .TouchUpInside)
         let navSelectTourButton = UIBarButtonItem(customView: selectTourButton)
         
-        // keep references to the buttons to manipulate them later
+        /// keep references to the buttons to manipulate them later
         self.resetButton = resetButton
         self.selectTourButton = selectTourButton
         
+        /// nav bar title
         let navBarTitle = UILabel()
         navBarTitle.font = UIFont(name: "AppleSDGothicNeo-Bold", size: 20)
         navBarTitle.textColor = UIColor.whiteColor()
         navBarTitle.text = "PhishTour"
         navBarTitle.sizeToFit()
         
+        /// set the navigation items
         self.navigationItem.leftBarButtonItem = navResetButton
         self.navigationItem.titleView = navBarTitle
         self.navigationItem.rightBarButtonItem = navSelectTourButton
@@ -208,27 +182,19 @@ class TourMapViewController: UIViewController,
     
     func saveToUserDefaults()
     {
+        /// encode info for the current tour as NSData and save it into a dictionary
         var previousSettings = [String : AnyObject]()
         
         if let previousYear = PhishModel.sharedInstance().previousYear
         {
-            print("Saving \(previousYear) to the NSUserDefaults...")
             let previousYearData: NSData = NSKeyedArchiver.archivedDataWithRootObject(previousYear)
             previousSettings.updateValue(previousYearData, forKey: "previousYear")
         }
         if let previousTour = PhishModel.sharedInstance().previousTour
         {
-            print("Saving \(previousTour) to the NSUserDefaults...")
             let previousTourData: NSData = NSKeyedArchiver.archivedDataWithRootObject(previousTour)
             previousSettings.updateValue(previousTourData, forKey: "previousTour")
         }
-        /*
-        if let currentTours = PhishModel.sharedInstance().currentTours
-        {
-            let currentToursData: NSData = NSKeyedArchiver.archivedDataWithRootObject(currentTours)
-            previousSettings.updateValue(currentToursData, forKey: "currentTours")
-        }
-        */
         if let selectedTour = PhishModel.sharedInstance().selectedTour
         {
             let selectedTourID: Int = selectedTour.tourID
@@ -236,6 +202,7 @@ class TourMapViewController: UIViewController,
             previousSettings.updateValue(selectedTourIDData, forKey: "selectedTourID")
         }
         
+        /// we need to know if the map has been reset before the app closes
         if self.didReset
         {
             previousSettings.updateValue(self.didReset, forKey: "didReset")
@@ -254,7 +221,8 @@ class TourMapViewController: UIViewController,
         self.selectTourButton.setTitleColor(UIColor.redColor(), forState: .Normal)
         self.selectTourButton.setTitle("Cancel", forState: .Normal)
         
-        /// create the tour selecter
+        /// create the tour selecter: it consists of a year picker, a tour picker, and a button to follow the selected tour;
+        /// then request the years and tours to populate the pickers with
         if self.tourSelecter == nil
         {
             self.tourSelecter = UIVisualEffectView(effect: UIBlurEffect(style: .Light))
@@ -312,7 +280,7 @@ class TourMapViewController: UIViewController,
                     {
                         action in
                         
-                        // revert the "select tour" button
+                        /// revert the "select tour" button
                         self.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
                         self.selectTourButton.setTitle("Select Tour", forState: .Normal)
                         
@@ -328,6 +296,7 @@ class TourMapViewController: UIViewController,
                 }
                 else
                 {
+                    /// the previously selected year to request tours for
                     var reloadYear: PhishYear?
                     
                     dispatch_async(dispatch_get_main_queue())
@@ -337,19 +306,18 @@ class TourMapViewController: UIViewController,
                         /// set the picker to whatever it was at the last time
                         if let previousYear = PhishModel.sharedInstance().previousYear
                         {
-                            reloadYear = PhishModel.sharedInstance().years![previousYear]
-                            print("Reloading \(reloadYear!.year)")
-                            
+                            /// set the year to reload and select the previous year setting
+                            reloadYear = PhishModel.sharedInstance().years![previousYear]                            
                             yearPicker.selectRow(previousYear, inComponent: 0, animated: false)
                         }
                         
-                        // get the tours for the most current year, or whichever year was previously selected
+                        /// get the tours for the most current year, or whichever year was previously selected
                         let yearToGet: PhishYear = (reloadYear != nil) ? reloadYear! : PhishModel.sharedInstance().years!.first!
-                        print("Getting tours for \(yearToGet.year)")
                         PhishModel.sharedInstance().getToursForYear(yearToGet)
                         {
                             toursError, tours in
                             
+                            /// something went wrong
                             if toursError != nil
                             {
                                 /// create an alert for the problem and dismiss the tour selecter
@@ -358,7 +326,7 @@ class TourMapViewController: UIViewController,
                                 {
                                     action in
                                     
-                                    // revert the "select tour" button
+                                    /// revert the "select tour" button
                                     self.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
                                     self.selectTourButton.setTitle("Select Tour", forState: .Normal)
                                     
@@ -378,27 +346,18 @@ class TourMapViewController: UIViewController,
                                 {
                                     tourPicker.reloadAllComponents()
                                     
+                                    /// set the tour picker to the previously selected tour, or the first item if there wasn't a previous selection
                                     if let previousTour = PhishModel.sharedInstance().previousTour
                                     {
-                                        print("Selecting the previous tour: \(previousTour)")
                                         tourPicker.selectRow(previousTour, inComponent: 0, animated: false)
-                                        
-                                        PhishModel.sharedInstance().selectedTour = tours![previousTour] // PhishModel.sharedInstance().currentTours![previousTour]
-                                        // PhishModel.sharedInstance().previousTour = 0
+                                        PhishModel.sharedInstance().selectedTour = tours![previousTour]
                                     }
                                     else
                                     {
-                                        print("There wasn't a previously selected tour!!!")
                                         PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
                                         PhishModel.sharedInstance().previousTour = 0
                                     }
                                 }
-                                
-                                
-                                
-                                // self.saveToUserDefaults()
-                                
-                                
                                 
                                 /// make the progress bar green when it finishes successfully
                                 /// then, remove it after a short delay
@@ -416,17 +375,15 @@ class TourMapViewController: UIViewController,
                             }
                         }
                     }
-                    
-                    
                 }
             }
             
             self.view.addSubview(tourSelecter!)
         }
-        // dismiss the tour selecter
+        /// dismiss the tour selecter
         else
         {
-            // revert the "select tour" button
+            /// revert the "select tour" button
             self.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
             self.selectTourButton.setTitle("Select Tour", forState: .Normal)
             
@@ -435,18 +392,20 @@ class TourMapViewController: UIViewController,
         }
     }
     
+    /// NOTE:
+    /// this consists of only the List button, at the moment
     func showTourNavControls()
     {
-        // create the tour nav controls
+        /// create the tour nav controls
         if self.tourNavControls == nil
         {
             self.tourNavControls = TourNavControls(parentView: self.view)
             self.tourNavControls?.delegate = self
             
-            // add the buttons to the view
+            /// add the buttons to the view
             self.tourNavControls?.addButtons()
         }
-        // dismiss the tour nav controls
+        /// dismiss the tour nav controls
         else
         {
             self.tourNavControls?.removeButtons()
@@ -456,13 +415,14 @@ class TourMapViewController: UIViewController,
     
     // MARK: Map methods
     
+    /// reset the map state
     func reset(saveTour: Bool = false)
     {
-        // disable the "reset" button
+        /// disable the "reset" button
         self.resetButton.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
         self.resetButton.enabled = false
         
-        // blank the selected tour
+        /// blank the current selections, if we don't need to remember them
         if !saveTour
         {
             PhishModel.sharedInstance().selectedTour = nil
@@ -472,33 +432,32 @@ class TourMapViewController: UIViewController,
             self.saveToUserDefaults()
         }
         
-        // dismiss the tour selecter
+        /// dismiss the tour selecter
         if self.tourSelecter != nil
         {
             self.showTourSelecter()
         }
         
-        // dismiss the tour title
+        /// dismiss the tour title
         if self.tourTitleLabel != nil
         {
             self.showTourTitle()
         }
         
-        // dismiss the tour nav controls
+        /// dismiss the tour nav controls
         if self.tourNavControls != nil
         {
             self.showTourNavControls()
         }
         
-        // dismiss the tour list
+        /// dismiss the tour list
         if self.tourList != nil
         {
             self.didPressListButton()
         }
         
-        // dismiss the info pane
-        
-        // reset the map
+        /// reset the map;
+        /// remove any annotations and dismiss the current callout
         if tourMap.annotations.count > 0
         {
             tourMap.removeAnnotations(tourMap.annotations)
@@ -509,20 +468,21 @@ class TourMapViewController: UIViewController,
             self.currentCallout = nil
         }
         
-        // put the map back at the default region
+        /// put the map back at the default region
         tourMap.setRegion(self.defaultRegion, animated: true)
     }
     
+    /// display the shows for the selected tour on the map
     func followTour()
     {
-        // reset everything
+        /// reset everything
         self.reset(true)
         
-        // enable the "reset" button
+        /// enable the "reset" button
         self.resetButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
         self.resetButton.enabled = true
         
-        // make sure we've got a tour selected
+        /// make sure we've got a tour selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
         else
         {
@@ -601,21 +561,21 @@ class TourMapViewController: UIViewController,
                         }
                     }
                     
-                    // show the tour title
+                    /// show the tour title
                     self.showTourTitle()
                     
-                    // center the map on the first show
+                    /// center the map on the first show
                     self.centerOnFirstShow()
                     
-                    // drop the pins on the map after a short delay
-                    // NOTE: dispatch_after trick cribbed from http://stackoverflow.com/a/24034838
+                    /// drop the pins on the map after a short delay
+                    /// NOTE: dispatch_after trick cribbed from http://stackoverflow.com/a/24034838
                     let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC)))
                     dispatch_after(delayTime, dispatch_get_main_queue())
                     {
                         self.tourMap.addAnnotations(selectedTour.uniqueLocations!)
                         
-                        // if a show was selected from the song history, select the annotation associated with the show,
-                        // so the callout will be presented
+                        /// if a show was selected from the song history, select the annotation associated with the show,
+                        /// so the callout will be presented
                         if self.didComeFromSongHistory
                         {
                             let venue = PhishModel.sharedInstance().currentShow!.venue
@@ -627,7 +587,7 @@ class TourMapViewController: UIViewController,
                         }
                     }
                                         
-                    // show the tour nav controls, if they aren't already up
+                    /// show the tour nav controls, if they aren't already up
                     if self.tourNavControls == nil
                     {
                         self.showTourNavControls()
@@ -645,9 +605,10 @@ class TourMapViewController: UIViewController,
         }
     }
     
+    /// show a label with the selected tour's title
     func showTourTitle()
     {
-        // remove the old label is one is already onscreen
+        /// remove the old label is one is already onscreen
         if self.tourTitleLabel != nil
         {
             self.tourTitleLabel?.removeFromSuperview()
@@ -655,7 +616,7 @@ class TourMapViewController: UIViewController,
             self.tourTitleLabel = nil
         }
         
-        // make sure a tour is selected
+        /// make sure a tour is selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
         else
         {
@@ -664,7 +625,7 @@ class TourMapViewController: UIViewController,
             return
         }
         
-        // create the label with the name of the selected tour
+        /// create the label with the name of the selected tour
         self.tourTitleLabel = UILabel()
         self.tourTitleLabel!.backgroundColor = UIColor.orangeColor()
         self.tourTitleLabel!.font = UIFont(name: "AppleSDGothicNeo-Bold", size: 16)
@@ -672,18 +633,19 @@ class TourMapViewController: UIViewController,
         self.tourTitleLabel!.textAlignment = .Center
         self.tourTitleLabel!.text = selectedTour.name
         
-        // center the label at the top of the screen
+        /// center the label at the top of the screen
         self.tourTitleLabel!.sizeToFit()
         self.tourTitleLabel!.frame.size.width += 20
         self.tourTitleLabel!.frame.origin = CGPoint(x: CGRectGetMidX(view.bounds) - (self.tourTitleLabel!.bounds.width / 2), y: UIApplication.sharedApplication().statusBarFrame.size.height + self.navigationController!.navigationBar.bounds.height)
         
-        // add the label to the view
+        /// add the label to the view
         view.addSubview(self.tourTitleLabel!)
     }
     
+    /// move the map to the first show
     func centerOnFirstShow()
     {
-        // make sure a tour is selected
+        /// make sure a tour is selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
         else
         {
@@ -692,23 +654,25 @@ class TourMapViewController: UIViewController,
             return
         }
         
+        /// if we've selected a show/tour from the song history, move the map to the specific show, not the first show on the tour
         var firstShowRegion: MKCoordinateRegion
         if self.isComingFromSongHistory
         {
             firstShowRegion = MKCoordinateRegion(center: PhishModel.sharedInstance().currentShow!.coordinate, span: MKCoordinateSpan(latitudeDelta: 50.0, longitudeDelta: 50.0))
         }
+        /// set the map to be centered on the first show of the tour and zoomed far out
         else
         {
-            // set the map to be centered on the first show of the tour and zoomed far out
             firstShowRegion = MKCoordinateRegion(center: selectedTour.showCoordinates.first!, span: MKCoordinateSpan(latitudeDelta: 50.0, longitudeDelta: 50.0))
         }
         
         tourMap.setRegion(firstShowRegion, animated: true)
     }
     
+    /// connect each show on the tour with a trail
     func makeTourTrail()
     {
-        // make sure a tour is selected
+        /// make sure a tour is selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
         else
         {
@@ -717,7 +681,7 @@ class TourMapViewController: UIViewController,
             return
         }
         
-        // get the coordinates for every location on the tour
+        /// get the coordinates for every location on the tour
         var showCoordinates = [CLLocationCoordinate2D]()
         for index in selectedTour.showCoordinates.indices
         {
@@ -726,7 +690,7 @@ class TourMapViewController: UIViewController,
         
         dispatch_async(dispatch_get_main_queue())
         {
-            // draw the trail between every coordinate
+            /// draw the trail between every coordinate
             let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
             self.tourMap.addOverlay(tourTrail)
         }
@@ -734,7 +698,7 @@ class TourMapViewController: UIViewController,
     
     // MARK: MKMapViewDelegate methods
     
-    // controls the look of the tour "trail"
+    /// controls the look of the tour "trail"
     func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer
     {
         let trail = overlay as! MKPolyline
@@ -746,16 +710,17 @@ class TourMapViewController: UIViewController,
         return trailRenderer
     }
     
+    /// configure the pins that are dropped onto the map
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView?
     {
-        // cast the annotation to a PhishShow to get at the consecutiveNights property
+        /// cast the annotation to a PhishShow to get at the consecutiveNights property
         let theShow = annotation as! PhishShow
         
-        // re-use an annotation view, if possible
+        /// re-use an annotation view, if possible
         if let reusedAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("mapPin") as? MKPinAnnotationView
         {
-            // remove the number image view it came with
-            // (the annotation view being re-used might not be the same one that was associated with the annotation last time)
+            /// remove the number image view it came with
+            /// (the annotation view being re-used might not be the same one that was associated with the annotation last time)
             if let previousNumberImageView = reusedAnnotationView.viewWithTag(5)
             {
                 previousNumberImageView.removeFromSuperview()
@@ -763,7 +728,7 @@ class TourMapViewController: UIViewController,
             
             reusedAnnotationView.annotation = theShow
             
-            // add a new number image view with the correct number
+            /// add a new number image view with the correct number
             let numberImageView = UIImageView(image: UIImage(named: "\(theShow.consecutiveNights)"))
             numberImageView.frame = CGRect(x: CGRectGetMidX(reusedAnnotationView.bounds) - (numberImageView.frame.size.width / 2) - 1, y: CGRectGetMaxY(reusedAnnotationView.bounds) - (numberImageView.frame.size.height), width: numberImageView.frame.size.width, height: numberImageView.frame.size.height)
             numberImageView.tag = 5
@@ -773,11 +738,12 @@ class TourMapViewController: UIViewController,
             
             return reusedAnnotationView
         }
+        /// no annotation view to re-use
         else
         {
             let newAnnotationView = MKPinAnnotationView(annotation: theShow, reuseIdentifier: "mapPin")
             
-            // use the consecutiveNights to add a number to the pin indicating the number of nights played at that location
+            /// use the consecutiveNights to add a number to the pin indicating the number of nights played at that location
             let numberImageView = UIImageView(image: UIImage(named: "\(theShow.consecutiveNights)"))
             numberImageView.frame = CGRect(x: CGRectGetMidX(newAnnotationView.bounds) - (numberImageView.frame.size.width / 2) - 1, y: CGRectGetMaxY(newAnnotationView.bounds) - (numberImageView.frame.size.height), width: numberImageView.frame.size.width, height: numberImageView.frame.size.height)
             numberImageView.tag = 5
@@ -791,27 +757,30 @@ class TourMapViewController: UIViewController,
         }
     }
     
+    /// when a pin is selected, display a callout with the information for each show played at that location;
+    /// this is accomplished using callout cells for each show, a container view to hold the cells,
+    /// and with the help of the custom SMCalloutView map callout
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView)
     {        
-        // if another callout if showing, dismiss it first
+        /// if another callout if showing, dismiss it first
         if self.currentCallout != nil
         {
             self.currentCallout?.dismissCalloutAnimated(true)
             self.currentCallout = nil
         }
         
+        /// don't dismiss the callout when the map centers on the first show
         self.didSelectAnnotationView = true
         
-        // set the selected show
+        /// set the selected show
         let selectedLocation = view.annotation as! PhishShow
         PhishModel.sharedInstance().currentShow = selectedLocation
         
-        // create a container view to hold the callout cells
+        /// create a container view to hold the callout cells
         let callout = CalloutCellView()
         
-        // create a callout cell for every show at the location
+        /// create a callout cell for every show at the location
         let venue = PhishModel.sharedInstance().currentShow!.venue
-        print("selectedTour: \(PhishModel.sharedInstance().selectedTour!)")
         let showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary[venue]!
         var showCells = [CalloutCell]()
         for (index, show) in showsAtVenue.enumerate()
@@ -826,42 +795,42 @@ class TourMapViewController: UIViewController,
             showCell.cellNumber = index
             showCell.show = show
             
-            // set the delegate
+            /// set the delegate to handle when the setlist button is pressed
             showCell.delegate = self
             
-            // set the background color of the cell
+            /// set the background color of the cell
             showCell.setBackgroundColor()
             
-            // place all the cell views
+            /// place all the cell's views
             showCell.layoutSubviews()
             
-            // add the new cell to an array of all the cells that are going to be added to the container view
+            /// add the new cell to an array of all the cells that are going to be added to the container view
             showCells.append(showCell)
         }
         
-        // add all the cells to the container view
+        /// add all the cells to the container view
         callout.addCells(showCells)
         
-        // create the custom callout view
+        /// create the custom callout view
         let calloutView = SMCalloutView()
         
-        // set the current callout
+        /// set the current callout
         self.currentCallout = calloutView
         
-        // the content of the callout view is the container view that holds all the cells for each show
+        /// the content of the callout view is the container view that holds all the cells for each show
         calloutView.contentView = callout
         
-        // set the SMCalloutView's arrow image to be the same as the background color of the last cell in the callout
+        /// set the SMCalloutView's arrow image to be the same as the background color of the last cell in the callout
         let bgView: SMCalloutMaskedBackgroundView = calloutView.backgroundView as! SMCalloutMaskedBackgroundView
         let lastCell = callout.subviews.last as! CalloutCell
         bgView.arrowImageColor(lastCell.backgroundColor!)
         
-        // present the callout from the middle of the screen;
-        // set map center to the annotation coordinate
+        /// present the callout from the middle of the screen;
+        /// set map center to the annotation coordinate
         let viewPosition = mapView.convertCoordinate(self.tourMap.centerCoordinate, toPointToView: mapView)
         self.tourMap.setCenterCoordinate(selectedLocation.coordinate, animated: true)
         
-        // present the custom callout after a short delay
+        /// present the custom callout after a short delay
         let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
         dispatch_after(delayTime, dispatch_get_main_queue())
         {
@@ -871,9 +840,9 @@ class TourMapViewController: UIViewController,
         self.didSelectAnnotationView = false
     }
     
+    /// remove the current callout if one is showing
     func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView)
     {
-        // remove the current callout if one is showing
         if currentCallout != nil
         {
             currentCallout?.dismissCalloutAnimated( true )
@@ -882,9 +851,9 @@ class TourMapViewController: UIViewController,
         }
     }
     
+    /// using this method to draw the tour trail a short delay after the pins drop
     func mapView(mapView: MKMapView, didAddAnnotationViews views: [MKAnnotationView])
     {
-        // draw the tour trail a short delay after the pins drop
         let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(1.5 * Double(NSEC_PER_SEC)))
         dispatch_after(delayTime, dispatch_get_main_queue())
         {
@@ -892,12 +861,12 @@ class TourMapViewController: UIViewController,
         }
     }
     
-    // dismiss the current callout when scrolling the map;
-    // don't dismiss the callout when setting the map's center coordinate prior to presenting the callout
+    /// dismiss the current callout when scrolling the map;
+    /// don't dismiss the callout when setting the map's center coordinate prior to presenting the callout
     func mapView(mapView: MKMapView, regionWillChangeAnimated animated: Bool)
     {
         guard self.didSelectAnnotationView == true
-            else
+        else
         {
             if self.currentCallout != nil
             {
@@ -911,30 +880,14 @@ class TourMapViewController: UIViewController,
     
     // MARK: TourNavControlsDelegate methods
     
-    /*
-    func didPressBackButton()
-    {
-        print( "didPressBackButton" )
-    }
-    
-    func didPressNextButton()
-    {
-        print( "didPressNextButton" )
-    }
-    
-    func didPressZoomOutButton()
-    {
-        print( "didPressZoomOutButton" )
-    }
-    */
-    
     func didPressListButton()
     {
-        // create the tour list
+        /// create the tour list
         if self.tourList == nil
         {
             self.tourList = UIVisualEffectView(effect: UIBlurEffect(style: .Dark))
             
+            /// figure out how much space we have to work with
             let usedHeight: CGFloat = UIApplication.sharedApplication().statusBarFrame.size.height + self.navigationController!.navigationBar.bounds.height + self.tourTitleLabel!.bounds.height
             self.tourList?.frame = CGRect(x: 25, y: usedHeight + 25, width: self.view.bounds.width - 50, height: self.view.bounds.height - usedHeight - 90)
             
@@ -947,7 +900,7 @@ class TourMapViewController: UIViewController,
             self.tourList?.contentView.addSubview(tourListTable)
             self.view.addSubview(tourList!)
         }
-        // dismiss the tour list
+        /// dismiss the tour list
         else
         {
             self.tourList?.removeFromSuperview()
@@ -957,7 +910,7 @@ class TourMapViewController: UIViewController,
     
     // MARK: CalloutCellDelegate method
     
-    // segue to setlist view controller when the button is pressed in the callout view cell
+    /// segue to setlist view controller when the button is pressed in the callout view cell
     func didPressSetlistButton(cell: CalloutCell)
     {
         PhishModel.sharedInstance().currentShow = cell.show
@@ -966,12 +919,11 @@ class TourMapViewController: UIViewController,
         setlistViewController.show = cell.show
         
         self.showViewController(setlistViewController, sender: self)
-        // self.showDetailViewController(setlistViewController, sender: self)
     }
     
     // MARK: TourListCellDelegate method
     
-    // segue to setlist view controller when the button is pressed in the table view cell
+    /// segue to setlist view controller when the button is pressed in the table view cell
     func didPressSetlistButtonInTourListCell(cell: TourListCell)
     {
         PhishModel.sharedInstance().currentShow = cell.show
@@ -980,7 +932,6 @@ class TourMapViewController: UIViewController,
         setlistViewController.show = cell.show
         
         self.showViewController(setlistViewController, sender: self)
-        // self.showDetailViewController(setlistViewController, sender: self)
     }
 }
 
