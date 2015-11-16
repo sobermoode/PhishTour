@@ -1,6 +1,6 @@
 //
 //  CalloutCell.swift
-//  new phishtour navbar test
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/30/15.
 //  Copyright © 2015 AaronJ. All rights reserved.
@@ -48,7 +48,7 @@ class CalloutCell: UIView
     
     override func layoutSubviews()
     {
-        // set the look and frames of all the labels
+        /// set the look and frames of all the labels
         self.dateLabel.font = UIFont(name: "AppleSDGothicNeo-SemiBold", size: 16)
         self.dateLabel.sizeToFit()
         self.dateLabel.frame = CGRect(x: 7, y: 7, width: self.dateLabel.bounds.width, height: self.dateLabel.bounds.height)
@@ -65,12 +65,12 @@ class CalloutCell: UIView
         self.cityLabel.sizeToFit()
         self.cityLabel.frame = CGRect(x: self.venueLabel.frame.origin.x + self.venueLabel.bounds.width + 5, y: self.venueLabel.frame.origin.y, width: self.cityLabel.bounds.width, height: self.cityLabel.bounds.height)
         
-        // get the button to be the right size
+        /// get the button to be the right size
         self.setlistButton.setImage(UIImage(named: "setlistButton"), forState: .Normal)
         self.setlistButton.sizeToFit()
         
-        // find the width of the widest pair of the labels, either the top two or the bottom two,
-        // and calculate the width and height of the cell
+        /// find the width of the widest pair of the labels, either the top two or the bottom two,
+        /// and calculate the width and height of the cell
         let widerPair = ((self.dateLabel.bounds.width + self.yearLabel.bounds.width) > (self.venueLabel.bounds.width + self.cityLabel.bounds.width)) ? (self.dateLabel.bounds.width + self.yearLabel.bounds.width) : (self.venueLabel.bounds.width + self.cityLabel.bounds.width)
         let width = 7 + widerPair + 25 + self.setlistButton.bounds.width + 12
         let height = 7 + self.yearLabel.bounds.height + 5 + self.venueLabel.bounds.height + 2
@@ -78,15 +78,15 @@ class CalloutCell: UIView
         CalloutCell.cellWidth = width
         CalloutCell.cellHeight = height
         
-        // use the width and height values to set the cell's frame 
+        /// use the width and height values to set the cell's frame 
         self.frame = CGRect(x: 0, y: CalloutCell.cellHeight * CGFloat(self.cellNumber), width: CalloutCell.cellWidth, height: CalloutCell.cellHeight)
         
-        // finally, set the setlist button to the right of the widest pair of labels and midway from top to bottom
+        /// finally, set the setlist button to the right of the widest pair of labels and midway from top to bottom
         self.setlistButton.frame = CGRect(x: self.cityLabel.frame.origin.x + self.cityLabel.bounds.width + 25, y: (CalloutCell.cellHeight / 2) - (self.setlistButton.bounds.height / 2), width: self.setlistButton.bounds.width, height: self.setlistButton.bounds.height)
         self.setlistButton.addTarget(self, action: "seeSetlist", forControlEvents: .TouchUpInside)
     }
     
-    // create a "gradient" effect on callouts with multiple shows by making them successively grayer
+    /// create a "gradient" effect on callouts with multiple shows by making them successively grayer
     func setBackgroundColor()
     {
         let grayFactor = CGFloat(0.05 * Double(cellNumber))
@@ -97,7 +97,6 @@ class CalloutCell: UIView
     
     func seeSetlist()
     {
-        print("seeSetlist...")
         guard self.delegate != nil
         else
         {
