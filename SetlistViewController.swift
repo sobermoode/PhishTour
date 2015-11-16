@@ -1,6 +1,6 @@
 //
 //  SetlistViewController.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/13/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.
@@ -11,10 +11,15 @@ import UIKit
 class SetlistViewController: UIViewController,
     UITableViewDataSource , UITableViewDelegate
 {
+    /// the show who's setlist is being displayed
     var show: PhishShow!
     var setlist: [Int : [PhishSong]]?
+    
+    /// references to the table view and the progress bar
     var setlistTable: UITableView!
     var progressBar: UIProgressView!
+    
+    /// flag to know if the view controller is being loaded directly after app-relaunch
     var isRelaunchingApp: Bool = false
     
     override func viewDidLoad()
@@ -23,24 +28,24 @@ class SetlistViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
-        // self.view.restorationIdentifier = "SetlistViewController"
-        // self.restorationClass = SetlistViewController.self
-        // self.saveToUserDefaults()
         setupNavBar()
         createScene()
         getSetlist()
     }
     
+    /// if the app was re-launched, check to see if the app was previously on the song history
     override func viewDidAppear(animated: Bool)
     {
         if self.isRelaunchingApp
         {
             self.isRelaunchingApp = false
             
+            /// get the previous song history information
             if let previousHistorySettings = NSUserDefaults.standardUserDefaults().objectForKey("previousHistorySettings")
             {
                 if let previousDateData = previousHistorySettings["previousDate"] as? NSData, let previousSongNameData = previousHistorySettings["previousSong"] as? NSData
                 {
+                    /// retrieve the information from the device and segue to the history
                     let previousDate = NSKeyedUnarchiver.unarchiveObjectWithData(previousDateData) as! String
                     let previousSongName = NSKeyedUnarchiver.unarchiveObjectWithData(previousSongNameData) as! String
                     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
@@ -58,6 +63,7 @@ class SetlistViewController: UIViewController,
         }
     }
     
+    /// create the back button and nav bar title
     func setupNavBar()
     {
         let backButton = UIButton()
@@ -78,11 +84,12 @@ class SetlistViewController: UIViewController,
         self.navigationItem.titleView = titleLabel
     }
     
+    /// add all the views to the view controller
     func createScene()
     {
         view.backgroundColor = UIColor.whiteColor()
         
-        // create the header labels
+        /// create the header labels
         let dateLabel = UILabel()
         dateLabel.font = UIFont(name: "AppleSDGothicNeo-SemiBold", size: 22)
         dateLabel.text = show.date
@@ -113,11 +120,10 @@ class SetlistViewController: UIViewController,
         view.addSubview(venueLabel)
         view.addSubview(cityLabel)
         
-        // figure out how tall the table can be and create the table
+        /// figure out how tall the table can be and create the table
         let remainingHeight = view.bounds.height - ((dateLabel.frame.origin.x + dateLabel.frame.size.height) + (venueLabel.frame.size.height + 5) + 50)
         let setlistTableView = UITableView(frame: CGRect(x: venueLabel.frame.origin.x, y: venueLabel.frame.origin.y + venueLabel.frame.size.height + 20, width: CGRectGetMaxX(view.bounds) - 50, height: remainingHeight - 75), style: .Plain)
         setlistTableView.separatorStyle = .None
-        // setlistTableView.tag = 600
         setlistTableView.dataSource = self
         setlistTableView.delegate = self
         
@@ -132,12 +138,14 @@ class SetlistViewController: UIViewController,
     
     func getSetlist()
     {
+        /// the show already has setlist info, so we don't need to request it
         if self.show.setlist != nil
         {
             self.setlist = show.setlist
             self.setlistTable.reloadData()
             self.saveToUserDefaults()
         }
+        /// no setlist info, we need to request it
         else
         {
             /// create a progress bar to track the progress of requesting the setlist
@@ -155,6 +163,7 @@ class SetlistViewController: UIViewController,
             {
                 setlistError, setlist in
                 
+                /// something went wrong
                 if setlistError != nil
                 {
                     /// create an alert for the problem and unwind back to the map
@@ -205,6 +214,7 @@ class SetlistViewController: UIViewController,
     
     func saveToUserDefaults()
     {
+        /// encode info for the current tour as NSData and save it into a dictionary
         var previousSetlistSettings = [String : AnyObject]()
         
         if let show = self.show
@@ -219,13 +229,15 @@ class SetlistViewController: UIViewController,
     
     func backToMap()
     {
+        /// don't save the setlist view controller data if we leave it
         NSUserDefaults.standardUserDefaults().removeObjectForKey("previousSetlistSettings")
+        
         self.navigationController?.popToRootViewControllerAnimated(true)
     }
     
     // MARK: UITableViewDataSource methods
     
-    // each set and the encore will be a section in the table view
+    /// each set and the encore will be a section in the table view
     func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         if setlist != nil
@@ -240,7 +252,7 @@ class SetlistViewController: UIViewController,
         }
     }
     
-    // the number of rows will be equal to the number of songs played in the corresponding set
+    /// the number of rows will be equal to the number of songs played in the corresponding set
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         if self.setlist != nil
@@ -259,13 +271,13 @@ class SetlistViewController: UIViewController,
         }
     }
     
-    // the header view will indicate each set and the encore
+    /// the header view will indicate each set and the encore
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView?
     {
-        // dequeue a header view
+        /// dequeue a header view
         let headerView = tableView.dequeueReusableHeaderFooterViewWithIdentifier("SetHeader") as UITableViewHeaderFooterView!
         
-        // make sure the setlist exists
+        /// make sure the setlist exists
         guard self.setlist != nil
         else
         {
@@ -274,7 +286,7 @@ class SetlistViewController: UIViewController,
             return headerView
         }
         
-        // get the title for the header view
+        /// get the title for the header view
         var sets: [Int] = Array(self.setlist!.keys)
         sets.sortInPlace()
         let set: Int = sets[section]
@@ -295,7 +307,7 @@ class SetlistViewController: UIViewController,
         return headerView
     }
     
-    // customize the header view before it is displayed
+    /// customize the header view before it is displayed
     func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int)
     {
         let headerView = view as! UITableViewHeaderFooterView
@@ -317,29 +329,27 @@ class SetlistViewController: UIViewController,
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        // dequeue a cell
+        /// dequeue a cell
         let cell = tableView.dequeueReusableCellWithIdentifier("songCell", forIndexPath: indexPath) as! SongCell
         
-        // make sure the request was successful, and we have info to give to the table view
+        /// make sure the request was successful, and we have info to give to the table view
         if setlist != nil
         {
-            // get to the song for the cell
+            /// get to the song for the cell
             var sets: [Int] = Array(self.setlist!.keys)
             sets.sortInPlace()
             let set: Int = sets[indexPath.section]
             let songs: [PhishSong] = setlist![set]!
             let song: PhishSong = songs[indexPath.row]
             
-            // set the cell properties
+            /// set the cell properties
             cell.song = song
-            
             cell.textLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
             cell.textLabel?.text = song.name
-            
             cell.detailTextLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
             cell.detailTextLabel?.text = song.duration
         }
-        // no table info yet, just keep the cell blank for the time being
+        /// no table info yet, just keep the cell blank for the time being
         else
         {
             cell.textLabel?.text = ""
@@ -349,7 +359,7 @@ class SetlistViewController: UIViewController,
         return cell
     }
     
-    // segue to the song history scene for whichever song was selected
+    /// segue to the song history scene for whichever song was selected
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! SongCell
