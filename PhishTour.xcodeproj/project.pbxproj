@@ -8,20 +8,52 @@
 
 /* Begin PBXBuildFile section */
 		810779711BF9629800756A0C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779701BF9629800756A0C /* AppDelegate.swift */; };
-		810779731BF9629800756A0C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779721BF9629800756A0C /* ViewController.swift */; };
-		810779761BF9629800756A0C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 810779741BF9629800756A0C /* Main.storyboard */; };
 		810779781BF9629800756A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 810779771BF9629800756A0C /* Assets.xcassets */; };
 		8107797B1BF9629800756A0C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 810779791BF9629800756A0C /* LaunchScreen.storyboard */; };
+		810779831BF9631D00756A0C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 810779821BF9631D00756A0C /* Main.storyboard */; };
+		810779871BF9636500756A0C /* SetlistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779841BF9636500756A0C /* SetlistViewController.swift */; };
+		810779881BF9636500756A0C /* SongHistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779851BF9636500756A0C /* SongHistoryViewController.swift */; };
+		810779891BF9636500756A0C /* TourMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779861BF9636500756A0C /* TourMapViewController.swift */; };
+		810779901BF963C700756A0C /* PhishModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107798B1BF963C700756A0C /* PhishModel.swift */; };
+		810779911BF963C700756A0C /* PhishShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107798C1BF963C700756A0C /* PhishShow.swift */; };
+		810779921BF963C700756A0C /* PhishSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107798D1BF963C700756A0C /* PhishSong.swift */; };
+		810779931BF963C700756A0C /* PhishTour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107798E1BF963C700756A0C /* PhishTour.swift */; };
+		810779941BF963C700756A0C /* PhishYear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107798F1BF963C700756A0C /* PhishYear.swift */; };
+		810779981BF9640D00756A0C /* MapquestClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779961BF9640D00756A0C /* MapquestClient.swift */; };
+		810779991BF9640D00756A0C /* PhishinClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779971BF9640D00756A0C /* PhishinClient.swift */; };
+		8107799E1BF9646D00756A0C /* TourNavControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107799B1BF9646D00756A0C /* TourNavControls.swift */; };
+		8107799F1BF9646D00756A0C /* SongCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107799C1BF9646D00756A0C /* SongCell.swift */; };
+		810779A01BF9646D00756A0C /* TourListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107799D1BF9646D00756A0C /* TourListCell.swift */; };
+		810779A71BF964B700756A0C /* CalloutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A31BF964B700756A0C /* CalloutCell.swift */; };
+		810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A41BF964B700756A0C /* CalloutCellView.swift */; };
+		810779A91BF964B700756A0C /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 810779A61BF964B700756A0C /* SMCalloutView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		8107796D1BF9629800756A0C /* PhishTour.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhishTour.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		810779701BF9629800756A0C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		810779721BF9629800756A0C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		810779751BF9629800756A0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		810779771BF9629800756A0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8107797A1BF9629800756A0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8107797C1BF9629800756A0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		810779821BF9631D00756A0C /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = ../Main.storyboard; sourceTree = "<group>"; };
+		810779841BF9636500756A0C /* SetlistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetlistViewController.swift; path = ../SetlistViewController.swift; sourceTree = "<group>"; };
+		810779851BF9636500756A0C /* SongHistoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SongHistoryViewController.swift; path = ../SongHistoryViewController.swift; sourceTree = "<group>"; };
+		810779861BF9636500756A0C /* TourMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TourMapViewController.swift; path = ../TourMapViewController.swift; sourceTree = "<group>"; };
+		8107798B1BF963C700756A0C /* PhishModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhishModel.swift; path = ../PhishModel.swift; sourceTree = "<group>"; };
+		8107798C1BF963C700756A0C /* PhishShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhishShow.swift; path = ../PhishShow.swift; sourceTree = "<group>"; };
+		8107798D1BF963C700756A0C /* PhishSong.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhishSong.swift; path = ../PhishSong.swift; sourceTree = "<group>"; };
+		8107798E1BF963C700756A0C /* PhishTour.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishTour.swift; sourceTree = SOURCE_ROOT; };
+		8107798F1BF963C700756A0C /* PhishYear.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhishYear.swift; path = ../PhishYear.swift; sourceTree = "<group>"; };
+		810779961BF9640D00756A0C /* MapquestClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapquestClient.swift; sourceTree = "<group>"; };
+		810779971BF9640D00756A0C /* PhishinClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishinClient.swift; sourceTree = "<group>"; };
+		8107799B1BF9646D00756A0C /* TourNavControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TourNavControls.swift; sourceTree = "<group>"; };
+		8107799C1BF9646D00756A0C /* SongCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongCell.swift; sourceTree = "<group>"; };
+		8107799D1BF9646D00756A0C /* TourListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TourListCell.swift; sourceTree = "<group>"; };
+		810779A21BF964B600756A0C /* PhishTour-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PhishTour-Bridging-Header.h"; sourceTree = "<group>"; };
+		810779A31BF964B700756A0C /* CalloutCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCell.swift; sourceTree = "<group>"; };
+		810779A41BF964B700756A0C /* CalloutCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCellView.swift; sourceTree = "<group>"; };
+		810779A51BF964B700756A0C /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCalloutView.h; sourceTree = "<group>"; };
+		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,13 +87,73 @@
 			isa = PBXGroup;
 			children = (
 				810779701BF9629800756A0C /* AppDelegate.swift */,
-				810779721BF9629800756A0C /* ViewController.swift */,
-				810779741BF9629800756A0C /* Main.storyboard */,
+				810779821BF9631D00756A0C /* Main.storyboard */,
+				8107798A1BF9638100756A0C /* View Controllers */,
+				810779951BF963E900756A0C /* Model Classes */,
+				8107799A1BF9642600756A0C /* Client Classes */,
+				810779A11BF9647400756A0C /* Custom Classes */,
+				810779AA1BF964C600756A0C /* Pin Callouts */,
 				810779771BF9629800756A0C /* Assets.xcassets */,
 				810779791BF9629800756A0C /* LaunchScreen.storyboard */,
 				8107797C1BF9629800756A0C /* Info.plist */,
 			);
 			path = PhishTour;
+			sourceTree = "<group>";
+		};
+		8107798A1BF9638100756A0C /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				810779861BF9636500756A0C /* TourMapViewController.swift */,
+				810779841BF9636500756A0C /* SetlistViewController.swift */,
+				810779851BF9636500756A0C /* SongHistoryViewController.swift */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		810779951BF963E900756A0C /* Model Classes */ = {
+			isa = PBXGroup;
+			children = (
+				8107798B1BF963C700756A0C /* PhishModel.swift */,
+				8107798F1BF963C700756A0C /* PhishYear.swift */,
+				8107798E1BF963C700756A0C /* PhishTour.swift */,
+				8107798C1BF963C700756A0C /* PhishShow.swift */,
+				8107798D1BF963C700756A0C /* PhishSong.swift */,
+			);
+			name = "Model Classes";
+			sourceTree = "<group>";
+		};
+		8107799A1BF9642600756A0C /* Client Classes */ = {
+			isa = PBXGroup;
+			children = (
+				810779971BF9640D00756A0C /* PhishinClient.swift */,
+				810779961BF9640D00756A0C /* MapquestClient.swift */,
+			);
+			name = "Client Classes";
+			path = ..;
+			sourceTree = "<group>";
+		};
+		810779A11BF9647400756A0C /* Custom Classes */ = {
+			isa = PBXGroup;
+			children = (
+				8107799B1BF9646D00756A0C /* TourNavControls.swift */,
+				8107799D1BF9646D00756A0C /* TourListCell.swift */,
+				8107799C1BF9646D00756A0C /* SongCell.swift */,
+			);
+			name = "Custom Classes";
+			path = ..;
+			sourceTree = "<group>";
+		};
+		810779AA1BF964C600756A0C /* Pin Callouts */ = {
+			isa = PBXGroup;
+			children = (
+				810779A41BF964B700756A0C /* CalloutCellView.swift */,
+				810779A31BF964B700756A0C /* CalloutCell.swift */,
+				810779A51BF964B700756A0C /* SMCalloutView.h */,
+				810779A61BF964B700756A0C /* SMCalloutView.m */,
+				810779A21BF964B600756A0C /* PhishTour-Bridging-Header.h */,
+			);
+			name = "Pin Callouts";
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,9 +215,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				810779831BF9631D00756A0C /* Main.storyboard in Resources */,
 				8107797B1BF9629800756A0C /* LaunchScreen.storyboard in Resources */,
 				810779781BF9629800756A0C /* Assets.xcassets in Resources */,
-				810779761BF9629800756A0C /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,22 +228,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				810779731BF9629800756A0C /* ViewController.swift in Sources */,
+				810779931BF963C700756A0C /* PhishTour.swift in Sources */,
+				8107799F1BF9646D00756A0C /* SongCell.swift in Sources */,
+				810779941BF963C700756A0C /* PhishYear.swift in Sources */,
 				810779711BF9629800756A0C /* AppDelegate.swift in Sources */,
+				8107799E1BF9646D00756A0C /* TourNavControls.swift in Sources */,
+				810779911BF963C700756A0C /* PhishShow.swift in Sources */,
+				810779991BF9640D00756A0C /* PhishinClient.swift in Sources */,
+				810779A01BF9646D00756A0C /* TourListCell.swift in Sources */,
+				810779981BF9640D00756A0C /* MapquestClient.swift in Sources */,
+				810779901BF963C700756A0C /* PhishModel.swift in Sources */,
+				810779A71BF964B700756A0C /* CalloutCell.swift in Sources */,
+				810779891BF9636500756A0C /* TourMapViewController.swift in Sources */,
+				810779A91BF964B700756A0C /* SMCalloutView.m in Sources */,
+				810779921BF963C700756A0C /* PhishSong.swift in Sources */,
+				810779881BF9636500756A0C /* SongHistoryViewController.swift in Sources */,
+				810779871BF9636500756A0C /* SetlistViewController.swift in Sources */,
+				810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		810779741BF9629800756A0C /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				810779751BF9629800756A0C /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		810779791BF9629800756A0C /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -248,10 +347,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = PhishTour/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaronj.PhishTour;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PhishTour-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -259,10 +361,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = PhishTour/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaronj.PhishTour;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PhishTour-Bridging-Header.h";
 			};
 			name = Release;
 		};
