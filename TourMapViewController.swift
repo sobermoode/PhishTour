@@ -41,6 +41,9 @@ class TourMapViewController: UIViewController,
     /// prevent the reset button from being active on app-re-launch
     var didReset: Bool = false
     
+    /// should re-launch to setlist view controller
+    // var shouldGoToSetlist: Bool = false
+    
     // MARK: Setup methods
     
     override func viewDidLoad()
@@ -70,6 +73,7 @@ class TourMapViewController: UIViewController,
         {
             if let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
             {
+                // self.shouldGoToSetlist = true
                 if let previousShowIDData = previousSetlistSettings["previousShow"] as? NSData
                 {
                     print("Got the setlist from NSUserDefaults...")
@@ -131,6 +135,30 @@ class TourMapViewController: UIViewController,
             }
         }
     }
+    
+//    override func viewDidAppear(animated: Bool)
+//    {
+//        if self.shouldGoToSetlist
+//        {
+//            let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")!
+//            
+//            if let previousShowIDData = previousSetlistSettings["previousShow"] as? NSData
+//            {
+//                print("Got the setlist from NSUserDefaults...")
+//                let previousShowID = NSKeyedUnarchiver.unarchiveObjectWithData(previousShowIDData) as! Int
+//                let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+//                let documentsURL = NSURL(string: documentsPath)!
+//                let filename = "show\(previousShowID)"
+//                let fileURL = documentsURL.URLByAppendingPathComponent(filename)
+//                let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(fileURL.path!) as! PhishShow
+//                
+//                let setlistViewController = SetlistViewController()
+//                setlistViewController.show = savedShow
+//                setlistViewController.isRelaunchingApp = true
+//                self.showViewController(setlistViewController, sender: self)
+//            }
+//        }
+//    }
     
     func setupNavBar()
     {

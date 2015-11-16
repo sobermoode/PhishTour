@@ -25,6 +25,8 @@ class SongHistoryViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
+        print("Date: \(date), Song: \(song.name)")
+        
         // self.restorationIdentifier = "SongHistoryViewController"
         view.backgroundColor = UIColor.whiteColor()
         
@@ -103,6 +105,7 @@ class SongHistoryViewController: UIViewController,
             self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
             self.totalPlaysLabel.hidden = false
             self.historyTable.reloadData()
+            self.saveToUserDefaults()
         }
         /// otherwise, we need to request it
         else

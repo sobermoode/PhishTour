@@ -56,6 +56,10 @@ class SetlistViewController: UIViewController,
                 }
             }
         }
+        else
+        {
+            print("Not re-launching app!!!")
+        }
     }
     
     func setupNavBar()
@@ -354,6 +358,8 @@ class SetlistViewController: UIViewController,
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! SongCell
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: false)
         
         let songHistory = SongHistoryViewController()
         songHistory.date = "\(show.date) \(show.year)"
