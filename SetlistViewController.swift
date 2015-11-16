@@ -214,7 +214,7 @@ class SetlistViewController: UIViewController,
     
     func saveToUserDefaults()
     {
-        /// encode info for the current tour as NSData and save it into a dictionary
+        /// encode info for the history as NSData and save it into a dictionary
         var previousSetlistSettings = [String : AnyObject]()
         
         if let show = self.show

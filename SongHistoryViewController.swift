@@ -1,6 +1,6 @@
 //
 //  SongHistoryViewController.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/17/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.
@@ -11,12 +11,16 @@ import UIKit
 class SongHistoryViewController: UIViewController,
     UITableViewDataSource, UITableViewDelegate
 {
-    var date: String!
+    /// the song who's history is being displayed
     var song: PhishSong!
-    var totalPlaysLabel: UILabel!
     var history: [Int : [PhishShow]]?
-    var historyTable: UITableView!
     
+    /// associated info for the song
+    var date: String!
+    var totalPlaysLabel: UILabel!
+    
+    /// references to the table view and the progress bar
+    var historyTable: UITableView!
     var progressBar: UIProgressView!
     
     override func viewDidLoad()
@@ -25,16 +29,12 @@ class SongHistoryViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
-        print("Date: \(date), Song: \(song.name)")
-        
-        // self.restorationIdentifier = "SongHistoryViewController"
-        view.backgroundColor = UIColor.whiteColor()
-        
         setupNavBar()
         sceneSetup()
         getHistory()
     }
     
+    /// create the back button and nav bar title
     func setupNavBar()
     {
         let backButton = UIButton()
@@ -55,9 +55,12 @@ class SongHistoryViewController: UIViewController,
         self.navigationItem.titleView = titleLabel
     }
     
+    /// add all the views to the view controller
     func sceneSetup()
     {
-        // the song name is the title for the scene
+        view.backgroundColor = UIColor.whiteColor()
+        
+        /// the song name is the title for the scene
         let songLabel = UILabel()
         songLabel.font = UIFont(name: "AppleSDGothicNeo-Bold", size: 20)
         songLabel.text = song.name
@@ -65,6 +68,7 @@ class SongHistoryViewController: UIViewController,
         songLabel.frame = CGRect(x: 25, y: 75, width: songLabel.frame.size.width, height: songLabel.frame.size.height)
         view.addSubview(songLabel)
         
+        /// a label indicating the total number of times the song has been played
         self.totalPlaysLabel = UILabel()
         self.totalPlaysLabel.font = UIFont(name: "AppleSDGothicNeo-SemiBold", size: 14)
         self.totalPlaysLabel.text = "Total performances: 9999"
@@ -73,7 +77,7 @@ class SongHistoryViewController: UIViewController,
         self.totalPlaysLabel.hidden = true
         view.addSubview(self.totalPlaysLabel)
         
-        // figure out how tall the table can be and create the table
+        /// figure out how tall the table can be and create the table
         let remainingHeight = view.bounds.height - (songLabel.frame.origin.y + songLabel.frame.size.height) - 5 - totalPlaysLabel.bounds.height
         self.historyTable = UITableView(frame: CGRect(x: songLabel.frame.origin.x, y: totalPlaysLabel.frame.origin.y + totalPlaysLabel.frame.size.height + 20, width: CGRectGetMaxX(view.bounds) - 50, height: remainingHeight - 75), style: .Plain)
         self.historyTable.sectionIndexMinimumDisplayRowCount = 1
@@ -82,7 +86,7 @@ class SongHistoryViewController: UIViewController,
         self.historyTable.dataSource = self
         self.historyTable.delegate = self
         
-        // register the table view's cell class and header view class
+        /// register the table view's cell class and header view class
         self.historyTable.registerClass(SongCell.self, forCellReuseIdentifier: "songCell")
         self.historyTable.registerClass(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "yearHeader")
         
@@ -91,7 +95,9 @@ class SongHistoryViewController: UIViewController,
     
     func backToSetlist()
     {
+        /// don't save the history view controller data if we leave it
         NSUserDefaults.standardUserDefaults().removeObjectForKey("previousHistorySettings")
+        
         self.navigationController?.popViewControllerAnimated(true)
     }
     
@@ -145,12 +151,12 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
-                    // save the history
+                    /// save the history
                     self.history = history
                     
                     self.saveToUserDefaults()
                     
-                    // reload the table on the main thread
+                    /// reload the table on the main thread
                     dispatch_async(dispatch_get_main_queue())
                     {
                         self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
@@ -158,6 +164,8 @@ class SongHistoryViewController: UIViewController,
                         self.historyTable.reloadData()
                     }
                     
+                    /// make the progress bar green when it finishes successfully
+                    /// then, remove it after a short delay
                     dispatch_async(dispatch_get_main_queue())
                     {
                         self.progressBar?.progressTintColor = UIColor.greenColor()
@@ -176,6 +184,7 @@ class SongHistoryViewController: UIViewController,
     
     func saveToUserDefaults()
     {
+        /// encode info for the history as NSData and save it into a dictionary
         var previousHistorySettings = [String : AnyObject]()
         
         if let date = self.date
@@ -195,6 +204,7 @@ class SongHistoryViewController: UIViewController,
     
     // MARK: UITableViewDataSource methods
     
+    /// each year the song was played in will be a section in the table view
     func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         if self.history != nil
@@ -279,6 +289,7 @@ class SongHistoryViewController: UIViewController,
         }
     }
     
+    /// each section (a year) will have a row for every date the song was played
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         if history != nil
@@ -337,6 +348,7 @@ class SongHistoryViewController: UIViewController,
                 /// something went wrong
                 if showError != nil
                 {
+                    /// update the cell to reflect that the show couldn't be retrieved
                     dispatch_async(dispatch_get_main_queue())
                     {
                         cell.textLabel?.textColor = UIColor.redColor()
@@ -345,6 +357,7 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
+                    /// this will be the map annotation to select when popping back to the tour map controller
                     cell.otherTourShow = show!
                     
                     /// the request was successful; update the cell with the show date on the main thread
@@ -358,11 +371,14 @@ class SongHistoryViewController: UIViewController,
                         {
                             cell.detailTextLabel?.text = tour.name
                             cell.tourID = tour.tourID
+                            
+                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                             cell.userInteractionEnabled = (tour.tourID == 71) ? false : true
                         }
                         /// if no tour info, then we need to request it
                         else
                         {
+                            /// get the tour ID
                             if let tourID = show!.tourID
                             {
                                 PhishModel.sharedInstance().getTourNameForTourID(tourID)
@@ -372,6 +388,7 @@ class SongHistoryViewController: UIViewController,
                                     /// something went wrong
                                     if tourNameError != nil
                                     {
+                                        /// update the cell to reflect that the tour couldn't be retrieved
                                         dispatch_async(dispatch_get_main_queue())
                                         {
                                             cell.detailTextLabel?.textColor = UIColor.redColor()
@@ -385,6 +402,8 @@ class SongHistoryViewController: UIViewController,
                                         {
                                             cell.detailTextLabel?.text = tourName
                                             cell.tourID = show!.tourID
+                                            
+                                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                             cell.userInteractionEnabled = (tourID == 71) ? false : true
                                         }
                                     }
@@ -410,23 +429,24 @@ class SongHistoryViewController: UIViewController,
         return cell
     }
     
+    /// when a cell is selected, pop back to the map, which will now display the selected tour, and dislpay a callout on the associated show
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
-        // get the cell that was selected
+        /// get the cell that was selected
         let cell = tableView.cellForRowAtIndexPath( indexPath ) as! SongCell
         
-        // set the show that was selected
+        //// set the show that was selected
         if let show = cell.otherTourShow
         {
             PhishModel.sharedInstance().currentShow = show
         }
         
-        // get the tour that the show was a part of
+        /// get the tour that the show was a part of
         PhishModel.sharedInstance().getTourForID(cell.tourID)
         {
             tourError, tour in
             
-            // something went wrong
+            /// something went wrong
             if tourError != nil
             {
                 /// create an alert for the problem and unwind back to the setlist
@@ -444,17 +464,17 @@ class SongHistoryViewController: UIViewController,
                     self.presentViewController(alert, animated: true, completion: nil)
                 }
             }
-            // we got the tour
+            /// we got the tour
             else
             {
-                // set the selected tour
+                /// set the selected tour
                 PhishModel.sharedInstance().selectedTour = tour
                 
-                // get a reference to the tour map view controller, to let it know the song history view controller is updating it
+                /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
                 let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
                 tourMap.isComingFromSongHistory = true
                 
-                // make the segue on the main thread, because we're modifying the map view
+                /// make the segue on the main thread, because we're modifying the map view
                 dispatch_async(dispatch_get_main_queue())
                 {
                     self.navigationController?.popToRootViewControllerAnimated(true)
