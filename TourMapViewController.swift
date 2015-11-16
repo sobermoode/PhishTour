@@ -486,8 +486,6 @@ class TourMapViewController: UIViewController,
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
         else
         {
-            print("A tour hasn't been selected!!!")
-            
             return
         }
         

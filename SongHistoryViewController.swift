@@ -467,6 +467,14 @@ class SongHistoryViewController: UIViewController,
             /// we got the tour
             else
             {
+                /// don't save the history view controller data if we leave it;
+                /// remove the setlist data as well
+                NSUserDefaults.standardUserDefaults().removeObjectForKey("previousHistorySettings")
+                if let _ = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
+                {
+                    NSUserDefaults.standardUserDefaults().removeObjectForKey("previousSetlistSettings")
+                }
+                
                 /// set the selected tour
                 PhishModel.sharedInstance().selectedTour = tour
                 
