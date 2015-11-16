@@ -56,10 +56,6 @@ class SetlistViewController: UIViewController,
                 }
             }
         }
-        else
-        {
-            print("Not re-launching app!!!")
-        }
     }
     
     func setupNavBar()
@@ -147,8 +143,7 @@ class SetlistViewController: UIViewController,
             /// create a progress bar to track the progress of requesting the setlist
             /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
             let progressBar = UIProgressView(progressViewStyle: .Default)
-            // progressBar.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: CGRectGetMinY(self.view.bounds) + UIApplication.sharedApplication().statusBarFrame.height + self.navigationController!.navigationBar.bounds.height, width: CGRectGetWidth(self.view.bounds), height: 10)
-            progressBar.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: CGRectGetMinY(self.view.bounds) + 100, width: CGRectGetWidth(self.view.bounds), height: 10)
+            progressBar.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: CGRectGetMinY(self.view.bounds) + UIApplication.sharedApplication().statusBarFrame.height + self.navigationController!.navigationBar.bounds.height, width: CGRectGetWidth(self.view.bounds), height: 10)
             progressBar.progressTintColor = UIColor.blueColor()
             progressBar.trackTintColor = UIColor.lightGrayColor()
             progressBar.transform = CGAffineTransformMakeScale(1, 2.5)

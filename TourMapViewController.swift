@@ -41,9 +41,6 @@ class TourMapViewController: UIViewController,
     /// prevent the reset button from being active on app-re-launch
     var didReset: Bool = false
     
-    /// should re-launch to setlist view controller
-    // var shouldGoToSetlist: Bool = false
-    
     // MARK: Setup methods
     
     override func viewDidLoad()
