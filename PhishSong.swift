@@ -1,6 +1,6 @@
 //
 //  PhishSong.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 9/30/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.

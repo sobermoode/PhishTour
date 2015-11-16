@@ -1,6 +1,6 @@
 //
 //  TourListCell.swift
-//  new phishtour navbar test
+//  PhishTour
 //
 //  Created by Aaron Justman on 11/1/15.
 //  Copyright © 2015 AaronJ. All rights reserved.
@@ -45,6 +45,7 @@ class TourListCell: UITableViewCell
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// put all the labels and the button in the right places
     override func layoutSubviews()
     {
         self.showNumberLabel.font = UIFont(name: "AppleSDGothicNeo-Bold", size: 14)
@@ -68,19 +69,18 @@ class TourListCell: UITableViewCell
         self.cityLabel.sizeToFit()
         self.cityLabel.frame = CGRect(x: self.venueLabel.frame.origin.x + self.venueLabel.bounds.width + 5, y: self.venueLabel.frame.origin.y, width: self.cityLabel.bounds.width, height: self.cityLabel.bounds.height)
         
-        // put the setlist button on the right side of the cell
+        /// put the setlist button on the right side of the cell
         self.setlistButton.setImage(UIImage(named: "setlistButton"), forState: .Normal)
         self.setlistButton.sizeToFit()
         self.setlistButton.frame = CGRect(x: CGRectGetMaxX(self.contentView.bounds) - 10 - self.setlistButton.bounds.width, y: (CalloutCell.cellHeight / 2) - (self.setlistButton.bounds.height / 2), width: self.setlistButton.bounds.width, height: self.setlistButton.bounds.height)
         self.setlistButton.addTarget(self, action: "seeSetlist", forControlEvents: .TouchUpInside)
         
-        // place the cell within the table view
+        /// place the cell within the table view
         self.frame = CGRect(x: 0, y: self.bounds.height * CGFloat(self.showNumber), width: self.bounds.width, height: self.bounds.height)
     }
     
     func seeSetlist()
     {
-        print("seeSetlist...")
         guard self.delegate != nil
         else
         {
@@ -90,18 +90,6 @@ class TourListCell: UITableViewCell
         }
         
         self.delegate!.didPressSetlistButtonInTourListCell(self)
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(selected: Bool, animated: Bool)
-    {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 }
 

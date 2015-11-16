@@ -1,6 +1,6 @@
 //
 //  TourNavControls.swift
-//  new phishtour navbar test
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/26/15.
 //  Copyright © 2015 AaronJ. All rights reserved.
@@ -20,13 +20,13 @@ import UIKit
 
 class TourNavControls: NSObject
 {
-    // the control button
+    /// the control button
     let listButton = UIButton(type: .Custom)
     
-    // the superview
+    /// the superview
     let parentView: UIView!
     
-    // tour nav controls delegate
+    /// tour nav controls delegate
     var delegate: TourNavControlsDelegate?
     
     init(parentView: UIView)
@@ -35,7 +35,7 @@ class TourNavControls: NSObject
         
         super.init()
         
-        // create the list button and set it on the bottom of the screen
+        /// create the list button and set it on the bottom of the screen
         self.listButton.setImage(UIImage(named: "listButton"), forState: .Normal)
         self.listButton.sizeToFit()
         self.listButton.alpha = 0.5
@@ -43,13 +43,13 @@ class TourNavControls: NSObject
         self.listButton.addTarget(self, action: "didPressListButton", forControlEvents: .TouchUpInside)
     }
     
-    // add the control button
+    /// add the control button
     func addButtons()
     {
         parentView.addSubview(self.listButton)
     }
     
-    // remove the control button
+    /// remove the control button
     func removeButtons()
     {
         self.listButton.removeFromSuperview()

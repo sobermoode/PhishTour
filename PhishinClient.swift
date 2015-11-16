@@ -1,6 +1,6 @@
 //
 //  PhishinClient.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 9/30/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.
@@ -13,7 +13,7 @@ class PhishinClient: NSObject
     let session: NSURLSession = NSURLSession.sharedSession()
     let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
     
-    // to construct request URLs
+    /// to construct request URLs
     let endpoint: String = "http://phish.in/api/v1"
     struct Routes
     {

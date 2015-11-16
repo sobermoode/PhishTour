@@ -1,6 +1,6 @@
 //
 //  PhishYear.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/1/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.

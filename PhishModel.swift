@@ -1,6 +1,6 @@
 //
 //  PhishModel.swift
-//  new phishtour navbar test
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/27/15.
 //  Copyright © 2015 AaronJ. All rights reserved.

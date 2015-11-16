@@ -1,6 +1,6 @@
 //
 //  MapquestClient.swift
-//  PhishTourV2
+//  PhishTour
 //
 //  Created by Aaron Justman on 10/4/15.
 //  Copyright (c) 2015 AaronJ. All rights reserved.
@@ -12,11 +12,10 @@ class MapquestClient: NSObject
 {
     let session: NSURLSession = NSURLSession.sharedSession()
     
+    /// to construct request URLs
     let mapquestBaseURL: String = "http://www.mapquestapi.com/"
     let apiKey: String = "sFvGlJbu43uE3lAkJFxj5gEAE1nUpjhM"
     
-    // NOTE:
-    // will add more functionality for other services
     struct Services
     {
         struct Geocoding
@@ -29,22 +28,14 @@ class MapquestClient: NSObject
                 case Reverse = "reverse?"
                 case Batch = "batch?"
             }
-            
-//            static let Address = "geocoding/v1/address?"
-//            static let Reverse = "geocoding/v1/reverse?"
-//            static let Batch = "geocoding/v1/batch?"
         }
     }
     
-    // NOTE:
-    // will add more functionality for other versions
     struct Versions
     {
         static let Version1 = "v1/"
     }
     
-    // NOTE:
-    // will add more functionality for other options
     struct Options
     {
         static let MaxResults = "1"
@@ -53,8 +44,6 @@ class MapquestClient: NSObject
     
     /// reference to the progress bar on the tour map
     var tourMapProgressBar: UIProgressView!
-    
-    // let mapquestBaseURL = "http://www.mapquestapi.com/geocoding/v1/batch?" key=sFvGlJbu43uE3lAkJFxj5gEAE1nUpjhM&maxResults=1&thumbMaps=false"
     
     class func sharedInstance() -> MapquestClient
     {
@@ -88,7 +77,6 @@ class MapquestClient: NSObject
                     if counter == uniqueLocations.count - 1
                     {
                         /// complete with no error
-                        print("Don't need to geocode the locations!!!")
                         completionHandler(geocodingError: nil)
                         return
                     }
@@ -102,7 +90,6 @@ class MapquestClient: NSObject
                 /// there's a location that needs to be geocoded
                 else
                 {
-                    print("Geocoding \(location)...")
                     /// turn the location into a string that can be appended to the request;
                     /// some locations need additional formatting
                     var city = location.city
@@ -185,7 +172,7 @@ class MapquestClient: NSObject
                     }
                     catch
                     {
-                        print( "There was a problem parsing the geocoding data from mapquest.com" )
+                        print("There was a problem parsing the geocoding data from mapquest.com")
                     }
                 }
             }
