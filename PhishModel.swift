@@ -12,18 +12,17 @@ import MapKit
 class PhishModel: NSObject,
     UIPickerViewDataSource, UIPickerViewDelegate, UITableViewDataSource, UITableViewDelegate
 {
+    /// reference to the device's documents directory
     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
     
+    /// the available years
     var years: [PhishYear]?
-    /*
-    var tours: [PhishYear : [PhishTour]]?
-    var shows: [PhishTour : [PhishShow]]?
-    var setlists: [PhishShow : [PhishSong]]?
-    */
     
+    /// previous selections
     var previousYear: Int?
     var previousTour: Int?
     
+    /// the tours for the currently selected year and their names
     var currentTours: [PhishTour]?
     var currentTourNames: [String]?
     {
@@ -42,15 +41,16 @@ class PhishModel: NSObject,
         return tourNames
     }
     
+    /// current selections
     var currentShow: PhishShow?
-    
     var selectedYear: PhishYear?
     var selectedTour: PhishTour?
     
-    // TODO: need to set this to access it; in the final version the map will be on a custom view controller class, and this wont be necessary
+    /// references to the TourMapViewController and its map view
     var tourMapVC: TourMapViewController?
     var tourMap: MKMapView?
     
+    /// a progress bar to display on the TourMapViewController as certain requests are in-progress
     var progressBar: UIProgressView!
     
     class func sharedInstance() -> PhishModel
@@ -63,34 +63,37 @@ class PhishModel: NSObject,
         return Singleton.sharedInstance
     }
     
+    /// get the available years or request them
     func getYears(completionHandler: (yearsError: NSError?) -> Void)
     {
         guard self.years != nil
         else
         {
+            /// return saved years
             if let savedYears = self.getSavedYears()
             {
                 self.years = savedYears
-                // self.previousYear = 0
                 
                 completionHandler(yearsError: nil)
                 
                 return
             }
+            /// request the years
             else
             {
                 PhishinClient.sharedInstance().requestYears()
                 {
                     yearsRequestError, years in
                     
+                    /// something went wrong
                     if yearsRequestError != nil
                     {
                         completionHandler(yearsError: yearsRequestError)
                     }
                     else
                     {
+                        /// set the years
                         self.years = years!
-                        // self.previousYear = 0
                         
                         /// the years request was successful;
                         /// 1983-1987 all come back as one "year",
@@ -105,6 +108,7 @@ class PhishModel: NSObject,
                         }
                         while --year >= 1983
                         
+                        /// write the years to the device
                         let documentsURL = NSURL(string: self.documentsPath)!
                         let yearsURL = documentsURL.URLByAppendingPathComponent("allYears")
                         NSKeyedArchiver.archiveRootObject(self.years!, toFile: yearsURL.path!)
@@ -120,6 +124,7 @@ class PhishModel: NSObject,
         completionHandler(yearsError: nil)
     }
     
+    /// retrieve the saved years from the device
     func getSavedYears() -> [PhishYear]?
     {
         let filename = "allyears"
@@ -135,104 +140,48 @@ class PhishModel: NSObject,
         }
     }
     
-    // NEW getToursForYear 11.14.2015
+    /// retrieve the tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: NSError?, tours: [PhishTour]?) -> Void)
     {
+        /// retrieve the tours from the device and return them
         let filename: String = "year\(year.year)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedYearWithTours = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishYear
             where savedYearWithTours.tours != nil
         {
             self.currentTours = savedYearWithTours.tours
-            // self.selectedTour = self.currentTours?.first!
-            // self.previousTour = 0
             
             completionHandler(toursError: nil, tours: savedYearWithTours.tours!)
         }
+        /// no saved tours, we need to request them
         else
         {
             PhishinClient.sharedInstance().requestToursForYear(year)
             {
                 toursRequestError, tours in
                 
+                /// something went wrong
                 if toursRequestError != nil
                 {
                     completionHandler(toursError: toursRequestError!, tours: nil)
                 }
                 else
                 {
-                    // year.tours = tours
-                    
+                    /// set the tours
                     self.currentTours = tours!
                     
-                    // set the selected tour, so the user doesn't have to do anything to start following a tour
-                    // self.selectedTour = self.currentTours?.first!
-                    
-                    // remember which tour was selected
-                    // self.previousTour = 0
-                    
+                    /// return the tours
                     completionHandler(toursError: nil, tours: tours!)
                 }
             }
         }
     }
     
-    /*
-    func getToursForYear(year: PhishYear, completionHandler: (toursRequestError: NSError?) -> Void)
-    {
-        guard year.tours != nil
-        else
-        {
-            if let savedTours = self.getSavedToursForYear(year.year)
-            {
-                // year.tours = savedTours
-                self.currentTours = savedTours
-                self.selectedTour = self.currentTours?.first!
-                
-                completionHandler(toursRequestError: nil)
-                
-                return
-            }
-            else
-            {
-                PhishinClient.sharedInstance().requestToursForYear(year)
-                {
-                    toursRequestError, tours in
-                    
-                    if toursRequestError != nil
-                    {
-                        completionHandler(toursRequestError: toursRequestError!)
-                    }
-                    else
-                    {
-                        year.tours = tours
-                        
-                        self.currentTours = tours!
-                        
-                        // set the selected tour, so the user doesn't have to do anything to start following a tour
-                        self.selectedTour = self.currentTours?.first!
-                        
-                        // remember which tour was selected
-                        self.previousTour = 0
-                        
-                        completionHandler(toursRequestError: nil)
-                    }
-                }
-                
-                return
-            }
-        }
-        
-        completionHandler(toursRequestError: nil)
-    }
-    */
-    
+    /// retrieve saved tours from the device
     func getSavedToursForYear(year: Int) -> [PhishTour]?
     {
         let filename = "year\(year)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         guard let savedYearWithTours = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishYear
             where savedYearWithTours.tours != nil
         else
@@ -243,27 +192,30 @@ class PhishModel: NSObject,
         return savedYearWithTours.tours
     }
     
+    /// retrieve a setlist from the device or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {
+        /// check for a saved setlist and return it
         let filename = "show\(show.showID)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedShowWithSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishShow
             where savedShowWithSetlist.setlist != nil
         {
-            print("Got a saved setlist!!!")
             completionHandler(setlistError: nil, setlist: savedShowWithSetlist.setlist!)
         }
+        /// no saved setlist, we need to request one
         else
         {
             PhishinClient.sharedInstance().requestSetlistForShow(show)
             {
                 setlistError, setlist in
                 
+                /// something went wrong
                 if setlistError != nil
                 {
                     completionHandler(setlistError: setlistError!, setlist: nil)
                 }
+                /// return the setlist
                 else
                 {
                     completionHandler(setlistError: nil, setlist: setlist!)
@@ -272,26 +224,29 @@ class PhishModel: NSObject,
         }
     }
     
+    /// retrieve a history from the device or request one for a given song
     func getHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songWithHistory: [Int : [PhishShow]]?) -> Void)
     {
+        /// check for a saved history and return it
         let filename = "song\(song.name)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedSongWithHistory = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishSong where savedSongWithHistory.history != nil
         {
-            print("Getting saved history...")
             completionHandler(songHistoryError: nil, songWithHistory: savedSongWithHistory.history!)
         }
+        /// no saved history, we need to request one
         else
         {
             PhishinClient.sharedInstance().requestHistoryForSong(song)
             {
                 songHistoryError, songHistory in
                 
+                /// something went wrong
                 if songHistoryError != nil
                 {
                     completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
                 }
+                /// return the history
                 else
                 {
                     completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
@@ -300,25 +255,29 @@ class PhishModel: NSObject,
         }
     }
     
+    /// retrieve a show from the device or request one for a given ID
     func getShowForID(id: Int, completionHandler: (showError: NSError?, show: PhishShow?) -> Void)
     {
+        /// check for a saved show and return it
         let filename = "show\(id)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishShow
         {
             completionHandler(showError: nil, show: savedShow)
         }
+        /// no saved show, we need to request it
         else
         {
             PhishinClient.sharedInstance().requestShowForID(id)
             {
                 showRequestError, show in
                 
+                /// something went wrong
                 if showRequestError != nil
                 {
                     completionHandler(showError: showRequestError, show: nil)
                 }
+                /// return the show
                 else
                 {
                     completionHandler(showError: nil, show: show!)
@@ -327,25 +286,29 @@ class PhishModel: NSObject,
         }
     }
     
+    /// retrieve a tour from the device or request one for a given ID
     func getTourForID(id: Int, completionHandler: (tourError: NSError?, tour: PhishTour?) -> Void)
     {
+        /// check for a saved tour and return it
         let filename = "tour\(id)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
         {
             completionHandler(tourError: nil, tour: savedTour)
         }
+        /// no saved tour, we need to request it
         else
         {
             PhishinClient.sharedInstance().requestTourForID(id)
             {
                 tourRequestError, tour in
                 
+                /// something went wrong
                 if tourRequestError != nil
                 {
                     completionHandler(tourError: tourRequestError!, tour: nil)
                 }
+                /// return the tour
                 else
                 {
                     completionHandler(tourError: nil, tour: tour!)
@@ -354,25 +317,29 @@ class PhishModel: NSObject,
         }
     }
     
+    /// retrieve a tour from the device or request a name for a given tour ID
     func getTourNameForTourID(id: Int, completionHandler: (tourNameError: NSError?, tourName: String?) -> Void)
     {
+        /// check for a saved tour and return its name
         let filename = "tour\(id)"
         let filepath = self.createFileURLWithFilename(filename)
-        
         if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
         {
             completionHandler(tourNameError: nil, tourName: savedTour.name)
         }
+        /// no saved tour, we need to request one
         else
         {
             PhishinClient.sharedInstance().requestTourNameForID(id)
             {
                 tourNameRequestError, tourName in
                 
+                /// something went wrong
                 if tourNameRequestError != nil
                 {
                     completionHandler(tourNameError: tourNameRequestError!, tourName: nil)
                 }
+                /// return the tour name
                 else
                 {
                     completionHandler(tourNameError: nil, tourName: tourName!)
@@ -381,6 +348,7 @@ class PhishModel: NSObject,
         }
     }
     
+    /// returns a string to plug into the keyed unarchiver to retrieve files
     func createFileURLWithFilename(filename: String) -> String
     {
         let documentsURL = NSURL(string: self.documentsPath)!
@@ -391,6 +359,9 @@ class PhishModel: NSObject,
     
     // MARK: UIPickerViewDataSource, UIPickerViewDelegate methods
     
+    /// the PhishModel is delegate of the year picker and the tour picker on the TourMapViewController's tour selecter
+    
+    /// each picker has one component
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int
     {
         switch pickerView.tag
@@ -410,29 +381,32 @@ class PhishModel: NSObject,
     {
         switch pickerView.tag
         {
-        case 201:
-            guard let years = self.years
-            else
-            {
+            /// the year picker has a row for each year
+            case 201:
+                guard let years = self.years
+                else
+                {
+                    return 0
+                }
+                
+                return years.count
+            
+            /// the tour picker has a row for each tour in the year
+            case 202:
+                guard let currentTourNames = self.currentTourNames
+                else
+                {
+                    return 0
+                }
+                
+                return currentTourNames.count
+                
+            default:
                 return 0
-            }
-            
-            return years.count
-            
-        case 202:
-            guard let currentTourNames = self.currentTourNames
-            else
-            {
-                return 0
-            }
-            
-            return currentTourNames.count
-            
-        default:
-            return 0
         }
     }
     
+    /// using a label set with a custom font and text size for each row in the pickers
     func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView?) -> UIView
     {
         var label = view as? UILabel
@@ -446,39 +420,43 @@ class PhishModel: NSObject,
         
         switch pickerView.tag
         {
-        case 201:
-            label?.font = UIFont(name: "Apple SD Gothic Neo", size: 20)
+            /// the years can have a bigger font
+            case 201:
+                label?.font = UIFont(name: "Apple SD Gothic Neo", size: 20)
+                
+                guard let years = self.years
+                else
+                {
+                    label?.text =  ". . ."
+                    
+                    return label!
+                }
+                
+                label?.text = "\(years[row].year)"
             
-            guard let years = self.years
-            else
-            {
+            /// the tours need to be set smaller, because some tours have long names
+            case 202:
+                label?.font = UIFont(name: "Apple SD Gothic Neo", size: 12)
+                
+                guard let currentTourNames = self.currentTourNames
+                else
+                {
+                    label?.text = ". . ."
+                    
+                    return label!
+                }
+                
+                label?.text = currentTourNames[row]
+                
+            default:
                 label?.text =  ". . ."
-                
-                return label!
-            }
-            
-            label?.text = "\(years[row].year)"
-            
-        case 202:
-            label?.font = UIFont(name: "Apple SD Gothic Neo", size: 12)
-            
-            guard let currentTourNames = self.currentTourNames
-            else
-            {
-                label?.text = ". . ."
-                
-                return label!
-            }
-            
-            label?.text = currentTourNames[row]
-            
-        default:
-            label?.text =  ". . ."
         }
         
         return label!
     }
     
+    /// when a year is selected, reload the tour picker with that year's tours;
+    /// when a tour is selected, all the info needed to follow a tour is available
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int)
     {
         switch pickerView.tag
@@ -537,25 +515,20 @@ class PhishModel: NSObject,
                             self.tourMapVC!.presentViewController(alert, animated: true, completion: nil)
                         }
                     }
-                    // the request was successful
+                    /// the request was successful
                     else
                     {
                         /// remember the currently selected year
                         self.previousYear = row
                         
                         /// set the tours for the selected year
-                        // self.currentTours = year.tours!
                         self.currentTours = tours
                         
-                        // self.selectedTour = self.currentTours![row]
-                        // self.selectedTour = year.tours!.first!
+                        /// set first tour as the current selection
                         self.selectedTour = tours!.first!
                         self.previousTour = 0
                         
-                        // self.tourMapVC!.saveToUserDefaults()
-                        
-                        // get at the year picker so we can reload it with the new tours
-                        print("Reloading the tour picker...")
+                        /// get at the year picker so we can reload it with the new tours
                         let tourSelecter = pickerView.superview! as UIView
                         let tourPicker = tourSelecter.viewWithTag(202) as! UIPickerView
                         
@@ -564,7 +537,7 @@ class PhishModel: NSObject,
                             tourPicker.reloadAllComponents()
                         }
                         
-                        /// indicate that the request has completed successfully by making it green;
+                        /// indicate that the request has completed successfully by making the progress bar green;
                         /// then remove it after a short delay
                         dispatch_async(dispatch_get_main_queue())
                         {
@@ -580,11 +553,11 @@ class PhishModel: NSObject,
                     }
                 }
             
-            // selected a tour
+            /// selected a tour
             case 202:
+                /// set the selected tour and remember which row it was at
                 self.selectedTour = self.currentTours![row]
                 self.previousTour = row
-                // self.tourMapVC!.saveToUserDefaults()
             
             default:
                 self.selectedYear = nil
@@ -594,6 +567,9 @@ class PhishModel: NSObject,
     
     // MARK: UITableViewDataSource, UITableViewDelegate methods
     
+    /// these methods are for the tour list on the TourMapViewController
+    
+    /// just one section
     func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         guard self.selectedTour != nil
@@ -606,6 +582,7 @@ class PhishModel: NSObject,
         return 1
     }
     
+    /// every show on the tour is a row in the table
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         guard self.selectedTour != nil
@@ -625,10 +602,10 @@ class PhishModel: NSObject,
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        // dequeue a cell
+        /// dequeue a cell
         let cell = tableView.dequeueReusableCellWithIdentifier("tourListCell", forIndexPath: indexPath) as! TourListCell
         
-        // make sure we get a valid show to build the cell with
+        /// make sure we get a valid show to build the cell with
         guard let show = PhishModel.sharedInstance().selectedTour?.shows[indexPath.row]
         else
         {
@@ -637,7 +614,7 @@ class PhishModel: NSObject,
             return cell
         }
         
-        // set the cell properties
+        /// set the cell properties
         cell.show = show
         cell.showNumber = indexPath.row
         cell.dateLabel.text = show.date
@@ -645,7 +622,7 @@ class PhishModel: NSObject,
         cell.venueLabel.text = show.venue
         cell.cityLabel.text = show.city
         
-        // set the delegate
+        /// set the delegate
         cell.delegate = self.tourMapVC
         
         /// create the gradient effect with the cells' background colors;
@@ -660,8 +637,10 @@ class PhishModel: NSObject,
         return cell
     }
     
+    /// when a cell is selected, display the callout for the pin on the map
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
+        /// dismiss the current callout if one is showing
         if self.tourMapVC!.currentCallout != nil
         {
             self.tourMap?.deselectAnnotation(self.currentShow, animated: true)
@@ -671,16 +650,16 @@ class PhishModel: NSObject,
         
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! TourListCell
         
-        // annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
+        /// annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
         // get the venue and use it to find the location
         let venue = cell.venueLabel.text!
-        let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary[ venue ]
+        let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary[venue]
         let show = locations!.first!
         
-        // move the map to the annotaton, so the callout doesn't appear offscreen
+        /// move the map to the annotaton, so the callout doesn't appear offscreen
         self.tourMap?.setCenterCoordinate(show.coordinate, animated: true)
         
-        // select the annotation and dismiss the list after a short delay
+        /// select the annotation and dismiss the list after a short delay
         let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
         dispatch_after(delayTime, dispatch_get_main_queue())
         {
