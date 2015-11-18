@@ -68,9 +68,16 @@ class PhishShow: NSManagedObject,
     }
     */
     
-    /// shows are initialized from different requests, which all provide different information
+    /// shows are initialized from different requests, which all provide different information;
+    /// in this case, we need a default show object, which will get specific information later
     init()
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
+        super.init(entity: showEntity, insertIntoManagedObjectContext: context)
+        
+        /// set some default values
         self.date = ""
         self.year = 9999
         self.venue = ""
@@ -80,6 +87,11 @@ class PhishShow: NSManagedObject,
     
     init(showInfoFromYear showInfo: [String : AnyObject])
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
+        super.init(entity: showEntity, insertIntoManagedObjectContext: context)
+        
         /// need to convert the date to a more pleasing form;
         /// step 1: get the date, as returned from phish.in
         let date = showInfo["date"] as! String
@@ -105,6 +117,11 @@ class PhishShow: NSManagedObject,
     
     init(showInfoFromShow showInfo: [String : AnyObject])
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
+        super.init(entity: showEntity, insertIntoManagedObjectContext: context)
+        
         /// format the date and set the property
         let date = showInfo["date"] as! String
         let dateFormatter = NSDateFormatter()

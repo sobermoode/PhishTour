@@ -53,7 +53,10 @@ class PhishSong: NSManagedObject
     
     init(songInfo: [String : AnyObject], forShow show: PhishShow)
     {
-        super.init()
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let songEntity = NSEntityDescription.entityForName("PhishSong", inManagedObjectContext: context)!
+        super.init(entity: songEntity, insertIntoManagedObjectContext: context)
         
         self.name = songInfo["title"] as! String
         

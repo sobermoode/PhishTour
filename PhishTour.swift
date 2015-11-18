@@ -53,6 +53,11 @@ class PhishTour: NSManagedObject
     
     init(year: PhishYear, name: String, tourID: Int, shows: [PhishShow])
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let tourEntity = NSEntityDescription.entityForName("PhishTour", inManagedObjectContext: context)!
+        super.init(entity: tourEntity, insertIntoManagedObjectContext: context)
+        
         self.year = year
         self.name = name
         self.tourID = Int(tourID)
@@ -63,6 +68,11 @@ class PhishTour: NSManagedObject
     
     init(tourInfo: [String: AnyObject]) 
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let tourEntity = NSEntityDescription.entityForName("PhishTour", inManagedObjectContext: context)!
+        super.init(entity: tourEntity, insertIntoManagedObjectContext: context)
+        
         /// extract tour name and ID the from the dictionary and set the properties
         self.name = tourInfo["name"] as! String
         self.tourID = tourInfo["id"] as! Int
@@ -76,7 +86,7 @@ class PhishTour: NSManagedObject
             let yearPath = yearPathURL.URLByAppendingPathComponent("year\(intYear)")
             self.year = NSKeyedUnarchiver.unarchiveObjectWithFile(yearPath.path!) as? PhishYear
         }
-            /// or, the tour is referring to a festival (ie., "Lemonwheel"), or something else, in which case, we need to look at another entry in the dictionary
+        /// or, the tour is referring to a festival (ie., "Lemonwheel"), or something else, in which case, we need to look at another entry in the dictionary
         else
         {
             let startDate = tourInfo["starts_on"] as! String
@@ -128,7 +138,8 @@ class PhishTour: NSManagedObject
         {
             show.tour = self
             
-            show.save()
+            // show.save()
+            CoreDataStack.sharedInstance().saveContext()
         }
     }
     

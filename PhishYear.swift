@@ -34,6 +34,11 @@ class PhishYear: NSManagedObject
     
     init(year: Int)
     {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let yearEntity = NSEntityDescription.entityForName("PhishYear", inManagedObjectContext: context)!
+        super.init(entity: yearEntity, insertIntoManagedObjectContext: context)
+        
         self.year = year
     }
     
