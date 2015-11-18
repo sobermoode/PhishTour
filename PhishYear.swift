@@ -12,7 +12,7 @@ import CoreData
 class PhishYear: NSManagedObject
 {
     /// the year
-    @NSManaged var year: Int
+    @NSManaged var year: NSNumber
     
     /// a year is composed of a set of tours
     @NSManaged var tours: [PhishTour]?

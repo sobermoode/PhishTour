@@ -14,8 +14,8 @@ class PhishSong: NSManagedObject
     /// specific information for the song
     @NSManaged var name: String
     @NSManaged var duration: String
-    @NSManaged var set: Int!
-    @NSManaged var songID: Int
+    @NSManaged var set: NSNumber!
+    @NSManaged var songID: NSNumber
     @NSManaged var show: PhishShow!
     
     /// the song has a history of every show it was played at
@@ -53,6 +53,8 @@ class PhishSong: NSManagedObject
     
     init(songInfo: [String : AnyObject], forShow show: PhishShow)
     {
+        super.init()
+        
         self.name = songInfo["title"] as! String
         
         /// create a nicely formatted mm:ss string out of an amount of milliseconds

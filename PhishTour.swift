@@ -15,7 +15,7 @@ class PhishTour: NSManagedObject
     /// specific information for the tour
     @NSManaged var year: PhishYear?
     @NSManaged var name: String
-    @NSManaged var tourID: Int
+    @NSManaged var tourID: NSNumber
     
     /// a tour consists of a series of shows at several different locations
     @NSManaged var shows: [PhishShow]
@@ -55,7 +55,7 @@ class PhishTour: NSManagedObject
     {
         self.year = year
         self.name = name
-        self.tourID = tourID
+        self.tourID = Int(tourID)
         self.shows = shows
         self.uniqueLocations = [PhishShow]()
         self.locationDictionary = [String : [PhishShow]]()

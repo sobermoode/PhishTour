@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9057" systemVersion="14F1021" minimumToolsVersion="Xcode 7.0">
+    <entity name="PhishShow" representedClassName=".PhishShow" syncable="YES">
+        <attribute name="city" attributeType="String" syncable="YES"/>
+        <attribute name="consecutiveNights" attributeType="Integer 16" defaultValueString="1" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="day" optional="YES" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="month" optional="YES" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="setlist" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="showID" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="showLatittude" attributeType="Double" syncable="YES"/>
+        <attribute name="showLongitude" attributeType="Double" syncable="YES"/>
+        <attribute name="tourID" optional="YES" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="venue" attributeType="String" syncable="YES"/>
+        <attribute name="year" attributeType="Integer 16" syncable="YES"/>
+        <relationship name="tour" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishTour" inverseName="shows" inverseEntity="PhishTour" syncable="YES"/>
+    </entity>
+    <entity name="PhishSong" representedClassName=".PhishSong" syncable="YES">
+        <attribute name="duration" attributeType="String" syncable="YES"/>
+        <attribute name="history" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="set" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="show" attributeType="Transformable" syncable="YES"/>
+        <attribute name="songID" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <entity name="PhishTour" representedClassName=".PhishTour" syncable="YES">
+        <attribute name="locationDictionary" attributeType="Transformable" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tourID" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="uniqueLocations" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <relationship name="shows" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishShow" inverseName="tour" inverseEntity="PhishShow" syncable="YES"/>
+        <relationship name="year" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishYear" inverseName="tours" inverseEntity="PhishYear" syncable="YES"/>
+    </entity>
+    <entity name="PhishYear" representedClassName=".PhishYear" syncable="YES">
+        <attribute name="year" attributeType="Integer 16" syncable="YES"/>
+        <relationship name="tours" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishTour" inverseName="year" inverseEntity="PhishTour" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
+        <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="135"/>
+        <element name="PhishShow" positionX="-36" positionY="9" width="128" height="240"/>
+        <element name="PhishSong" positionX="-18" positionY="27" width="128" height="135"/>
+    </elements>
+</model>

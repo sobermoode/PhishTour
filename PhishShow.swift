@@ -15,15 +15,15 @@ class PhishShow: NSManagedObject,
 {
     /// specific inforamation for the show
     @NSManaged var date: String
-    @NSManaged var day: Int?
-    @NSManaged var month: Int?
-    @NSManaged var year: Int
+    @NSManaged var day: NSNumber?
+    @NSManaged var month: NSNumber?
+    @NSManaged var year: NSNumber
     @NSManaged var venue: String
     @NSManaged var city: String
-    @NSManaged var showID: Int
-    @NSManaged var consecutiveNights: Int = 1
+    @NSManaged var showID: NSNumber
+    @NSManaged var consecutiveNights: NSNumber
     @NSManaged var tour: PhishTour?  // being set in PhishTour.associateShows()
-    @NSManaged var tourID: Int?
+    @NSManaged var tourID: NSNumber?
     
     /// a show consists of sets of songs (the "setlist")
     @NSManaged var setlist: [Int : [PhishSong]]?
@@ -52,12 +52,12 @@ class PhishShow: NSManagedObject,
     */
     
     /// location information for the show
-    @NSManaged var showLatitude, showLongitude: Double?
+    @NSManaged var showLatitude, showLongitude: Double
     var coordinate: CLLocationCoordinate2D
     {
         return CLLocationCoordinate2D(
-            latitude: showLatitude!,
-            longitude: showLongitude!
+            latitude: showLatitude,
+            longitude: showLongitude
         )
     }
     
@@ -121,8 +121,8 @@ class PhishShow: NSManagedObject,
         let venueData = showInfo["venue"] as! [String : AnyObject]
         self.venue = venueData["name"] as! String
         self.city = venueData["location"] as! String
-        self.showLatitude = venueData["latitude"] as? Double
-        self.showLongitude = venueData["longitude"] as? Double
+        self.showLatitude = venueData["latitude"] as! Double
+        self.showLongitude = venueData["longitude"] as! Double
         
         /// set the show's ID and tourID
         self.showID = showInfo["id"] as! Int
