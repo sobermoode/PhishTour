@@ -72,6 +72,7 @@ class PhishModel: NSObject,
             /// return saved years
             if let savedYears = self.getSavedYears()
             {
+                /// set the years
                 self.years = savedYears
                 
                 completionHandler(yearsError: nil)
@@ -102,16 +103,21 @@ class PhishModel: NSObject,
                         repeat
                         {
                             let newYear = PhishYear(year: year)
-                            newYear.save()
+                            // newYear.save()
                             
                             self.years?.append(newYear)
                         }
                         while --year >= 1983
                         
+                        /*
                         /// write the years to the device
                         let documentsURL = NSURL(string: self.documentsPath)!
                         let yearsURL = documentsURL.URLByAppendingPathComponent("allYears")
                         NSKeyedArchiver.archiveRootObject(self.years!, toFile: yearsURL.path!)
+                        */
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         completionHandler(yearsError: nil)
                     }

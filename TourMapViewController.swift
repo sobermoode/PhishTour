@@ -197,7 +197,7 @@ class TourMapViewController: UIViewController,
         }
         if let selectedTour = PhishModel.sharedInstance().selectedTour
         {
-            let selectedTourID: Int = selectedTour.tourID
+            let selectedTourID: Int = Int(selectedTour.tourID)
             let selectedTourIDData: NSData = NSKeyedArchiver.archivedDataWithRootObject(selectedTourID)
             previousSettings.updateValue(selectedTourIDData, forKey: "selectedTourID")
         }

@@ -338,7 +338,7 @@ class SongHistoryViewController: UIViewController,
             
             /// get the ID of the show
             let show: PhishShow = shows[indexPath.row]
-            let showID: Int = show.showID
+            let showID: Int = Int(show.showID)
             
             /// get the show data
             PhishModel.sharedInstance().getShowForID(showID)
@@ -370,7 +370,7 @@ class SongHistoryViewController: UIViewController,
                         if let tour = show!.tour
                         {
                             cell.detailTextLabel?.text = tour.name
-                            cell.tourID = tour.tourID
+                            cell.tourID = Int(tour.tourID)
                             
                             /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                             cell.userInteractionEnabled = (tour.tourID == 71) ? false : true
@@ -381,7 +381,7 @@ class SongHistoryViewController: UIViewController,
                             /// get the tour ID
                             if let tourID = show!.tourID
                             {
-                                PhishModel.sharedInstance().getTourNameForTourID(tourID)
+                                PhishModel.sharedInstance().getTourNameForTourID(Int(tourID))
                                 {
                                     tourNameError, tourName in
                                     
@@ -401,7 +401,7 @@ class SongHistoryViewController: UIViewController,
                                         dispatch_async(dispatch_get_main_queue())
                                         {
                                             cell.detailTextLabel?.text = tourName
-                                            cell.tourID = show!.tourID
+                                            cell.tourID = Int(show!.tourID!)
                                             
                                             /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                             cell.userInteractionEnabled = (tourID == 71) ? false : true

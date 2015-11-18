@@ -71,7 +71,7 @@ class MapquestClient: NSObject
             for location in uniqueLocations
             {
                 /// check the coordinates
-                if location.showLatitude != nil && location.showLongitude != nil
+                if location.showLatitude.boolValue && location.showLongitude.boolValue
                 {
                     /// we checked all the locations
                     if counter == uniqueLocations.count - 1
@@ -135,8 +135,8 @@ class MapquestClient: NSObject
                         for result in geocodeResults
                         {
                             /// get the current show, see if its part of a multi-night run, then get all the shows associated with the location
-                            let currentShow = tour.shows[counter]
-                            let shows: [PhishShow] = Array(tour.shows[counter...(counter + (currentShow.consecutiveNights - 1))])
+                            let currentShow: PhishShow = tour.shows[counter]
+                            let shows: [PhishShow] = Array(tour.shows[counter...(counter + (Int(currentShow.consecutiveNights) - 1))])
                             
                             /// get at the latitude/longitude info
                             let locations = result["locations"] as! [AnyObject]
@@ -151,13 +151,13 @@ class MapquestClient: NSObject
                             {
                                 show.showLatitude = geocodedLatitude
                                 show.showLongitude = geocodedLongitude
-                                show.save()
-                                show.tour?.save()
-                                show.tour?.year!.save()
+                                // show.save()
+                                // show.tour?.save()
+                                // show.tour?.year!.save()
                             }
                             
                             /// jump to the first show at the next location
-                            counter += currentShow.consecutiveNights
+                            counter += Int(currentShow.consecutiveNights)
                             
                             /// update the progress bar
                             totalProgress += progressBump
@@ -166,6 +166,9 @@ class MapquestClient: NSObject
                                 self.tourMapProgressBar.setProgress(totalProgress, animated: true)
                             }
                         }
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         /// everything completed successfully
                         completionHandler(geocodingError: nil)

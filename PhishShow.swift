@@ -52,12 +52,12 @@ class PhishShow: NSManagedObject,
     */
     
     /// location information for the show
-    @NSManaged var showLatitude, showLongitude: Double
+    @NSManaged var showLatitude, showLongitude: NSNumber
     var coordinate: CLLocationCoordinate2D
     {
         return CLLocationCoordinate2D(
-            latitude: showLatitude,
-            longitude: showLongitude
+            latitude: Double(showLatitude),
+            longitude: Double(showLongitude)
         )
     }
     

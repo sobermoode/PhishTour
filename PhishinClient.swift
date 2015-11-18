@@ -81,7 +81,8 @@ class PhishinClient: NSObject
                             if let intYear = Int(year)
                             {
                                 let newYear = PhishYear(year: intYear)
-                                newYear.save()
+                                // newYear.save()
+                                // CoreDataStack.sharedInstance().saveContext()
                                 
                                 phishYears.append(newYear)
                                 
@@ -98,8 +99,11 @@ class PhishinClient: NSObject
                         {
                             year1, year2 in
                             
-                            year1.year > year2.year
+                            Int(year1.year) > Int(year2.year)
                         }
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         /// send it back through the completion handler
                         completionHandler(yearsRequestError: nil, years: phishYears)
@@ -147,7 +151,8 @@ class PhishinClient: NSObject
                         {
                             /// create a new PhishShow
                             let newShow = PhishShow(showInfoFromYear: show)
-                            newShow.save()
+                            // newShow.save()
+                            // CoreDataStack.sharedInstance().saveContext()
                             
                             /// only append unique tour IDs
                             let tourID = show["tour_id"] as! Int
@@ -176,7 +181,10 @@ class PhishinClient: NSObject
                             {
                                 /// set the tours
                                 year.tours = tours
-                                year.save()
+                                // year.save()
+                                
+                                /// save new and updated objects to the context
+                                CoreDataStack.sharedInstance().saveContext()
                                 
                                 /// send the tours back through the completion handler
                                 completionHandler(toursRequestError: nil, tours: tours)
@@ -223,17 +231,20 @@ class PhishinClient: NSObject
                     for show in shows
                     {
                         let newShow = PhishShow(showInfoFromYear: show)
-                        newShow.save()
+                        // newShow.save()
                         
                         showArray.append(newShow)
                     }
                     
                     /// create the tour
                     let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id, shows: showArray)
-                    newTour.associateShows()
+                    // newTour.associateShows()
                     newTour.createLocationDictionary()
-                    newTour.save()
-                    newTour.year!.save()
+                    // newTour.save()
+                    // newTour.year!.save()
+                    
+                    /// save new and updated objects to the context
+                    CoreDataStack.sharedInstance().saveContext()
                     
                     /// send the tour back through the completion handler
                     completionHandler(tourRequestError: nil, tour: newTour)
@@ -273,13 +284,16 @@ class PhishinClient: NSObject
                         
                         /// create the new tour
                         let newTour = PhishTour(tourInfo: tourData)
-                        newTour.associateShows()
-                        newTour.createLocationDictionary()
-                        newTour.save()
+                        // newTour.associateShows()
+                        // newTour.createLocationDictionary()
+                        // newTour.save()
                         
-                        if let tourYear = newTour.year
+                        // if let tourYear = newTour.year
+                        if let _ = newTour.year
                         {
-                            tourYear.save()
+                            // tourYear.save()
+                            /// save new and updated objects to the context
+                            CoreDataStack.sharedInstance().saveContext()
                         }
                         
                         /// send the tour name back through the completion handler
@@ -345,16 +359,16 @@ class PhishinClient: NSObject
                             
                             /// create a new PhishTour
                             let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showsForID[tourID]!)
-                            newTour.associateShows()
-                            newTour.createLocationDictionary()
-                            newTour.save()
-                            newTour.year!.save()
+                            // newTour.associateShows()
+                            // newTour.createLocationDictionary()
+                            // newTour.save()
+                            // newTour.year!.save()
                             
                             tours.append(newTour)
                         }
                         catch
                         {
-                            print("There was a problem processing the results for tour \( tourID ).")
+                            print("There was a problem processing the results for tour \(tourID).")
                         }
                     }
                     
@@ -363,12 +377,15 @@ class PhishinClient: NSObject
                     {
                         tour1, tour2 in
                         
-                        tour1.tourID < tour2.tourID
+                        Int(tour1.tourID) < Int(tour2.tourID)
                     }
                     
                     /// set the tours
                     year.tours = tours
-                    year.save()
+                    // year.save()
+                    
+                    /// save new and updated objects to the context
+                    CoreDataStack.sharedInstance().saveContext()
                     
                     /// return the tours through the completion handler
                     completionHandler(tourNamesRequestError: nil, tours: tours)
@@ -487,7 +504,7 @@ class PhishinClient: NSObject
                                 let newSong = PhishSong(songInfo: track, forShow: show)
                                 set.append(newSong)
                                 newSong.set = currentTrackSet
-                                previousTrackSet = newSong.set
+                                previousTrackSet = Int(newSong.set)
                                 
                                 /// update the setlist if we're at the last song
                                 if index == tracks.count - 1
@@ -508,7 +525,7 @@ class PhishinClient: NSObject
                                 newSong.set = currentTrackSet
                                 
                                 /// update the current set
-                                currentSet = newSong.set
+                                currentSet = Int(newSong.set)
                                 
                                 /// blank the set array, so we can start over with a new set
                                 /// and add that first song to it
@@ -523,16 +540,19 @@ class PhishinClient: NSObject
                                 /// otherwise, remember which set we're in
                                 else
                                 {
-                                    previousTrackSet = newSong.set
+                                    previousTrackSet = Int(newSong.set)
                                 }
                             }
                         }
                         
-                        /// set the show's setlist and save the setlist to the device for later retrieval
+                        /// set the show's setlist
                         show.setlist = setlist
-                        show.save()
-                        show.tour?.save()
-                        show.tour?.year!.save()
+                        // show.save()
+                        // show.tour?.save()
+                        // show.tour?.year!.save()
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         // return the setlist through the completion handler
                         completionHandler(setlistError: nil, setlist: setlist)
@@ -638,8 +658,8 @@ class PhishinClient: NSObject
                                     {
                                         show1, show2 in
                                         
-                                        let show1TotalDays = (show1.month! * 31) + show1.day!
-                                        let show2TotalDays = (show2.month! * 31) + show2.day!
+                                        let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                        let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
                                         
                                         if show1TotalDays > show2TotalDays
                                         {
@@ -677,8 +697,8 @@ class PhishinClient: NSObject
                                     {
                                         show1, show2 in
                                         
-                                        let show1TotalDays = (show1.month! * 31) + show1.day!
-                                        let show2TotalDays = (show2.month! * 31) + show2.day!
+                                        let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                        let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
                                         
                                         if show1TotalDays > show2TotalDays
                                         {
@@ -702,8 +722,8 @@ class PhishinClient: NSObject
                                 {
                                     show1, show2 in
                                     
-                                    let show1TotalDays = (show1.month! * 31) + show1.day!
-                                    let show2TotalDays = (show2.month! * 31) + show2.day!
+                                    let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                    let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
                                     
                                     if show1TotalDays > show2TotalDays
                                     {
@@ -736,8 +756,8 @@ class PhishinClient: NSObject
                                     {
                                         show1, show2 in
                                         
-                                        let show1TotalDays = (show1.month! * 31) + show1.day!
-                                        let show2TotalDays = (show2.month! * 31) + show2.day!
+                                        let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                        let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
                                         
                                         if show1TotalDays > show2TotalDays
                                         {
@@ -759,12 +779,15 @@ class PhishinClient: NSObject
                             }
                         }
                         
-                        /// set the history and save it
+                        /// set the history
                         song.history = historyByYear
-                        song.save()
-                        song.show.save()
-                        song.show.tour?.save()
-                        song.show.tour?.year?.save()
+                        // song.save()
+                        // song.show.save()
+                        // song.show.tour?.save()
+                        // song.show.tour?.year?.save()
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         /// send the history back through the completion handler
                         completionHandler(songHistoryError: nil, songHistory: historyByYear)
@@ -806,9 +829,12 @@ class PhishinClient: NSObject
                         
                         // create a new show
                         let newShow = PhishShow(showInfoFromShow: showData)
-                        newShow.save()
-                        newShow.tour?.save()
-                        newShow.tour?.year?.save()
+                        // newShow.save()
+                        // newShow.tour?.save()
+                        // newShow.tour?.year?.save()
+                        
+                        /// save new and updated objects to the context
+                        CoreDataStack.sharedInstance().saveContext()
                         
                         // return it through the completion handler
                         completionHandler(showRequestError: nil, show: newShow)
