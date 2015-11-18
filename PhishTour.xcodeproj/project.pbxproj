@@ -27,6 +27,7 @@
 		810779A71BF964B700756A0C /* CalloutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A31BF964B700756A0C /* CalloutCell.swift */; };
 		810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A41BF964B700756A0C /* CalloutCellView.swift */; };
 		810779A91BF964B700756A0C /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 810779A61BF964B700756A0C /* SMCalloutView.m */; };
+		81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9D1BFBD33700408BDD /* CoreDataStack.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		810779A41BF964B700756A0C /* CalloutCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCellView.swift; sourceTree = "<group>"; };
 		810779A51BF964B700756A0C /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCalloutView.h; sourceTree = "<group>"; };
 		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
+		81979D9D1BFBD33700408BDD /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				810779701BF9629800756A0C /* AppDelegate.swift */,
+				81979D9D1BFBD33700408BDD /* CoreDataStack.swift */,
 				810779821BF9631D00756A0C /* Main.storyboard */,
 				8107798A1BF9638100756A0C /* View Controllers */,
 				810779951BF963E900756A0C /* Model Classes */,
@@ -231,6 +234,7 @@
 				810779931BF963C700756A0C /* PhishTour.swift in Sources */,
 				8107799F1BF9646D00756A0C /* SongCell.swift in Sources */,
 				810779941BF963C700756A0C /* PhishYear.swift in Sources */,
+				81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */,
 				810779711BF9629800756A0C /* AppDelegate.swift in Sources */,
 				8107799E1BF9646D00756A0C /* TourNavControls.swift in Sources */,
 				810779911BF963C700756A0C /* PhishShow.swift in Sources */,
@@ -389,6 +393,7 @@
 				810779811BF9629800756A0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

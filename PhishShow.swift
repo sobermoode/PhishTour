@@ -8,24 +8,25 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class PhishShow: NSObject,
-    NSCoding, MKAnnotation
+class PhishShow: NSManagedObject,
+    MKAnnotation
 {
     /// specific inforamation for the show
-    var date: String
-    var day: Int?
-    var month: Int?
-    var year: Int
-    var venue: String
-    var city: String
-    var showID: Int
-    var consecutiveNights: Int = 1
-    var tour: PhishTour?  // being set in PhishTour.associateShows()
-    var tourID: Int?
+    @NSManaged var date: String
+    @NSManaged var day: Int?
+    @NSManaged var month: Int?
+    @NSManaged var year: Int
+    @NSManaged var venue: String
+    @NSManaged var city: String
+    @NSManaged var showID: Int
+    @NSManaged var consecutiveNights: Int = 1
+    @NSManaged var tour: PhishTour?  // being set in PhishTour.associateShows()
+    @NSManaged var tourID: Int?
     
     /// a show consists of sets of songs (the "setlist")
-    var setlist: [Int : [PhishSong]]?
+    @NSManaged var setlist: [Int : [PhishSong]]?
     
     /// the number of songs played in the show
     var totalSongs: Int
@@ -42,14 +43,16 @@ class PhishShow: NSObject,
         return total
     }
     
+    /*
     /// filename for the saved data
     var filename: String
     {
         return "show\( self.showID )"
     }
+    */
     
     /// location information for the show
-    var showLatitude, showLongitude: Double?
+    @NSManaged var showLatitude, showLongitude: Double?
     var coordinate: CLLocationCoordinate2D
     {
         return CLLocationCoordinate2D(
@@ -58,8 +61,15 @@ class PhishShow: NSObject,
         )
     }
     
+    /*
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
+    {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    */
+    
     /// shows are initialized from different requests, which all provide different information
-    override init()
+    init()
     {
         self.date = ""
         self.year = 9999
@@ -119,6 +129,7 @@ class PhishShow: NSObject,
         self.tourID = showInfo["tour_id"] as? Int
     }
     
+    /*
     required init?(coder aDecoder: NSCoder)
     {
         self.date = aDecoder.decodeObjectForKey("date") as! String
@@ -163,4 +174,5 @@ class PhishShow: NSObject,
             print("There was an error saving \( self.date ) \( self.year ) to the device.")
         }
     }
+    */
 }

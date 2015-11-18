@@ -7,21 +7,37 @@
 //
 
 import UIKit
+import CoreData
 
-class PhishYear: NSObject,
-    NSCoding
+class PhishYear: NSManagedObject
 {
-    var year: Int
+    /// the year
+    @NSManaged var year: Int
     
     /// a year is composed of a set of tours
-    var tours: [PhishTour]?
+    @NSManaged var tours: [PhishTour]?
     
+    /*
     /// filename for the data saved to the device
     var filename: String
     {
         return "year\(self.year)"
     }
+    */
     
+    /*
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
+    {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    */
+    
+    init(year: Int)
+    {
+        self.year = year
+    }
+    
+    /*
     init(year: Int)
     {
         self.year = year
@@ -55,4 +71,5 @@ class PhishYear: NSObject,
             print("There was an error saving \(self.year) to the device.")
         }
     }
+    */
 }

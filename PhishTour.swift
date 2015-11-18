@@ -8,21 +8,21 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class PhishTour: NSObject,
-    NSCoding
+class PhishTour: NSManagedObject
 {
     /// specific information for the tour
-    var year: PhishYear?
-    var name: String
-    var tourID: Int
+    @NSManaged var year: PhishYear?
+    @NSManaged var name: String
+    @NSManaged var tourID: Int
     
     /// a tour consists of a series of shows at several different locations
-    var shows: [PhishShow]
-    var uniqueLocations: [PhishShow]?
+    @NSManaged var shows: [PhishShow]
+    @NSManaged var uniqueLocations: [PhishShow]?
     
     /// lookup the shows associated with a given location
-    var locationDictionary: [String : [PhishShow]]
+    @NSManaged var locationDictionary: [String : [PhishShow]]
     
     /// the coordinates of every show
     var showCoordinates: [CLLocationCoordinate2D]
@@ -36,11 +36,20 @@ class PhishTour: NSObject,
         return coordinates
     }
     
+    /*
     /// filename for the data saved to the device
     var filename: String
     {
         return "tour\(self.tourID)"
     }
+    */
+    
+    /*
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
+    {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    */
     
     init(year: PhishYear, name: String, tourID: Int, shows: [PhishShow])
     {
@@ -90,6 +99,7 @@ class PhishTour: NSObject,
         self.locationDictionary = [String : [PhishShow]]()
     }
     
+    /*
     required init?(coder aDecoder: NSCoder)
     {
         self.year = aDecoder.decodeObjectForKey("year") as? PhishYear
@@ -109,6 +119,7 @@ class PhishTour: NSObject,
         aCoder.encodeObject(uniqueLocations, forKey: "uniqueLocations")
         aCoder.encodeObject(locationDictionary, forKey: "locationDictionary")
     }
+    */
     
     /// set the tour property on all the shows
     func associateShows()
@@ -225,6 +236,7 @@ class PhishTour: NSObject,
         return (highlightIndex, scrollToIndex)
     }
     
+    /*
     /// save the tour to the device for later retrieval
     func save()
     {
@@ -241,4 +253,5 @@ class PhishTour: NSObject,
             print("There was an error saving \( self.name ) to the device.")
         }
     }
+    */
 }

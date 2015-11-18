@@ -7,19 +7,19 @@
 //
 
 import UIKit
+import CoreData
 
-class PhishSong: NSObject,
-    NSCoding
+class PhishSong: NSManagedObject
 {
     /// specific information for the song
-    var name: String
-    var duration: String
-    var set: Int!
-    var songID: Int
-    var show: PhishShow!
+    @NSManaged var name: String
+    @NSManaged var duration: String
+    @NSManaged var set: Int!
+    @NSManaged var songID: Int
+    @NSManaged var show: PhishShow!
     
     /// the song has a history of every show it was played at
-    var history: [Int : [PhishShow]]?
+    @NSManaged var history: [Int : [PhishShow]]?
     
     /// the total number of times the song has been played
     var totalPlays: Int
@@ -36,11 +36,20 @@ class PhishSong: NSObject,
         return total
     }
     
+    /*
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
+    {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    */
+    
+    /*
     /// filename to save the song data to for later retrieval
     var filename: String
     {
         return "song\(self.name)"
     }
+    */
     
     init(songInfo: [String : AnyObject], forShow show: PhishShow)
     {
@@ -64,6 +73,7 @@ class PhishSong: NSObject,
         self.show = show
     }
     
+    /*
     required init?(coder aDecoder: NSCoder)
     {
         self.name = aDecoder.decodeObjectForKey("name") as! String
@@ -99,4 +109,5 @@ class PhishSong: NSObject,
             print("There was an error saving \( self.name ) to the device.")
         }
     }
+    */
 }
