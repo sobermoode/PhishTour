@@ -50,6 +50,7 @@ class PhishTour: NSManagedObject
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
+    /*
     init(year: PhishYear, name: String, tourID: Int, shows: [PhishShow])
     {
         /// insert the object into the core data context
@@ -67,6 +68,22 @@ class PhishTour: NSManagedObject
             self.shows.insert(show)
         }
         */
+        self.uniqueLocations = [PhishShow]()
+        self.locationDictionary = [String : [PhishShow]]()
+    }
+    */
+    init(year: PhishYear, name: String, tourID: Int)
+    {
+        /// insert the object into the core data context
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let tourEntity = NSEntityDescription.entityForName("PhishTour", inManagedObjectContext: context)!
+        super.init(entity: tourEntity, insertIntoManagedObjectContext: context)
+        
+        self.year = year
+        self.name = name
+        self.tourID = Int(tourID)
+        // self.shows = shows
+        
         self.uniqueLocations = [PhishShow]()
         self.locationDictionary = [String : [PhishShow]]()
     }

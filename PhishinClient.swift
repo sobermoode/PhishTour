@@ -10,6 +10,7 @@ import UIKit
 
 class PhishinClient: NSObject
 {
+    let context = CoreDataStack.sharedInstance().managedObjectContext
     let session: NSURLSession = NSURLSession.sharedSession()
     let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
     
@@ -103,7 +104,10 @@ class PhishinClient: NSObject
                         }
                         
                         /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
                         
                         /// send it back through the completion handler
                         completionHandler(yearsRequestError: nil, years: phishYears)
@@ -184,7 +188,10 @@ class PhishinClient: NSObject
                                 // year.save()
                                 
                                 /// save new and updated objects to the context
-                                CoreDataStack.sharedInstance().saveContext()
+                                dispatch_async(dispatch_get_main_queue())
+                                {
+                                    CoreDataStack.sharedInstance().saveContext()
+                                }
                                 
                                 /// send the tours back through the completion handler
                                 completionHandler(toursRequestError: nil, tours: tours)
@@ -236,15 +243,27 @@ class PhishinClient: NSObject
                         showArray.append(newShow)
                     }
                     
+                    /*
                     /// create the tour
                     let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id, shows: showArray)
                     newTour.associateShows()
                     newTour.createLocationDictionary()
+                    */
+                    let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
+                    for show in showArray
+                    {
+                        show.tour = newTour
+                    }
+                    newTour.createLocationDictionary()
+                    
                     // newTour.save()
                     // newTour.year!.save()
                     
                     /// save new and updated objects to the context
-                    CoreDataStack.sharedInstance().saveContext()
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        CoreDataStack.sharedInstance().saveContext()
+                    }
                     
                     /// send the tour back through the completion handler
                     completionHandler(tourRequestError: nil, tour: newTour)
@@ -293,7 +312,10 @@ class PhishinClient: NSObject
                         {
                             // tourYear.save()
                             /// save new and updated objects to the context
-                            CoreDataStack.sharedInstance().saveContext()
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
                         }
                         
                         /// send the tour name back through the completion handler
@@ -356,16 +378,32 @@ class PhishinClient: NSObject
                             let theTourData = tourResults["data"] as! [String : AnyObject]
                             let tourName = theTourData["name"] as! String
                             
-                            /// create a new PhishTour
-                            let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showsForID[tourID]!)
+                            /*
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                /// create a new PhishTour
+                                let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showsForID[tourID]!)
+                                newTour.associateShows()
+                                newTour.createLocationDictionary()
+                                tours.append(newTour)
+                            }
+                            */
+                            
+                            let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
+                            let shows = showsForID[tourID]!
+                            for show in shows
+                            {
+                                show.tour = newTour
+                            }
+                            newTour.createLocationDictionary()
+                            
                             // let showSet = Set(showsForID[tourID]!)
                             // let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showSet)
-                            newTour.associateShows()
-                            newTour.createLocationDictionary()
+                            
                             // newTour.save()
                             // newTour.year!.save()
                             
-                            tours.append(newTour)
+                            
                         }
                         catch
                         {
@@ -386,7 +424,10 @@ class PhishinClient: NSObject
                     // year.save()
                     
                     /// save new and updated objects to the context
-                    CoreDataStack.sharedInstance().saveContext()
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        CoreDataStack.sharedInstance().saveContext()
+                    }
                     
                     /// return the tours through the completion handler
                     completionHandler(tourNamesRequestError: nil, tours: tours)
