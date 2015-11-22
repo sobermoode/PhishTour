@@ -119,7 +119,10 @@ class PhishModel: NSObject,
                     }
                     
                     /// save new and updated objects to the context
-                    CoreDataStack.sharedInstance().saveContext()
+                    self.context.performBlockAndWait()
+                    {
+                        CoreDataStack.sharedInstance().saveContext()
+                    }
                     
                     completionHandler(yearsError: nil)
                 }
@@ -244,7 +247,7 @@ class PhishModel: NSObject,
             {
                 PhishinClient.sharedInstance().requestToursForYear(year)
                 {
-                    toursRequestError, tours in
+                    toursRequestError, requestedTours in
                     
                     /// something went wrong
                     if toursRequestError != nil
@@ -253,14 +256,18 @@ class PhishModel: NSObject,
                     }
                     else
                     {
+                        print("Requested tours: \(requestedTours!)")
                         /// set the tours
-                        self.currentTours = tours!
-                        
-                        CoreDataStack.sharedInstance().saveContext()
-                        
-                        /// return the tours
-                        completionHandler(toursError: nil, tours: tours!)
+                        self.currentTours = requestedTours!
                     }
+                    
+                    self.context.performBlockAndWait()
+                    {
+                        CoreDataStack.sharedInstance().saveContext()
+                    }
+                    
+                    /// return the tours
+                    completionHandler(toursError: nil, tours: requestedTours!)
                 }
             }
         }

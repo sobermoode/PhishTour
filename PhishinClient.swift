@@ -103,11 +103,13 @@ class PhishinClient: NSObject
                             Int(year1.year) > Int(year2.year)
                         }
                         
+                        /*
                         /// save new and updated objects to the context
-                        dispatch_async(dispatch_get_main_queue())
+                        self.context.performBlockAndWait()
                         {
                             CoreDataStack.sharedInstance().saveContext()
                         }
+                        */
                         
                         /// send it back through the completion handler
                         completionHandler(yearsRequestError: nil, years: phishYears)
@@ -187,12 +189,15 @@ class PhishinClient: NSObject
                                 // year.tours = tours
                                 // year.save()
                                 
+                                /*
                                 /// save new and updated objects to the context
-                                dispatch_async(dispatch_get_main_queue())
+                                self.context.performBlockAndWait()
                                 {
                                     CoreDataStack.sharedInstance().saveContext()
                                 }
+                                */
                                 
+                                print("Sending these tours back (2): \(tours!)")
                                 /// send the tours back through the completion handler
                                 completionHandler(toursRequestError: nil, tours: tours)
                             }
@@ -260,7 +265,7 @@ class PhishinClient: NSObject
                     // newTour.year!.save()
                     
                     /// save new and updated objects to the context
-                    dispatch_async(dispatch_get_main_queue())
+                    self.context.performBlockAndWait()
                     {
                         CoreDataStack.sharedInstance().saveContext()
                     }
@@ -312,7 +317,7 @@ class PhishinClient: NSObject
                         {
                             // tourYear.save()
                             /// save new and updated objects to the context
-                            dispatch_async(dispatch_get_main_queue())
+                            self.context.performBlockAndWait()
                             {
                                 CoreDataStack.sharedInstance().saveContext()
                             }
@@ -393,6 +398,7 @@ class PhishinClient: NSObject
                             let shows = showsForID[tourID]!
                             for show in shows
                             {
+                                print("Set \(show.showID) to \(newTour.name)")
                                 show.tour = newTour
                             }
                             newTour.createLocationDictionary()
@@ -423,12 +429,15 @@ class PhishinClient: NSObject
                     // year.tours = tours
                     // year.save()
                     
+                    /*
                     /// save new and updated objects to the context
-                    dispatch_async(dispatch_get_main_queue())
+                    self.context.performBlockAndWait()
                     {
                         CoreDataStack.sharedInstance().saveContext()
                     }
+                    */
                     
+                    print("Sending these tours back (1): \(tours)")
                     /// return the tours through the completion handler
                     completionHandler(tourNamesRequestError: nil, tours: tours)
                 }
@@ -594,7 +603,10 @@ class PhishinClient: NSObject
                         // show.tour?.year!.save()
                         
                         /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
                         
                         // return the setlist through the completion handler
                         completionHandler(setlistError: nil, setlist: setlist)
@@ -829,7 +841,10 @@ class PhishinClient: NSObject
                         // song.show.tour?.year?.save()
                         
                         /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
                         
                         /// send the history back through the completion handler
                         completionHandler(songHistoryError: nil, songHistory: historyByYear)
@@ -876,7 +891,10 @@ class PhishinClient: NSObject
                         // newShow.tour?.year?.save()
                         
                         /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
                         
                         // return it through the completion handler
                         completionHandler(showRequestError: nil, show: newShow)
