@@ -67,6 +67,8 @@ class TourMapViewController: UIViewController,
         }
         else
         {
+            // return
+            
             /// we might need to re-launch to the setlist view controller
             if let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
             {
@@ -275,7 +277,8 @@ class TourMapViewController: UIViewController,
                 if yearsError != nil
                 {
                     /// create an alert for the problem and dismiss the tour selecter
-                    let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!.localizedDescription)", preferredStyle: .Alert)
+                    // let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!.localizedDescription)", preferredStyle: .Alert)
+                    let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!)", preferredStyle: .Alert)
                     let alertAction = UIAlertAction(title: "OK", style: .Default)
                     {
                         action in
@@ -321,7 +324,7 @@ class TourMapViewController: UIViewController,
                             if toursError != nil
                             {
                                 /// create an alert for the problem and dismiss the tour selecter
-                                let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(yearToGet.year): \(toursError!.localizedDescription)", preferredStyle: .Alert)
+                                let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(yearToGet.year): \(toursError!)", preferredStyle: .Alert)
                                 let alertAction = UIAlertAction(title: "OK", style: .Default)
                                 {
                                     action in

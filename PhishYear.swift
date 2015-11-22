@@ -25,12 +25,10 @@ class PhishYear: NSManagedObject
     }
     */
     
-    /*
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
-    */
     
     init(year: Int)
     {

@@ -8,12 +8,16 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class PhishModel: NSObject,
     UIPickerViewDataSource, UIPickerViewDelegate, UITableViewDataSource, UITableViewDelegate
 {
     /// reference to the device's documents directory
     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+    
+    /// reference to the Core Data context
+    let context = CoreDataStack.sharedInstance().managedObjectContext
     
     /// the available years
     var years: [PhishYear]?
@@ -63,6 +67,75 @@ class PhishModel: NSObject,
         return Singleton.sharedInstance
     }
     
+    /// Core Data getYears
+    /// get the available years or request them
+    func getYears(completionHandler: (yearsError: ErrorType?) -> Void)
+    {
+        let yearsFetchRequest = NSFetchRequest(entityName: "PhishYear")
+        let sortDescriptor = NSSortDescriptor(key: "year", ascending: false)
+        yearsFetchRequest.sortDescriptors = [sortDescriptor]
+        
+        do
+        {
+            let years = try self.context.executeFetchRequest(yearsFetchRequest) as! [PhishYear]
+            
+            if !years.isEmpty
+            {
+                self.years = years
+                
+                completionHandler(yearsError: nil)
+                
+                return
+            }
+            else
+            {
+                print("There were no years in Core Data. Requesting...")
+                PhishinClient.sharedInstance().requestYears()
+                {
+                    yearsRequestError, years in
+                    
+                    if yearsRequestError != nil
+                    {
+                        completionHandler(yearsError: yearsRequestError)
+                    }
+                    else
+                    {
+                        print("Got the years: \(years!)")
+                        /// set the years
+                        self.years = years!
+                        
+                        /// the years request was successful;
+                        /// 1983-1987 all come back as one "year",
+                        /// need to add them as individual PhishYears
+                        var year: Int = 1987
+                        repeat
+                        {
+                            let newYear = PhishYear(year: year)
+                            // newYear.save()
+                            
+                            self.years?.append(newYear)
+                        }
+                        while --year >= 1983
+                    }
+                    
+                    /// save new and updated objects to the context
+                    CoreDataStack.sharedInstance().saveContext()
+                    
+                    completionHandler(yearsError: nil)
+                }
+            }
+            
+            // completionHandler(yearsError: nil)
+        }
+        catch
+        {
+            // print("There was an error fetching the years.")
+            
+            completionHandler(yearsError: error)
+        }
+    }
+    
+    /*
     /// get the available years or request them
     func getYears(completionHandler: (yearsError: NSError?) -> Void)
     {
@@ -129,6 +202,7 @@ class PhishModel: NSObject,
         
         completionHandler(yearsError: nil)
     }
+    */
     
     /// retrieve the saved years from the device
     func getSavedYears() -> [PhishYear]?
@@ -146,6 +220,57 @@ class PhishModel: NSObject,
         }
     }
     
+    /// Core Data getToursForYear
+    /// retrieve the tours for a given year or request them
+    func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
+    {
+        let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
+        toursFetchRequest.sortDescriptors = [sortDescriptor]
+        
+        do
+        {
+            let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
+            
+            if !tours.isEmpty
+            {
+                self.currentTours = tours
+                
+                completionHandler(toursError: nil, tours: tours)
+                
+                return
+            }
+            else
+            {
+                PhishinClient.sharedInstance().requestToursForYear(year)
+                {
+                    toursRequestError, tours in
+                    
+                    /// something went wrong
+                    if toursRequestError != nil
+                    {
+                        completionHandler(toursError: toursRequestError!, tours: nil)
+                    }
+                    else
+                    {
+                        /// set the tours
+                        self.currentTours = tours!
+                        
+                        CoreDataStack.sharedInstance().saveContext()
+                        
+                        /// return the tours
+                        completionHandler(toursError: nil, tours: tours!)
+                    }
+                }
+            }
+        }
+        catch
+        {
+            completionHandler(toursError: error, tours: nil)
+        }
+    }
+    
+    /*
     /// retrieve the tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: NSError?, tours: [PhishTour]?) -> Void)
     {
@@ -182,6 +307,7 @@ class PhishModel: NSObject,
             }
         }
     }
+    */
     
     /// retrieve saved tours from the device
     func getSavedToursForYear(year: Int) -> [PhishTour]?
@@ -502,7 +628,7 @@ class PhishModel: NSObject,
                         self.currentTours = self.selectedYear!.tours
                         
                         /// create an alert for the problem and dismiss the tour selecter
-                        let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(year.year): \(toursError!.localizedDescription)", preferredStyle: .Alert)
+                        let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(year.year): \(toursError!)", preferredStyle: .Alert)
                         let alertAction = UIAlertAction(title: "OK", style: .Default)
                         {
                             action in

@@ -19,6 +19,7 @@ class PhishTour: NSManagedObject
     
     /// a tour consists of a series of shows at several different locations
     @NSManaged var shows: [PhishShow]
+    // @NSManaged var shows: Set<PhishShow>
     @NSManaged var uniqueLocations: [PhishShow]?
     
     /// lookup the shows associated with a given location
@@ -44,12 +45,10 @@ class PhishTour: NSManagedObject
     }
     */
     
-    /*
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
-    */
     
     init(year: PhishYear, name: String, tourID: Int, shows: [PhishShow])
     {
@@ -62,6 +61,12 @@ class PhishTour: NSManagedObject
         self.name = name
         self.tourID = Int(tourID)
         self.shows = shows
+        /*
+        for show in shows
+        {
+            self.shows.insert(show)
+        }
+        */
         self.uniqueLocations = [PhishShow]()
         self.locationDictionary = [String : [PhishShow]]()
     }
@@ -102,6 +107,7 @@ class PhishTour: NSManagedObject
         {            
             let newShow = PhishShow(showInfoFromYear: show)
             showArray.append(newShow)
+            //self.shows.insert(newShow)
         }
         self.shows = showArray
         
@@ -139,7 +145,7 @@ class PhishTour: NSManagedObject
             show.tour = self
             
             // show.save()
-            CoreDataStack.sharedInstance().saveContext()
+            // CoreDataStack.sharedInstance().saveContext()
         }
     }
     
@@ -231,6 +237,10 @@ class PhishTour: NSManagedObject
         self.locationDictionary = locationDictionary
     }
     
+    // TODO: Re-instate?
+    // I commented it out, while making changes to the shows property to be a Set, to work with Core Data.
+    // However, it turned out, that in its initial submit form, I wasn't using this method, anyway.
+    /*
     /// for use with highlighting the correct rows in the show list table view
     /// returns the row number of the show to highlight and the row number of the last show of a multi-night run
     func showListNumberForLocation(location: PhishShow) -> (Int, Int)
@@ -246,6 +256,7 @@ class PhishTour: NSManagedObject
         
         return (highlightIndex, scrollToIndex)
     }
+    */
     
     /*
     /// save the tour to the device for later retrieval

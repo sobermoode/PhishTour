@@ -61,12 +61,10 @@ class PhishShow: NSManagedObject,
         )
     }
     
-    /*
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
-    */
     
     /// shows are initialized from different requests, which all provide different information;
     /// in this case, we need a default show object, which will get specific information later

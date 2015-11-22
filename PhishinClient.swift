@@ -179,8 +179,8 @@ class PhishinClient: NSObject
                             }
                             else
                             {
-                                /// set the tours
-                                year.tours = tours
+                                /// set the tours (being set by core data relationship)
+                                // year.tours = tours
                                 // year.save()
                                 
                                 /// save new and updated objects to the context
@@ -238,7 +238,7 @@ class PhishinClient: NSObject
                     
                     /// create the tour
                     let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id, shows: showArray)
-                    // newTour.associateShows()
+                    newTour.associateShows()
                     newTour.createLocationDictionary()
                     // newTour.save()
                     // newTour.year!.save()
@@ -284,8 +284,8 @@ class PhishinClient: NSObject
                         
                         /// create the new tour
                         let newTour = PhishTour(tourInfo: tourData)
-                        // newTour.associateShows()
-                        // newTour.createLocationDictionary()
+                        newTour.associateShows()
+                        newTour.createLocationDictionary()
                         // newTour.save()
                         
                         // if let tourYear = newTour.year
@@ -337,7 +337,6 @@ class PhishinClient: NSObject
                     }
                 }
                 
-                
                 let tourIDRequestString = self.endpoint + Routes.Tours + "/\(tourID)"
                 let tourIDRequestURL = NSURL(string: tourIDRequestString)!
                 let tourIDRequestTask = self.session.dataTaskWithURL(tourIDRequestURL)
@@ -359,8 +358,10 @@ class PhishinClient: NSObject
                             
                             /// create a new PhishTour
                             let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showsForID[tourID]!)
-                            // newTour.associateShows()
-                            // newTour.createLocationDictionary()
+                            // let showSet = Set(showsForID[tourID]!)
+                            // let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showSet)
+                            newTour.associateShows()
+                            newTour.createLocationDictionary()
                             // newTour.save()
                             // newTour.year!.save()
                             
@@ -380,8 +381,8 @@ class PhishinClient: NSObject
                         Int(tour1.tourID) < Int(tour2.tourID)
                     }
                     
-                    /// set the tours
-                    year.tours = tours
+                    /// set the tours (being set by core data relationship)
+                    // year.tours = tours
                     // year.save()
                     
                     /// save new and updated objects to the context
