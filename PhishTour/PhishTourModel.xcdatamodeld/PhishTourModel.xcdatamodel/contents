@@ -6,9 +6,8 @@
         <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="day" optional="YES" attributeType="Integer 16" syncable="YES"/>
         <attribute name="month" optional="YES" attributeType="Integer 16" syncable="YES"/>
-        <attribute name="setlist" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="showID" attributeType="Integer 16" syncable="YES"/>
-        <attribute name="showLatittude" attributeType="Double" defaultValueString="0" syncable="YES"/>
+        <attribute name="showLatitude" attributeType="Double" defaultValueString="0" syncable="YES"/>
         <attribute name="showLongitude" attributeType="Double" defaultValueString="0" syncable="YES"/>
         <attribute name="tourID" optional="YES" attributeType="Integer 16" syncable="YES"/>
         <attribute name="venue" attributeType="String" syncable="YES"/>
@@ -24,10 +23,8 @@
         <attribute name="songID" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
     <entity name="PhishTour" representedClassName=".PhishTour" syncable="YES">
-        <attribute name="locationDictionary" attributeType="Transformable" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="tourID" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="uniqueLocations" optional="YES" attributeType="Transformable" syncable="YES"/>
         <relationship name="shows" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishShow" inverseName="tour" inverseEntity="PhishShow" syncable="YES"/>
         <relationship name="year" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishYear" inverseName="tours" inverseEntity="PhishYear" syncable="YES"/>
     </entity>
@@ -36,9 +33,9 @@
         <relationship name="tours" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishTour" inverseName="year" inverseEntity="PhishTour" syncable="YES"/>
     </entity>
     <elements>
-        <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
-        <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="135"/>
-        <element name="PhishShow" positionX="-36" positionY="9" width="128" height="240"/>
+        <element name="PhishShow" positionX="-36" positionY="9" width="128" height="225"/>
         <element name="PhishSong" positionX="-18" positionY="27" width="128" height="135"/>
+        <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="105"/>
+        <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
     </elements>
 </model>

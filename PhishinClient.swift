@@ -157,6 +157,8 @@ class PhishinClient: NSObject
                         {
                             /// create a new PhishShow
                             let newShow = PhishShow(showInfoFromYear: show)
+                            // print("newShow lat/long: \(newShow.showLatitude), \(newShow.showLongitude)")
+                            // print("Created show: \(newShow)")
                             // newShow.save()
                             // CoreDataStack.sharedInstance().saveContext()
                             
@@ -259,7 +261,7 @@ class PhishinClient: NSObject
                     {
                         show.tour = newTour
                     }
-                    newTour.createLocationDictionary()
+                    // newTour.createLocationDictionary()
                     
                     // newTour.save()
                     // newTour.year!.save()
@@ -309,7 +311,7 @@ class PhishinClient: NSObject
                         /// create the new tour
                         let newTour = PhishTour(tourInfo: tourData)
                         newTour.associateShows()
-                        newTour.createLocationDictionary()
+                        // newTour.createLocationDictionary()
                         // newTour.save()
                         
                         // if let tourYear = newTour.year
@@ -401,6 +403,7 @@ class PhishinClient: NSObject
                                 print("Set \(show.showID) to \(newTour.name)")
                                 show.tour = newTour
                             }
+                            tours.append(newTour)
                             newTour.createLocationDictionary()
                             
                             // let showSet = Set(showsForID[tourID]!)

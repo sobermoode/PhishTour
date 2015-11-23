@@ -26,7 +26,7 @@ class PhishShow: NSManagedObject,
     @NSManaged var tourID: NSNumber?
     
     /// a show consists of sets of songs (the "setlist")
-    @NSManaged var setlist: [Int : [PhishSong]]?
+    var setlist: [Int : [PhishSong]]?
     
     /// the number of songs played in the show
     var totalSongs: Int
@@ -52,7 +52,8 @@ class PhishShow: NSManagedObject,
     */
     
     /// location information for the show
-    @NSManaged var showLatitude, showLongitude: NSNumber
+    @NSManaged var showLatitude: NSNumber
+    @NSManaged var showLongitude: NSNumber
     var coordinate: CLLocationCoordinate2D
     {
         return CLLocationCoordinate2D(
@@ -134,6 +135,7 @@ class PhishShow: NSManagedObject,
         
         /// get to the venue, location, and coordinates, and set the properties
         let venueData = showInfo["venue"] as! [String : AnyObject]
+        print("venueData: \(venueData.description)")
         self.venue = venueData["name"] as! String
         self.city = venueData["location"] as! String
         self.showLatitude = venueData["latitude"] as! Double

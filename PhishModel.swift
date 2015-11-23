@@ -81,6 +81,7 @@ class PhishModel: NSObject,
             
             if !years.isEmpty
             {
+                print("Got \(years.count) years from Core Data.")
                 self.years = years
                 
                 completionHandler(yearsError: nil)
@@ -237,6 +238,9 @@ class PhishModel: NSObject,
             
             if !tours.isEmpty
             {
+                print("Got \(tours.count) tours from Core Data.")
+                print("The \(tours[0].name) has \(tours[0].uniqueLocations!.count) unique locations.")
+                print("The \(tours[1].name) has \(tours[1].uniqueLocations!.count) unique locations.")
                 self.currentTours = tours
                 
                 completionHandler(toursError: nil, tours: tours)
@@ -766,7 +770,7 @@ class PhishModel: NSObject,
         
         /// create the gradient effect with the cells' background colors;
         /// each set of shows at a unique location will share the same background color
-        let shows = PhishModel.sharedInstance().selectedTour!.locationDictionary[show.venue]!
+        let shows = PhishModel.sharedInstance().selectedTour!.locationDictionary![show.venue]!
         let firstShow = shows.first!
         let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations!.indexOf(firstShow)!
         let grayFactor = CGFloat(0.02 * Double(position))
@@ -792,7 +796,7 @@ class PhishModel: NSObject,
         /// annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
         // get the venue and use it to find the location
         let venue = cell.venueLabel.text!
-        let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary[venue]
+        let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
         let show = locations!.first!
         
         /// move the map to the annotaton, so the callout doesn't appear offscreen

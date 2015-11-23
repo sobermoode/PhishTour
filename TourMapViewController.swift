@@ -492,6 +492,8 @@ class TourMapViewController: UIViewController,
             return
         }
         
+        print("The selected tour is the \(selectedTour.name)")
+        
         /// create a progress bar to track the progress of the location geocoding
         /// give the MapquestClient a reference to the progress bar, so it can update the bar as it does its thing
         let progressBar = UIProgressView(progressViewStyle: .Default)
@@ -580,7 +582,7 @@ class TourMapViewController: UIViewController,
                         if self.didComeFromSongHistory
                         {
                             let venue = PhishModel.sharedInstance().currentShow!.venue
-                            let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary[venue]
+                            let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
                             let show = locations!.first!
                             
                             self.tourMap.selectAnnotation(show, animated: true)
@@ -782,7 +784,7 @@ class TourMapViewController: UIViewController,
         
         /// create a callout cell for every show at the location
         let venue = PhishModel.sharedInstance().currentShow!.venue
-        let showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary[venue]!
+        let showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]!
         var showCells = [CalloutCell]()
         for (index, show) in showsAtVenue.enumerate()
         {
