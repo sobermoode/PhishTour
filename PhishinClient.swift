@@ -336,6 +336,7 @@ class PhishinClient: NSObject
                         // newTour.save()
                         
                         // if let tourYear = newTour.year
+                        /*
                         if let _ = newTour.year
                         {
                             // tourYear.save()
@@ -344,6 +345,13 @@ class PhishinClient: NSObject
                             {
                                 CoreDataStack.sharedInstance().saveContext()
                             }
+                        }
+                        */
+                        
+                        /// save new and updated objects to the context
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
                         }
                         
                         /// send the tour name back through the completion handler
@@ -900,6 +908,46 @@ class PhishinClient: NSObject
                     catch
                     {
                         print("There was an error with the show request.")
+                    }
+                }
+            }
+            showRequestTask.resume()
+        }
+    }
+    
+    func requestTourIDFromShowForID(id: Int, completionHandler: (tourIDRequestError: NSError?, tourID: Int!) -> Void)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+        {
+            /// construct the request URL
+            let showRequestString = self.endpoint + Routes.Shows + "/\(id)"
+            let showRequestURL = NSURL(string: showRequestString)!
+            let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
+            {
+                showRequestData, showRequestResponse, showRequestError in
+                
+                /// something went wrong
+                if showRequestError != nil
+                {
+                    completionHandler(tourIDRequestError: showRequestError!, tourID: nil)
+                }
+                else
+                {
+                    do
+                    {
+                        /// get the show data
+                        let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
+                        let showData = showResults["data"] as! [String : AnyObject]
+                        
+                        /// get the tour ID
+                        let tourID = showData["tour_id"] as! Int
+                        
+                        /// return it
+                        completionHandler(tourIDRequestError: nil, tourID: tourID)
+                    }
+                    catch
+                    {
+                        print("There was an error requesting info for show \(id).")
                     }
                 }
             }

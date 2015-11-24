@@ -357,6 +357,7 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
+                    print("Got \(show) for the cell...")
                     /// this will be the map annotation to select when popping back to the tour map controller
                     cell.otherTourShow = show!
                     
@@ -381,6 +382,7 @@ class SongHistoryViewController: UIViewController,
                             /// get the tour ID
                             if let tourID = show!.tourID
                             {
+                                print("We had a tour ID...")
                                 PhishModel.sharedInstance().getTourNameForTourID(Int(tourID))
                                 {
                                     tourNameError, tourName in
@@ -405,6 +407,57 @@ class SongHistoryViewController: UIViewController,
                                             
                                             /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                             cell.userInteractionEnabled = (tourID == 71) ? false : true
+                                        }
+                                    }
+                                }
+                            }
+                            /// no tour ID, so we need to request it
+                            else
+                            {
+                                print("There was no tour ID...")
+                                PhishinClient.sharedInstance().requestTourIDFromShowForID(show!.showID.integerValue)
+                                {
+                                    tourIDRequestError, tourID in
+                                    
+                                    /// something went wrong
+                                    if tourIDRequestError != nil
+                                    {
+                                        /// update the cell to reflect that the tour couldn't be retrieved
+                                        dispatch_async(dispatch_get_main_queue())
+                                        {
+                                            cell.detailTextLabel?.textColor = UIColor.redColor()
+                                            cell.detailTextLabel?.text = "Tour Error..."
+                                        }
+                                    }
+                                    /// we got the tour ID, now we can request the tour name with it
+                                    else
+                                    {
+                                        PhishModel.sharedInstance().getTourNameForTourID(tourID)
+                                        {
+                                            tourNameError, tourName in
+                                            
+                                            /// something went wrong
+                                            if tourNameError != nil
+                                            {
+                                                /// update the cell to reflect that the tour couldn't be retrieved
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    cell.detailTextLabel?.textColor = UIColor.redColor()
+                                                    cell.detailTextLabel?.text = "Tour Error..."
+                                                }
+                                            }
+                                            else
+                                            {
+                                                /// update the cell with the tour name on the main thread and enable the cell
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    cell.detailTextLabel?.text = tourName
+                                                    cell.tourID = tourID
+                                                    
+                                                    /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
+                                                    cell.userInteractionEnabled = (tourID == 71) ? false : true
+                                                }
+                                            }
                                         }
                                     }
                                 }

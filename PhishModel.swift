@@ -518,35 +518,59 @@ class PhishModel: NSObject,
         
     }
     
-    /// retrieve a tour from the device or request a name for a given tour ID
+    /// retrieve a tour from core data or request a name for a given tour ID
     func getTourNameForTourID(id: Int, completionHandler: (tourNameError: NSError?, tourName: String?) -> Void)
     {
         /// check for a saved tour and return its name
+        /// check for a saved tour and return it
+        let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        tourFetchRequest.predicate = tourFetchPredicate
+        
+        do
+        {
+            print("Making a fetch request for tour \(id)...")
+            let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
+            
+            if !tours.isEmpty
+            {
+                let savedTour = tours.first!
+                
+                completionHandler(tourNameError: nil, tourName: savedTour.name)
+            }
+            /// no saved tour, we need to request one
+            else
+            {
+                print("No saved tour, requesting...")
+                PhishinClient.sharedInstance().requestTourNameForID(id)
+                {
+                    tourNameRequestError, tourName in
+                    
+                    /// something went wrong
+                    if tourNameRequestError != nil
+                    {
+                        completionHandler(tourNameError: tourNameRequestError!, tourName: nil)
+                    }
+                    /// return the tour name
+                    else
+                    {
+                        completionHandler(tourNameError: nil, tourName: tourName!)
+                    }
+                }
+            }
+        }
+        catch
+        {
+            print("Couldn't retrieve tour \(id) from Core Data.")
+        }
+        /*
         let filename = "tour\(id)"
         let filepath = self.createFileURLWithFilename(filename)
         if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
         {
             completionHandler(tourNameError: nil, tourName: savedTour.name)
         }
-        /// no saved tour, we need to request one
-        else
-        {
-            PhishinClient.sharedInstance().requestTourNameForID(id)
-            {
-                tourNameRequestError, tourName in
-                
-                /// something went wrong
-                if tourNameRequestError != nil
-                {
-                    completionHandler(tourNameError: tourNameRequestError!, tourName: nil)
-                }
-                /// return the tour name
-                else
-                {
-                    completionHandler(tourNameError: nil, tourName: tourName!)
-                }
-            }
-        }
+        */
     }
     
     /// returns a string to plug into the keyed unarchiver to retrieve files
