@@ -403,66 +403,119 @@ class PhishModel: NSObject,
         }
     }
     
-    /// retrieve a show from the device or request one for a given ID
+    /// retrieve a show from core data or request one for a given ID
     func getShowForID(id: Int, completionHandler: (showError: NSError?, show: PhishShow?) -> Void)
     {
-        /// check for a saved show and return it
+        /// check for a saved show
+        /// create the fetch request
+        let showFetchRequest = NSFetchRequest(entityName: "PhishShow")
+        let showFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(id)")
+        showFetchRequest.predicate = showFetchPredicate
+        
+        do
+        {
+            /// execute the fetch request
+            let shows = try self.context.executeFetchRequest(showFetchRequest) as! [PhishShow]
+            
+            /// make sure we got something from Core Data
+            if !shows.isEmpty
+            {
+                print("Got a saved show!!!")
+                let show = shows.first!
+                print("\(show)")
+                
+                /// send the show back through the completion handler
+                completionHandler(showError: nil, show: show)
+            }
+            /// no saved show, we need to request it
+            else
+            {
+                print("Requesting a show...")
+                PhishinClient.sharedInstance().requestShowForID(id)
+                {
+                    showRequestError, show in
+                    
+                    /// something went wrong
+                    if showRequestError != nil
+                    {
+                        completionHandler(showError: showRequestError, show: nil)
+                    }
+                    /// return the show
+                    else
+                    {
+                        completionHandler(showError: nil, show: show!)
+                    }
+                }
+            }
+        }
+        catch
+        {
+            print("Couldn't retrieve show \(id) from Core Data.")
+        }
+        
+        /*
         let filename = "show\(id)"
         let filepath = self.createFileURLWithFilename(filename)
         if let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishShow
         {
             completionHandler(showError: nil, show: savedShow)
         }
-        /// no saved show, we need to request it
-        else
-        {
-            PhishinClient.sharedInstance().requestShowForID(id)
-            {
-                showRequestError, show in
-                
-                /// something went wrong
-                if showRequestError != nil
-                {
-                    completionHandler(showError: showRequestError, show: nil)
-                }
-                /// return the show
-                else
-                {
-                    completionHandler(showError: nil, show: show!)
-                }
-            }
-        }
+        */
+        
     }
     
-    /// retrieve a tour from the device or request one for a given ID
+    /// retrieve a tour from core data or request one for a given ID
     func getTourForID(id: Int, completionHandler: (tourError: NSError?, tour: PhishTour?) -> Void)
     {
         /// check for a saved tour and return it
+        let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        tourFetchRequest.predicate = tourFetchPredicate
+        
+        do
+        {
+            let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
+            
+            if !tours.isEmpty
+            {
+                let tour = tours.first!
+                
+                completionHandler(tourError: nil, tour: tour)
+            }
+            /// no saved tour, we need to request it
+            else
+            {
+                PhishinClient.sharedInstance().requestTourForID(id)
+                {
+                    tourRequestError, tour in
+                    
+                    /// something went wrong
+                    if tourRequestError != nil
+                    {
+                        completionHandler(tourError: tourRequestError!, tour: nil)
+                    }
+                    /// return the tour
+                    else
+                    {
+                        completionHandler(tourError: nil, tour: tour!)
+                    }
+                }
+            }
+        }
+        catch
+        {
+            print("Couldn't retrieve tour \(id) from Core Data.")
+        }
+        
+        /*
         let filename = "tour\(id)"
         let filepath = self.createFileURLWithFilename(filename)
         if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
         {
             completionHandler(tourError: nil, tour: savedTour)
         }
-        /// no saved tour, we need to request it
-        else
-        {
-            PhishinClient.sharedInstance().requestTourForID(id)
-            {
-                tourRequestError, tour in
-                
-                /// something went wrong
-                if tourRequestError != nil
-                {
-                    completionHandler(tourError: tourRequestError!, tour: nil)
-                }
-                /// return the tour
-                else
-                {
-                    completionHandler(tourError: nil, tour: tour!)
-                }
-            }
-        }
+        */
+        
     }
     
     /// retrieve a tour from the device or request a name for a given tour ID

@@ -693,6 +693,7 @@ class PhishinClient: NSObject
                             {
                                 let newShow = PhishShow()
                                 newShow.showID = showID
+                                newShow.createDate(date)
                                 newShow.day = day
                                 newShow.month = month
                                 newShow.year = currentYear
@@ -731,6 +732,7 @@ class PhishinClient: NSObject
                             {
                                 let newShow = PhishShow()
                                 newShow.showID = showID
+                                newShow.createDate(date)
                                 newShow.day = day
                                 newShow.month = month
                                 newShow.year = currentYear
@@ -793,6 +795,7 @@ class PhishinClient: NSObject
                                 /// create the new show and add it to the array for the new year
                                 let newShow = PhishShow()
                                 newShow.showID = showID
+                                newShow.createDate(date)
                                 newShow.day = day
                                 newShow.month = month
                                 newShow.year = currentYear

@@ -162,6 +162,16 @@ class PhishShow: NSManagedObject,
         self.tourID = showInfo["tour_id"] as? Int
     }
     
+    func createDate(date: String)
+    {
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let formattedDate = dateFormatter.dateFromString(date)!
+        dateFormatter.dateFormat = "MMM dd,"
+        let formattedString = dateFormatter.stringFromDate(formattedDate)
+        self.date = formattedString
+    }
+    
     /*
     required init?(coder aDecoder: NSCoder)
     {
