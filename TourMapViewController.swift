@@ -786,6 +786,8 @@ class TourMapViewController: UIViewController,
         
         /// create a callout cell for every show at the location
         let venue = PhishModel.sharedInstance().currentShow!.venue
+        print("selectedTour: \(PhishModel.sharedInstance().selectedTour!)")
+        print("locationDictionary: \(PhishModel.sharedInstance().selectedTour!.locationDictionary!)")
         let showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]!
         var showCells = [CalloutCell]()
         for (index, show) in showsAtVenue.enumerate()

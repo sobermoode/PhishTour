@@ -138,8 +138,24 @@ class PhishShow: NSManagedObject,
         print("venueData: \(venueData.description)")
         self.venue = venueData["name"] as! String
         self.city = venueData["location"] as! String
-        self.showLatitude = venueData["latitude"] as! Double
-        self.showLongitude = venueData["longitude"] as! Double
+        // self.showLatitude = venueData["latitude"] as! Double
+        // self.showLongitude = venueData["longitude"] as! Double
+        if let latitude = venueData["latitude"] as? Double
+        {
+            self.showLatitude = latitude
+        }
+        else
+        {
+            print("Couldn't set the latitude for \(self.date), \(self.year)")
+        }
+        if let longitude = venueData["longitude"] as? Double
+        {
+            self.showLongitude = longitude
+        }
+        else
+        {
+            print("Couldn't set the longitude for \(self.date), \(self.year)")
+        }
         
         /// set the show's ID and tourID
         self.showID = showInfo["id"] as! Int

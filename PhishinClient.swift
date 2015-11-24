@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class PhishinClient: NSObject
 {
@@ -199,7 +200,7 @@ class PhishinClient: NSObject
                                 }
                                 */
                                 
-                                print("Sending these tours back (2): \(tours!)")
+                                // print("Sending these tours back (2): \(tours!)")
                                 /// send the tours back through the completion handler
                                 completionHandler(toursRequestError: nil, tours: tours)
                             }
@@ -256,24 +257,44 @@ class PhishinClient: NSObject
                     newTour.associateShows()
                     newTour.createLocationDictionary()
                     */
-                    let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
-                    for show in showArray
+                    let startDate = tourData["starts_on"] as! String
+                    let intYear = Int(NSString(string: startDate).substringToIndex(4))!
+                    let nsNumberYear = NSNumber(integer: intYear) 
+                    let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
+                    let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", nsNumberYear)
+                    yearFetchRequest.predicate = yearFetchPredicate
+                    do
                     {
-                        show.tour = newTour
+                        let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+                        let year: PhishYear = years.first!
+                        PhishModel.sharedInstance().selectedYear = year
+                        let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
+                        for show in showArray
+                        {
+                            show.tour = newTour
+                        }
+                        
+                        /// save new and updated objects to the context
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        
+                        /// send the tour back through the completion handler
+                        completionHandler(tourRequestError: nil, tour: newTour)
                     }
+                    catch
+                    {
+                        print("Couldn't fetch \(intYear) from Core Data.")
+                    }
+                    
+                    
                     // newTour.createLocationDictionary()
                     
                     // newTour.save()
                     // newTour.year!.save()
                     
-                    /// save new and updated objects to the context
-                    self.context.performBlockAndWait()
-                    {
-                        CoreDataStack.sharedInstance().saveContext()
-                    }
                     
-                    /// send the tour back through the completion handler
-                    completionHandler(tourRequestError: nil, tour: newTour)
                 }
                 catch
                 {
@@ -310,7 +331,7 @@ class PhishinClient: NSObject
                         
                         /// create the new tour
                         let newTour = PhishTour(tourInfo: tourData)
-                        newTour.associateShows()
+                        // newTour.associateShows()
                         // newTour.createLocationDictionary()
                         // newTour.save()
                         
@@ -385,17 +406,7 @@ class PhishinClient: NSObject
                             let theTourData = tourResults["data"] as! [String : AnyObject]
                             let tourName = theTourData["name"] as! String
                             
-                            /*
-                            dispatch_async(dispatch_get_main_queue())
-                            {
-                                /// create a new PhishTour
-                                let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showsForID[tourID]!)
-                                newTour.associateShows()
-                                newTour.createLocationDictionary()
-                                tours.append(newTour)
-                            }
-                            */
-                            
+                            /// create a new tour, set the show/tour relationship, and create the location dictionary
                             let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
                             let shows = showsForID[tourID]!
                             for show in shows
@@ -403,16 +414,10 @@ class PhishinClient: NSObject
                                 print("Set \(show.showID) to \(newTour.name)")
                                 show.tour = newTour
                             }
+                            let _ = newTour.locationDictionary!
+                            
+                            /// add the new tour to the array being sent back
                             tours.append(newTour)
-                            newTour.createLocationDictionary()
-                            
-                            // let showSet = Set(showsForID[tourID]!)
-                            // let newTour = PhishTour(year: year, name: tourName, tourID: tourID, shows: showSet)
-                            
-                            // newTour.save()
-                            // newTour.year!.save()
-                            
-                            
                         }
                         catch
                         {
@@ -428,19 +433,6 @@ class PhishinClient: NSObject
                         Int(tour1.tourID) < Int(tour2.tourID)
                     }
                     
-                    /// set the tours (being set by core data relationship)
-                    // year.tours = tours
-                    // year.save()
-                    
-                    /*
-                    /// save new and updated objects to the context
-                    self.context.performBlockAndWait()
-                    {
-                        CoreDataStack.sharedInstance().saveContext()
-                    }
-                    */
-                    
-                    print("Sending these tours back (1): \(tours)")
                     /// return the tours through the completion handler
                     completionHandler(tourNamesRequestError: nil, tours: tours)
                 }

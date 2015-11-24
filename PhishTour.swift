@@ -62,9 +62,7 @@ class PhishTour: NSManagedObject
     }
     
     /// lookup the shows associated with a given location
-    var locationDictionary: [String : [PhishShow]]?
-    /*
-    =
+    lazy var locationDictionary: [String : [PhishShow]]? =
     {
         var previousShow: PhishShow = self.shows.first!
         var currentVenue: String = previousShow.venue
@@ -78,7 +76,7 @@ class PhishTour: NSManagedObject
             /// it's possible that there's only one show for the tour
             if self.shows.count == 1
             {
-                self.uniqueLocations!.append(show)
+                // self.uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 show.consecutiveNights = multiNightRun.count
@@ -93,7 +91,7 @@ class PhishTour: NSManagedObject
             /// add the first show to the array
             if index == 0
             {
-                self.uniqueLocations!.append(show)
+                // self.uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 continue
@@ -124,7 +122,7 @@ class PhishTour: NSManagedObject
                 else
                 {
                     /// there's a new location
-                    self.uniqueLocations!.append(show)
+                    // self.uniqueLocations!.append(show)
                     
                     for aShow in multiNightRun
                     {
@@ -145,9 +143,10 @@ class PhishTour: NSManagedObject
             }
         }
         
+        CoreDataStack.sharedInstance().saveContext()
+        
         return locationDictionary
     }()
-    */
     
     /// the coordinates of every show
     var showCoordinates: [CLLocationCoordinate2D]
@@ -203,13 +202,11 @@ class PhishTour: NSManagedObject
         let tourEntity = NSEntityDescription.entityForName("PhishTour", inManagedObjectContext: context)!
         super.init(entity: tourEntity, insertIntoManagedObjectContext: context)
         
+        /// set the tour/year relationship
         self.year = year
+        
         self.name = name
         self.tourID = Int(tourID)
-        // self.shows = shows
-        
-        // self.uniqueLocations = [PhishShow]()
-        // self.locationDictionary = [String : [PhishShow]]()
     }
     
     init(tourInfo: [String: AnyObject]) 
@@ -225,34 +222,43 @@ class PhishTour: NSManagedObject
         
         /// set the year;
         /// the tour will either be called something like, "2015 Summer Tour," in which case, we can just get at the number directly
-        var year: Int
+        var year: NSNumber
         if let intYear = Int(NSString(string: self.name).substringToIndex(4))
         {
-            year = intYear
+            year = NSNumber(integer: intYear) // intYear
         }
         /// or, the tour is referring to a festival (ie., "Lemonwheel"), or something else, in which case, we need to look at another entry in the dictionary
         else
         {
             let startDate = tourInfo["starts_on"] as! String
             let intYear = Int(NSString(string: startDate).substringToIndex(4))!
-            year = intYear
+            year = NSNumber(integer: intYear) // intYear
         }
         
-        /// make a fetch request for the year, if it has been saved to Core Data
-        let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-        let yearFetchPredicate = NSPredicate(format: "year == \(year)", argumentArray: nil)
-        yearFetchRequest.predicate = yearFetchPredicate
-        
-        do
+        if year == 2002
         {
-            let savedYear = try context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+            self.year = nil
+        }
+        else
+        {
+            /// make a fetch request for the year, if it has been saved to Core Data
+            let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
+            let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
+            yearFetchRequest.predicate = yearFetchPredicate
             
-            self.year = savedYear.first!
+            do
+            {
+                print("Fetching \(year.integerValue)")
+                let savedYear = try context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+                
+                self.year = savedYear.first!
+            }
+            catch
+            {
+                print("Couldn't fetch \(year)")
+            }
         }
-        catch
-        {
-            print("Couldn't fetch \(year)")
-        }
+        
         /*
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
         let yearPathURL = NSURL(string: documentsPath)!
@@ -321,6 +327,7 @@ class PhishTour: NSManagedObject
         }
     }
     
+    /*
     /// this creates a dictionary keyed by venue name, which retuns an array of shows played there during a tour.
     /// this is how i accomplished letting the map know when a callout for an annotation at any one location
     /// should display info for more than one show
@@ -417,6 +424,7 @@ class PhishTour: NSManagedObject
         self.locationDictionary = locationDictionary
         // print("The \(self.name) has \(self.uniqueLocations?.count) unique locations.")
     }
+    */
     
     // TODO: Re-instate?
     // I commented it out, while making changes to the shows property to be a Set, to work with Core Data.
