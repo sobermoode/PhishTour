@@ -435,6 +435,8 @@ class SongHistoryViewController: UIViewController,
         /// get the cell that was selected
         let cell = tableView.cellForRowAtIndexPath( indexPath ) as! SongCell
         
+        print("Selected cell's tour ID: \(cell.tourID)")
+        
         //// set the show that was selected
         if let show = cell.otherTourShow
         {

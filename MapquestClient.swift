@@ -58,6 +58,7 @@ class MapquestClient: NSObject
     /// take every location on the tour and geocode it to a latitude/longitude
     func geocodeShowsForTour(tour: PhishTour, withType type: Services.Geocoding.GeocodingType, completionHandler: (geocodingError: NSError!) -> Void)
     {
+        /*
         if let uniqueLocations = tour.uniqueLocations
         {
             print("Geocoding \(tour.uniqueLocations!) shows for the \(tour.name).")
@@ -66,6 +67,7 @@ class MapquestClient: NSObject
         {
             print("The \(tour.name) doesn't have any unique locations to geocode.")
         }
+        */
         
         
         /// construct the request URL, starting with the base
@@ -75,42 +77,40 @@ class MapquestClient: NSObject
         
         /// first, check to see if the locations need to be geocoded, and return if they already have been;
         /// only geocode every unique location, not every show (some locations have multi-night runs)
-        if let uniqueLocations = tour.uniqueLocations
+        let uniqueLocations = tour.uniqueLocations
+        var counter: Int = 0
+        for location in uniqueLocations
         {
-            var counter: Int = 0
-            for location in uniqueLocations
+            print("Going to check the coordinates for \(location)...")
+            /// check the coordinates
+            if location.showLatitude != 0 && location.showLongitude != 0
             {
-                print("Going to check the coordinates for \(location)...")
-                /// check the coordinates
-                if location.showLatitude != 0 && location.showLongitude != 0
+                print("\(location) doesn't need to be geocoded.")
+                /// we checked all the locations
+                if counter == uniqueLocations.count - 1
                 {
-                    print("\(location) doesn't need to be geocoded.")
-                    /// we checked all the locations
-                    if counter == uniqueLocations.count - 1
-                    {
-                        /// complete with no error
-                        completionHandler(geocodingError: nil)
-                        return
-                    }
-                    else
-                    {
-                        /// check next location
-                        counter++
-                        continue
-                    }
+                    /// complete with no error
+                    completionHandler(geocodingError: nil)
+                    return
                 }
-                /// there's a location that needs to be geocoded
                 else
                 {
-                    print("\(location) needs to be geocoded.")
-                    /// turn the location into a string that can be appended to the request;
-                    /// some locations need additional formatting
-                    var city = location.city
-                    city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
-                    city = self.fixSpecialCities(city)
-                    mapquestRequestString += "&location=\(city)"
+                    /// check next location
                     counter++
+                    continue
                 }
+            }
+            /// there's a location that needs to be geocoded
+            else
+            {
+                print("\(location) needs to be geocoded.")
+                /// turn the location into a string that can be appended to the request;
+                /// some locations need additional formatting
+                var city = location.city
+                city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
+                city = self.fixSpecialCities(city)
+                mapquestRequestString += "&location=\(city)"
+                counter++
             }
         }
         
@@ -143,7 +143,7 @@ class MapquestClient: NSObject
                         /// extract the latitude/longitude coordinates for each location and set the values on each PhishShow object
                         /// update the progress bar on the tour map when each location is geocoded
                         var counter: Int = 0
-                        let progressBump: Float = 0.2 / Float(tour.uniqueLocations!.count)
+                        let progressBump: Float = 0.2 / Float(tour.uniqueLocations.count)
                         var totalProgress: Float = self.tourMapProgressBar.progress
                         for result in geocodeResults
                         {

@@ -65,6 +65,7 @@ class TourMapViewController: UIViewController,
             self.reset(true)
             self.followTour()
         }
+        /*
         else
         {
             // return
@@ -129,6 +130,7 @@ class TourMapViewController: UIViewController,
                 }
             }
         }
+        */
     }
     
     func setupNavBar()
@@ -575,7 +577,7 @@ class TourMapViewController: UIViewController,
                     let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC)))
                     dispatch_after(delayTime, dispatch_get_main_queue())
                     {
-                        self.tourMap.addAnnotations(selectedTour.uniqueLocations!)
+                        self.tourMap.addAnnotations(selectedTour.uniqueLocations)
                         
                         /// if a show was selected from the song history, select the annotation associated with the show,
                         /// so the callout will be presented

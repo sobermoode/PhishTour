@@ -20,7 +20,46 @@ class PhishTour: NSManagedObject
     /// a tour consists of a series of shows at several different locations
     @NSManaged var shows: [PhishShow]
     // @NSManaged var shows: Set<PhishShow>
-    var uniqueLocations: [PhishShow]?
+    var uniqueLocations: [PhishShow]
+    {
+        var uniques = [PhishShow]()
+        
+        var previousShow: PhishShow = self.shows.first!
+        // var currentVenue: String = previousShow.venue
+        
+        for (index, show) in self.shows.enumerate()
+        {
+            if self.shows.count == 1
+            {
+                uniques.append(show)
+                
+                return uniques
+            }
+            
+            if index == 0
+            {
+                uniques.append(show)
+                
+                continue
+            }
+            else
+            {
+                if show.venue == previousShow.venue
+                {
+                    // currentVenue = show.venue
+                    previousShow = show
+                }
+                else
+                {
+                    uniques.append(show)
+                    // currentVenue = show.venue
+                    previousShow = show
+                }
+            }
+        }
+        
+        return uniques
+    }
     
     /// lookup the shows associated with a given location
     var locationDictionary: [String : [PhishShow]]?
@@ -288,10 +327,12 @@ class PhishTour: NSManagedObject
     func createLocationDictionary()
     {
         print("There are \(self.shows.count) shows on the \(self.name).")
+        /*
         if self.uniqueLocations == nil
         {
             self.uniqueLocations = [PhishShow]()
         }
+        */
         
         var previousShow: PhishShow = shows.first!
         var currentVenue: String = previousShow.venue
@@ -305,7 +346,7 @@ class PhishTour: NSManagedObject
             /// it's possible that there's only one show for the tour
             if shows.count == 1
             {
-                uniqueLocations!.append(show)
+                // uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 show.consecutiveNights = multiNightRun.count
@@ -320,7 +361,7 @@ class PhishTour: NSManagedObject
             /// add the first show to the array
             if index == 0
             {
-                uniqueLocations!.append(show)
+                // uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 continue
@@ -351,7 +392,7 @@ class PhishTour: NSManagedObject
                 else
                 {
                     /// there's a new location
-                    uniqueLocations!.append(show)
+                    // uniqueLocations!.append(show)
                     
                     for aShow in multiNightRun
                     {
@@ -374,7 +415,7 @@ class PhishTour: NSManagedObject
         
         /// set the tour's location dictionary
         self.locationDictionary = locationDictionary
-        print("The \(self.name) has \(self.uniqueLocations?.count) unique locations.")
+        // print("The \(self.name) has \(self.uniqueLocations?.count) unique locations.")
     }
     
     // TODO: Re-instate?

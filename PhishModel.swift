@@ -67,41 +67,44 @@ class PhishModel: NSObject,
         return Singleton.sharedInstance
     }
     
-    /// Core Data getYears
-    /// get the available years or request them
+    /// fetch the saved years or request them
     func getYears(completionHandler: (yearsError: ErrorType?) -> Void)
     {
+        /// create a fetch request with sort descriptor to sort them in descending order
         let yearsFetchRequest = NSFetchRequest(entityName: "PhishYear")
         let sortDescriptor = NSSortDescriptor(key: "year", ascending: false)
         yearsFetchRequest.sortDescriptors = [sortDescriptor]
         
         do
         {
+            /// execute the fetch request
             let years = try self.context.executeFetchRequest(yearsFetchRequest) as! [PhishYear]
             
+            /// make sure we got something back
             if !years.isEmpty
             {
-                print("Got \(years.count) years from Core Data.")
+                /// set the years
                 self.years = years
                 
+                /// return the years
                 completionHandler(yearsError: nil)
                 
                 return
             }
+            /// no saved years, we need to request them
             else
             {
-                print("There were no years in Core Data. Requesting...")
                 PhishinClient.sharedInstance().requestYears()
                 {
                     yearsRequestError, years in
                     
+                    /// something went wrong
                     if yearsRequestError != nil
                     {
                         completionHandler(yearsError: yearsRequestError)
                     }
                     else
                     {
-                        print("Got the years: \(years!)")
                         /// set the years
                         self.years = years!
                         
@@ -112,14 +115,13 @@ class PhishModel: NSObject,
                         repeat
                         {
                             let newYear = PhishYear(year: year)
-                            // newYear.save()
                             
                             self.years?.append(newYear)
                         }
                         while --year >= 1983
                     }
                     
-                    /// save new and updated objects to the context
+                    /// save new objects to the context
                     self.context.performBlockAndWait()
                     {
                         CoreDataStack.sharedInstance().saveContext()
@@ -128,13 +130,9 @@ class PhishModel: NSObject,
                     completionHandler(yearsError: nil)
                 }
             }
-            
-            // completionHandler(yearsError: nil)
         }
         catch
         {
-            // print("There was an error fetching the years.")
-            
             completionHandler(yearsError: error)
         }
     }
@@ -208,6 +206,7 @@ class PhishModel: NSObject,
     }
     */
     
+    /*
     /// retrieve the saved years from the device
     func getSavedYears() -> [PhishYear]?
     {
@@ -223,30 +222,36 @@ class PhishModel: NSObject,
             return nil
         }
     }
+    */
     
-    /// Core Data getToursForYear
-    /// retrieve the tours for a given year or request them
+    /// fetch the saved tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
     {
+        /// create a fetch request with a predicate to match the year being requested
+        /// and a sort descriptor to sort ascending by tour ID
         let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let toursFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
         let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
+        toursFetchRequest.predicate = toursFetchPredicate
         toursFetchRequest.sortDescriptors = [sortDescriptor]
         
         do
         {
+            /// fetch the tours from core data
             let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
             
+            /// make sure we got the saved tours
             if !tours.isEmpty
             {
-                print("Got \(tours.count) tours from Core Data.")
-                print("The \(tours[0].name) has \(tours[0].uniqueLocations!.count) unique locations.")
-                print("The \(tours[1].name) has \(tours[1].uniqueLocations!.count) unique locations.")
+                /// set the current tours
                 self.currentTours = tours
                 
+                /// return the tours
                 completionHandler(toursError: nil, tours: tours)
                 
                 return
             }
+            /// no saved tours, we need to request them
             else
             {
                 PhishinClient.sharedInstance().requestToursForYear(year)
@@ -260,11 +265,11 @@ class PhishModel: NSObject,
                     }
                     else
                     {
-                        print("Requested tours: \(requestedTours!)")
                         /// set the tours
                         self.currentTours = requestedTours!
                     }
                     
+                    /// save the new tours to the context
                     self.context.performBlockAndWait()
                     {
                         CoreDataStack.sharedInstance().saveContext()
@@ -772,7 +777,7 @@ class PhishModel: NSObject,
         /// each set of shows at a unique location will share the same background color
         let shows = PhishModel.sharedInstance().selectedTour!.locationDictionary![show.venue]!
         let firstShow = shows.first!
-        let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations!.indexOf(firstShow)!
+        let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations.indexOf(firstShow)!
         let grayFactor = CGFloat(0.02 * Double(position))
         let bgColor = UIColor(red: 1.0 - grayFactor, green: 1.0 - grayFactor, blue: 1.0 - grayFactor, alpha: 1.0)
         cell.backgroundColor = bgColor
