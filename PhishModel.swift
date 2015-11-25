@@ -204,7 +204,7 @@ class PhishModel: NSObject,
     {
         /// create a fetch request for the show and a predicate that matches the show ID
         let showsFetchRequest = NSFetchRequest(entityName: "PhishShow")
-        let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(show.showID)")
+        let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", show.showID)
         showsFetchRequest.predicate = showsFetchPredicate
         
         do
@@ -245,6 +245,13 @@ class PhishModel: NSObject,
             else
             {
                 print("The fetch request for \(show.date) \(show.year) returned nothing.")
+                
+                /// create an error to send back
+                var errorDictionary = [NSObject : AnyObject]()
+                errorDictionary.updateValue("Couldn't find the setlist.", forKey: NSLocalizedDescriptionKey)
+                let fetchError = NSError(domain: NSCocoaErrorDomain, code: 9999, userInfo: errorDictionary)
+                
+                completionHandler(setlistError: fetchError, setlist: nil)
             }
         }
         catch

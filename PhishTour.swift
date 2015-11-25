@@ -216,7 +216,14 @@ class PhishTour: NSManagedObject
             {
                 let savedYear = try context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
                 
-                self.year = savedYear.first!
+                if !savedYear.isEmpty
+                {
+                    self.year = savedYear.first!
+                }
+                else
+                {
+                    self.year = nil
+                }
             }
             catch
             {
