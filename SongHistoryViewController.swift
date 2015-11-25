@@ -510,6 +510,8 @@ class SongHistoryViewController: UIViewController,
                                                     
                                                     /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                                     cell.userInteractionEnabled = (tourID == 71) ? false : true
+                                                    
+                                                    cell.isSet = true
                                                 }
                                             }
                                         }

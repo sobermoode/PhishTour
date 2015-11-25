@@ -15,6 +15,8 @@ class SongCell: UITableViewCell
     
     var otherTourShow: PhishShow?
     
+    var isSet: Bool = false
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?)
     {
         super.init(style: .Value1, reuseIdentifier: "songCell")

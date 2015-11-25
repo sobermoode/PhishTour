@@ -150,12 +150,15 @@ class PhishSong: NSManagedObject
     func saveHistory()
     {
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let historyPathURL = NSURL(string: documentsPath)!
-        let historyPath = historyPathURL.URLByAppendingPathComponent(self.historyFilename)
+        // let historyPathURL = NSURL(string: documentsPath)!
+        // let historyPath = historyPathURL.URLByAppendingPathComponent(self.historyFilename)
+        let pathArray = [documentsPath, self.historyFilename]
+        let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
         
         let historyData: NSData = NSKeyedArchiver.archivedDataWithRootObject(self.history!)
-        if historyData.writeToFile(historyPath.path!, atomically: false)
+        if historyData.writeToFile(historyFileURL.path!, atomically: false)
         {
+            print("Saved \(self.name)'s history to \(historyFileURL.path!)")
             return
         }
         else

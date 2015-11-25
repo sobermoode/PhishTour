@@ -11,7 +11,7 @@ import MapKit
 import CoreData
 
 class PhishShow: NSManagedObject,
-    MKAnnotation
+    MKAnnotation, NSCoding
 {
     /// specific inforamation for the show
     @NSManaged var date: String
@@ -267,35 +267,47 @@ class PhishShow: NSManagedObject,
     }
     */
     
-    /*
     required init?(coder aDecoder: NSCoder)
     {
+        let context = CoreDataStack.sharedInstance().managedObjectContext
+        let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
+        super.init(entity: showEntity, insertIntoManagedObjectContext: context)
+        
         self.date = aDecoder.decodeObjectForKey("date") as! String
-        self.year = aDecoder.decodeIntegerForKey("year")
+        self.day = aDecoder.decodeObjectForKey("day") as? NSNumber
+        self.month = aDecoder.decodeObjectForKey("month") as? NSNumber
+        self.year = aDecoder.decodeObjectForKey("year") as! NSNumber
         self.venue = aDecoder.decodeObjectForKey("venue") as! String
         self.city = aDecoder.decodeObjectForKey("city") as! String
-        self.showID = aDecoder.decodeIntegerForKey("showID")
-        self.consecutiveNights = aDecoder.decodeIntegerForKey("consecutiveNights")
+        self.showID = aDecoder.decodeObjectForKey("showID") as! NSNumber
+        self.consecutiveNights = aDecoder.decodeObjectForKey("consecutiveNights") as! NSNumber
         self.tour = aDecoder.decodeObjectForKey("tour") as? PhishTour
-        self.setlist = aDecoder.decodeObjectForKey("setlist") as? [Int : [PhishSong]]
-        self.showLatitude = aDecoder.decodeObjectForKey("latitude") as? Double
-        self.showLongitude = aDecoder.decodeObjectForKey("longitude") as? Double
+        self.tourID = aDecoder.decodeObjectForKey("tourID") as? NSNumber
+        self.songs = aDecoder.decodeObjectForKey("songs") as? [PhishSong]
+        // self.setlist = aDecoder.decodeObjectForKey("setlist") as? [Int : [PhishSong]]
+        self.showLatitude = aDecoder.decodeObjectForKey("latitude") as! NSNumber
+        self.showLongitude = aDecoder.decodeObjectForKey("longitude") as! NSNumber
     }
     
     func encodeWithCoder(aCoder: NSCoder)
     {
         aCoder.encodeObject(self.date, forKey: "date")
-        aCoder.encodeInteger(self.year, forKey: "year")
+        aCoder.encodeObject(self.day, forKey: "day")
+        aCoder.encodeObject(self.month, forKey: "month")
+        aCoder.encodeObject(self.year, forKey: "year")
         aCoder.encodeObject(self.venue, forKey: "venue")
         aCoder.encodeObject(self.city, forKey: "city")
-        aCoder.encodeInteger(self.showID, forKey: "showID")
-        aCoder.encodeInteger(self.consecutiveNights, forKey: "consecutiveNights")
+        aCoder.encodeObject(self.showID, forKey: "showID")
+        aCoder.encodeObject(self.consecutiveNights, forKey: "consecutiveNights")
         aCoder.encodeObject(self.tour, forKey: "tour")
-        aCoder.encodeObject(self.setlist, forKey: "setlist")
+        aCoder.encodeObject(self.tourID, forKey: "tourID")
+        aCoder.encodeObject(self.songs, forKey: "songs")
+        // aCoder.encodeObject(self.setlist, forKey: "setlist")
         aCoder.encodeObject(self.showLatitude, forKey: "latitude")
         aCoder.encodeObject(self.showLongitude, forKey: "longitude")
     }
     
+    /*
     /// save the show data for later retrieval
     func save()
     {

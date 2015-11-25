@@ -435,9 +435,9 @@ class PhishModel: NSObject,
         
         /// check for a saved history and return it
         // let filename = "song\(song.name)"
-        let documentsURL = NSURL(string: self.documentsPath)!
-        let filename = song.historyFilename
-        let fileURL = documentsURL.URLByAppendingPathComponent(filename)
+        // let documentsURL = NSURL(string: self.documentsPath)!
+        // let filename = song.historyFilename
+        // let fileURL = documentsURL.URLByAppendingPathComponent(filename)
         // let filepath = self.createFileURLWithFilename(filename)
         /*
         if let savedSongWithHistory = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishSong where savedSongWithHistory.history != nil
@@ -445,10 +445,13 @@ class PhishModel: NSObject,
             completionHandler(songHistoryError: nil, songWithHistory: savedSongWithHistory.history!)
         }
         */
-        guard !NSFileManager.defaultManager().fileExistsAtPath(fileURL.path!)
+        
+        let pathArray = [self.documentsPath, song.historyFilename]
+        let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
+        guard !NSFileManager.defaultManager().fileExistsAtPath(historyFileURL.path!)
         else
         {
-            let historyTask = NSURLSession.sharedSession().dataTaskWithURL(fileURL)
+            let historyTask = NSURLSession.sharedSession().dataTaskWithURL(historyFileURL)
             {
                 historyData, historyResponse, historyError in
                 
@@ -460,6 +463,8 @@ class PhishModel: NSObject,
                 {
                     if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
                     {
+                        print("Got a saved history for \(song.name)")
+                        song.history = history
                         completionHandler(songHistoryError: nil, songWithHistory: history)
                     }
                 }
