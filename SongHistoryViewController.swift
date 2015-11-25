@@ -178,61 +178,6 @@ class SongHistoryViewController: UIViewController,
                     }
                 }
             }
-            
-            /*
-            PhishinClient.sharedInstance().requestHistoryForSong(song)
-            {
-                historyError, history in
-                
-                /// something went wrong
-                if historyError != nil
-                {
-                    /// create an alert for the problem and unwind back to the setlist
-                    let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the history for \(self.song.name): \(historyError!.localizedDescription)", preferredStyle: .Alert)
-                    let alertAction = UIAlertAction(title: "OK", style: .Default)
-                    {
-                        action in
-                        
-                        self.backToSetlist()
-                    }
-                    alert.addAction(alertAction)
-                    
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.presentViewController(alert, animated: true, completion: nil)
-                    }
-                }
-                else
-                {
-                    /// save the history
-                    self.history = history
-                    
-                    self.saveToUserDefaults()
-                    
-                    /// reload the table on the main thread
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
-                        self.totalPlaysLabel.hidden = false
-                        self.historyTable.reloadData()
-                    }
-                    
-                    /// make the progress bar green when it finishes successfully
-                    /// then, remove it after a short delay
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.progressBar?.progressTintColor = UIColor.greenColor()
-                        
-                        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
-                        dispatch_after(delayTime, dispatch_get_main_queue())
-                        {
-                            self.progressBar?.removeFromSuperview()
-                            self.progressBar = nil
-                        }
-                    }
-                }
-            }
-            */
         }
     }
     
@@ -381,7 +326,7 @@ class SongHistoryViewController: UIViewController,
         cell.detailTextLabel?.text = "Requesting tour..."
         cell.userInteractionEnabled = false
         
-        /// make sure we got a history to work with
+        /// make sure we've got a history to work with
         if self.history != nil
         {
             /// get the year and its shows
@@ -411,7 +356,6 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
-                    print("Got \(show) for the cell...")
                     /// this will be the map annotation to select when popping back to the tour map controller
                     cell.otherTourShow = show!
                     
@@ -436,7 +380,6 @@ class SongHistoryViewController: UIViewController,
                             /// get the tour ID
                             if let tourID = show!.tourID
                             {
-                                print("We had a tour ID...")
                                 PhishModel.sharedInstance().getTourNameForTourID(Int(tourID))
                                 {
                                     tourNameError, tourName in
@@ -468,7 +411,6 @@ class SongHistoryViewController: UIViewController,
                             /// no tour ID, so we need to request it
                             else
                             {
-                                print("There was no tour ID...")
                                 PhishinClient.sharedInstance().requestTourIDFromShowForID(show!.showID.integerValue)
                                 {
                                     tourIDRequestError, tourID in
@@ -486,6 +428,9 @@ class SongHistoryViewController: UIViewController,
                                     /// we got the tour ID, now we can request the tour name with it
                                     else
                                     {
+                                        /// set the show's tour ID
+                                        show?.tourID = tourID
+                                        
                                         PhishModel.sharedInstance().getTourNameForTourID(tourID)
                                         {
                                             tourNameError, tourName in
@@ -510,8 +455,6 @@ class SongHistoryViewController: UIViewController,
                                                     
                                                     /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                                     cell.userInteractionEnabled = (tourID == 71) ? false : true
-                                                    
-                                                    cell.isSet = true
                                                 }
                                             }
                                         }
@@ -538,13 +481,13 @@ class SongHistoryViewController: UIViewController,
         return cell
     }
     
+    // MARK: UITableViewDelegate method
+    
     /// when a cell is selected, pop back to the map, which will now display the selected tour, and dislpay a callout on the associated show
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
         /// get the cell that was selected
         let cell = tableView.cellForRowAtIndexPath( indexPath ) as! SongCell
-        
-        print("Selected cell's tour ID: \(cell.tourID)")
         
         //// set the show that was selected
         if let show = cell.otherTourShow
@@ -601,6 +544,8 @@ class SongHistoryViewController: UIViewController,
             }
         }
     }
+    
+    // MARK: UIScrollViewDelegate method
     
     /// save the context after the table view stops scrolling, because tour objects are created as cells scroll into view;
     /// otherwise, the app crashes when saving tons of times consecutively

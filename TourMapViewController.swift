@@ -279,7 +279,6 @@ class TourMapViewController: UIViewController,
                 if yearsError != nil
                 {
                     /// create an alert for the problem and dismiss the tour selecter
-                    // let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!.localizedDescription)", preferredStyle: .Alert)
                     let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!)", preferredStyle: .Alert)
                     let alertAction = UIAlertAction(title: "OK", style: .Default)
                     {
@@ -493,8 +492,6 @@ class TourMapViewController: UIViewController,
         {
             return
         }
-        
-        print("The selected tour is the \(selectedTour.name)")
         
         /// create a progress bar to track the progress of the location geocoding
         /// give the MapquestClient a reference to the progress bar, so it can update the bar as it does its thing
@@ -786,8 +783,6 @@ class TourMapViewController: UIViewController,
         
         /// create a callout cell for every show at the location
         let venue = PhishModel.sharedInstance().currentShow!.venue
-        print("selectedTour: \(PhishModel.sharedInstance().selectedTour!)")
-        print("locationDictionary: \(PhishModel.sharedInstance().selectedTour!.locationDictionary!)")
         let showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]!
         var showCells = [CalloutCell]()
         for (index, show) in showsAtVenue.enumerate()

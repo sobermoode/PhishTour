@@ -58,18 +58,6 @@ class MapquestClient: NSObject
     /// take every location on the tour and geocode it to a latitude/longitude
     func geocodeShowsForTour(tour: PhishTour, withType type: Services.Geocoding.GeocodingType, completionHandler: (geocodingError: NSError!) -> Void)
     {
-        /*
-        if let uniqueLocations = tour.uniqueLocations
-        {
-            print("Geocoding \(tour.uniqueLocations!) shows for the \(tour.name).")
-        }
-        else
-        {
-            print("The \(tour.name) doesn't have any unique locations to geocode.")
-        }
-        */
-        
-        
         /// construct the request URL, starting with the base
         var mapquestRequestString = mapquestBaseURL + Services.Geocoding.GeocodingURL + Versions.Version1 + type.rawValue
         mapquestRequestString += "key=\(apiKey)"
@@ -81,11 +69,9 @@ class MapquestClient: NSObject
         var counter: Int = 0
         for location in uniqueLocations
         {
-            print("Going to check the coordinates for \(location)...")
             /// check the coordinates
             if location.showLatitude != 0 && location.showLongitude != 0
             {
-                print("\(location) doesn't need to be geocoded.")
                 /// we checked all the locations
                 if counter == uniqueLocations.count - 1
                 {
@@ -103,7 +89,6 @@ class MapquestClient: NSObject
             /// there's a location that needs to be geocoded
             else
             {
-                print("\(location) needs to be geocoded.")
                 /// turn the location into a string that can be appended to the request;
                 /// some locations need additional formatting
                 var city = location.city
@@ -162,12 +147,8 @@ class MapquestClient: NSObject
                             /// (or just on the one show, if there weren't consecutive nights)
                             for show in shows
                             {
-                                print("Going to set the lat/long on the \(show.city)")
                                 show.showLatitude = geocodedLatitude
                                 show.showLongitude = geocodedLongitude
-                                // show.save()
-                                // show.tour?.save()
-                                // show.tour?.year!.save()
                             }
                             
                             /// jump to the first show at the next location

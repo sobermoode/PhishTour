@@ -19,16 +19,16 @@ class PhishTour: NSManagedObject
     
     /// a tour consists of a series of shows at several different locations
     @NSManaged var shows: [PhishShow]
-    // @NSManaged var shows: Set<PhishShow>
+    
+    /// unique tour locations (some shows are played at the same venue, in a multi-night run)
     var uniqueLocations: [PhishShow]
     {
         var uniques = [PhishShow]()
-        
         var previousShow: PhishShow = self.shows.first!
-        // var currentVenue: String = previousShow.venue
         
         for (index, show) in self.shows.enumerate()
         {
+            /// there might only be one location
             if self.shows.count == 1
             {
                 uniques.append(show)
@@ -36,6 +36,7 @@ class PhishTour: NSManagedObject
                 return uniques
             }
             
+            /// add the first show
             if index == 0
             {
                 uniques.append(show)
@@ -44,15 +45,15 @@ class PhishTour: NSManagedObject
             }
             else
             {
+                /// we're still at the same place
                 if show.venue == previousShow.venue
                 {
-                    // currentVenue = show.venue
                     previousShow = show
                 }
+                /// new location
                 else
                 {
                     uniques.append(show)
-                    // currentVenue = show.venue
                     previousShow = show
                 }
             }
@@ -76,14 +77,11 @@ class PhishTour: NSManagedObject
             /// it's possible that there's only one show for the tour
             if self.shows.count == 1
             {
-                // self.uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 show.consecutiveNights = multiNightRun.count
                 
                 locationDictionary.updateValue(multiNightRun, forKey: currentVenue)
-                
-                // self.locationDictionary = locationDictionary
                 
                 return locationDictionary
             }
@@ -91,7 +89,6 @@ class PhishTour: NSManagedObject
             /// add the first show to the array
             if index == 0
             {
-                // self.uniqueLocations!.append(show)
                 multiNightRun.append(show)
                 
                 continue
@@ -121,9 +118,7 @@ class PhishTour: NSManagedObject
                 }
                 else
                 {
-                    /// there's a new location
-                    // self.uniqueLocations!.append(show)
-                    
+                    /// there's a new location                    
                     for aShow in multiNightRun
                     {
                         aShow.consecutiveNights = multiNightRun.count
@@ -143,7 +138,7 @@ class PhishTour: NSManagedObject
             }
         }
         
-        CoreDataStack.sharedInstance().saveContext()
+        // CoreDataStack.sharedInstance().saveContext()
         
         return locationDictionary
     }()
@@ -160,41 +155,11 @@ class PhishTour: NSManagedObject
         return coordinates
     }
     
-    /*
-    /// filename for the data saved to the device
-    var filename: String
-    {
-        return "tour\(self.tourID)"
-    }
-    */
-    
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    /*
-    init(year: PhishYear, name: String, tourID: Int, shows: [PhishShow])
-    {
-        /// insert the object into the core data context
-        let context = CoreDataStack.sharedInstance().managedObjectContext
-        let tourEntity = NSEntityDescription.entityForName("PhishTour", inManagedObjectContext: context)!
-        super.init(entity: tourEntity, insertIntoManagedObjectContext: context)
-        
-        self.year = year
-        self.name = name
-        self.tourID = Int(tourID)
-        self.shows = shows
-        /*
-        for show in shows
-        {
-            self.shows.insert(show)
-        }
-        */
-        self.uniqueLocations = [PhishShow]()
-        self.locationDictionary = [String : [PhishShow]]()
-    }
-    */
     init(year: PhishYear, name: String, tourID: Int)
     {
         /// insert the object into the core data context
@@ -225,7 +190,7 @@ class PhishTour: NSManagedObject
         var year: NSNumber
         if let intYear = Int(NSString(string: self.name).substringToIndex(4))
         {
-            year = NSNumber(integer: intYear) // intYear
+            year = NSNumber(integer: intYear)
         }
         /// or, the tour is referring to a festival (ie., "Lemonwheel"), or something else, in which case, we need to look at another entry in the dictionary
         else
@@ -235,6 +200,7 @@ class PhishTour: NSManagedObject
             year = NSNumber(integer: intYear) // intYear
         }
         
+        /// 2002 had no shows that were part of a valid tour
         if year == 2002
         {
             self.year = nil
@@ -248,7 +214,6 @@ class PhishTour: NSManagedObject
             
             do
             {
-                print("Fetching \(year.integerValue)")
                 let savedYear = try context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
                 
                 self.year = savedYear.first!
@@ -259,61 +224,14 @@ class PhishTour: NSManagedObject
             }
         }
         
-        /*
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let yearPathURL = NSURL(string: documentsPath)!
-        if let intYear = Int(NSString(string: self.name).substringToIndex(4))
-        {
-            let yearPath = yearPathURL.URLByAppendingPathComponent("year\(intYear)")
-            self.year = NSKeyedUnarchiver.unarchiveObjectWithFile(yearPath.path!) as? PhishYear
-        }
-        /// or, the tour is referring to a festival (ie., "Lemonwheel"), or something else, in which case, we need to look at another entry in the dictionary
-        else
-        {
-            let startDate = tourInfo["starts_on"] as! String
-            let year = Int(NSString(string: startDate).substringToIndex(4))!
-            let yearPath = yearPathURL.URLByAppendingPathComponent("year\(year)")
-            self.year = NSKeyedUnarchiver.unarchiveObjectWithFile(yearPath.path!) as? PhishYear
-        }
-        */
-        
-        /// create the shows on the tour
+        /// create the shows on the tour and set the relationship
         let shows = tourInfo["shows"] as! [[String : AnyObject]]
-        // var showArray = [PhishShow]()
         for show in shows
         {            
             let newShow = PhishShow(showInfoFromYear: show)
             newShow.tour = self
-            // showArray.append(newShow)
-            // self.shows.insert(newShow)
         }
-        // self.shows = showArray
-        
-        // self.uniqueLocations = [PhishShow]()
-        // self.locationDictionary = [String : [PhishShow]]()
     }
-    
-    /*
-    required init?(coder aDecoder: NSCoder)
-    {
-        self.year = aDecoder.decodeObjectForKey("year") as? PhishYear
-        self.name = aDecoder.decodeObjectForKey("name") as! String
-        self.tourID = aDecoder.decodeIntegerForKey("tourID")
-        self.shows = aDecoder.decodeObjectForKey("shows") as! [PhishShow]
-        self.uniqueLocations = aDecoder.decodeObjectForKey("uniqueLocations") as? [PhishShow]
-        self.locationDictionary = aDecoder.decodeObjectForKey("locationDictionary") as! [String : [PhishShow]]
-    }
-    
-    func encodeWithCoder(aCoder: NSCoder)
-    {
-        aCoder.encodeObject(year, forKey: "year")
-        aCoder.encodeObject(name, forKey: "name")
-        aCoder.encodeInteger(tourID, forKey: "tourID")
-        aCoder.encodeObject(shows, forKey: "shows")
-        aCoder.encodeObject(uniqueLocations, forKey: "uniqueLocations")
-        aCoder.encodeObject(locationDictionary, forKey: "locationDictionary")
-    }
-    */
     
     /// set the tour property on all the shows
     func associateShows()
@@ -321,110 +239,8 @@ class PhishTour: NSManagedObject
         for show in self.shows
         {
             show.tour = self
-            
-            // show.save()
-            // CoreDataStack.sharedInstance().saveContext()
         }
     }
-    
-    /*
-    /// this creates a dictionary keyed by venue name, which retuns an array of shows played there during a tour.
-    /// this is how i accomplished letting the map know when a callout for an annotation at any one location
-    /// should display info for more than one show
-    func createLocationDictionary()
-    {
-        print("There are \(self.shows.count) shows on the \(self.name).")
-        /*
-        if self.uniqueLocations == nil
-        {
-            self.uniqueLocations = [PhishShow]()
-        }
-        */
-        
-        var previousShow: PhishShow = shows.first!
-        var currentVenue: String = previousShow.venue
-        var multiNightRun = [PhishShow]()
-        var locationDictionary = [String : [PhishShow]]()
-        
-        /// go through each show and add them to an array. keep adding shows to the array if the venue continues to be the same.
-        /// when the next venue is reached, set the array as a value for the key of the venue.
-        for (index, show) in shows.enumerate()
-        {
-            /// it's possible that there's only one show for the tour
-            if shows.count == 1
-            {
-                // uniqueLocations!.append(show)
-                multiNightRun.append(show)
-                
-                show.consecutiveNights = multiNightRun.count
-                
-                locationDictionary.updateValue(multiNightRun, forKey: currentVenue)
-                
-                self.locationDictionary = locationDictionary
-                
-                return
-            }
-            
-            /// add the first show to the array
-            if index == 0
-            {
-                // uniqueLocations!.append(show)
-                multiNightRun.append(show)
-                
-                continue
-            }
-            else
-            {
-                /// we're still at the current venue, so it's a multi-night run
-                if show.venue == previousShow.venue
-                {
-                    /// add the show and remember where we were
-                    currentVenue = show.venue
-                    multiNightRun.append(show)
-                    previousShow = show
-                    
-                    /// if we're at the last show, then add the array to the dictionary
-                    if index == shows.count - 1
-                    {
-                        for aShow in multiNightRun
-                        {
-                            aShow.consecutiveNights = multiNightRun.count
-                        }
-                        
-                        locationDictionary.updateValue(multiNightRun, forKey: currentVenue)
-                    }
-                    
-                    continue
-                }
-                else
-                {
-                    /// there's a new location
-                    // uniqueLocations!.append(show)
-                    
-                    for aShow in multiNightRun
-                    {
-                        aShow.consecutiveNights = multiNightRun.count
-                    }
-                    
-                    /// add the show(s) to the dictionary
-                    locationDictionary.updateValue(multiNightRun, forKey: currentVenue)
-                    
-                    /// blank the current multi-night run array
-                    multiNightRun.removeAll(keepCapacity: false)
-                    
-                    /// add the current show to the empty multi-night run array and remember where we were
-                    currentVenue = show.venue
-                    multiNightRun.append(show)
-                    previousShow = show
-                }
-            }
-        }
-        
-        /// set the tour's location dictionary
-        self.locationDictionary = locationDictionary
-        // print("The \(self.name) has \(self.uniqueLocations?.count) unique locations.")
-    }
-    */
     
     // TODO: Re-instate?
     // I commented it out, while making changes to the shows property to be a Set, to work with Core Data.
@@ -444,25 +260,6 @@ class PhishTour: NSManagedObject
         let scrollToIndex = (highlightIndex == 0) ? highlightIndex : highlightIndex + (showsAtVenue.count - 1)
         
         return (highlightIndex, scrollToIndex)
-    }
-    */
-    
-    /*
-    /// save the tour to the device for later retrieval
-    func save()
-    {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let tourPathURL = NSURL(string: documentsPath)!
-        let tourPath = tourPathURL.URLByAppendingPathComponent(self.filename)
-        
-        if NSKeyedArchiver.archiveRootObject(self, toFile: tourPath.path!)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \( self.name ) to the device.")
-        }
     }
     */
 }

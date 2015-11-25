@@ -22,7 +22,7 @@ class PhishShow: NSManagedObject,
     @NSManaged var city: String
     @NSManaged var showID: NSNumber
     @NSManaged var consecutiveNights: NSNumber
-    @NSManaged var tour: PhishTour?  // being set in PhishTour.associateShows()
+    @NSManaged var tour: PhishTour? 
     @NSManaged var tourID: NSNumber?
     
     /// a show consists of sets of songs (the "setlist")
@@ -42,8 +42,6 @@ class PhishShow: NSManagedObject,
             var previousSet: Int = currentSet
             for (index, song) in self.songs!.enumerate()
             {
-                // currentSet = song.set.integerValue
-                
                 /// add the first song
                 guard index != 0
                 else
@@ -103,29 +101,6 @@ class PhishShow: NSManagedObject,
             
             return setlist
         }
-    }
-    
-    /*
-    /// the number of songs played in the show
-    var totalSongs: Int
-    {
-        var total: Int = 0
-        let keys = self.setlist!.keys
-        
-        for key in keys
-        {
-            let songs: [PhishSong] = self.setlist![key]!
-            total += songs.count
-        }
-        
-        return total
-    }
-    */
-    
-    /// filename for the saved data
-    var setlistFilename: String
-    {
-        return "setlist\(self.showID)"
     }
     
     /// location information for the show
@@ -212,11 +187,8 @@ class PhishShow: NSManagedObject,
         
         /// get to the venue, location, and coordinates, and set the properties
         let venueData = showInfo["venue"] as! [String : AnyObject]
-        print("venueData: \(venueData.description)")
         self.venue = venueData["name"] as! String
         self.city = venueData["location"] as! String
-        // self.showLatitude = venueData["latitude"] as! Double
-        // self.showLongitude = venueData["longitude"] as! Double
         if let latitude = venueData["latitude"] as? Double
         {
             self.showLatitude = latitude
@@ -249,24 +221,7 @@ class PhishShow: NSManagedObject,
         self.date = formattedString
     }
     
-    /*
-    func saveSetlist()
-    {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let setlistPathURL = NSURL(string: documentsPath)!
-        let setlistPath = setlistPathURL.URLByAppendingPathComponent(self.setlistFilename)
-        
-        if NSKeyedArchiver.archiveRootObject(self.setlist!, toFile: setlistPath.path!)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \(self.date) \(self.year)'s setlist to the device.")
-        }
-    }
-    */
-    
+    /// PhishShow objects are archived as part of a PhishSong history
     required init?(coder aDecoder: NSCoder)
     {
         let context = CoreDataStack.sharedInstance().managedObjectContext
@@ -284,7 +239,6 @@ class PhishShow: NSManagedObject,
         self.tour = aDecoder.decodeObjectForKey("tour") as? PhishTour
         self.tourID = aDecoder.decodeObjectForKey("tourID") as? NSNumber
         self.songs = aDecoder.decodeObjectForKey("songs") as? [PhishSong]
-        // self.setlist = aDecoder.decodeObjectForKey("setlist") as? [Int : [PhishSong]]
         self.showLatitude = aDecoder.decodeObjectForKey("latitude") as! NSNumber
         self.showLongitude = aDecoder.decodeObjectForKey("longitude") as! NSNumber
     }
@@ -302,27 +256,7 @@ class PhishShow: NSManagedObject,
         aCoder.encodeObject(self.tour, forKey: "tour")
         aCoder.encodeObject(self.tourID, forKey: "tourID")
         aCoder.encodeObject(self.songs, forKey: "songs")
-        // aCoder.encodeObject(self.setlist, forKey: "setlist")
         aCoder.encodeObject(self.showLatitude, forKey: "latitude")
         aCoder.encodeObject(self.showLongitude, forKey: "longitude")
     }
-    
-    /*
-    /// save the show data for later retrieval
-    func save()
-    {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let showPathURL = NSURL(string: documentsPath)!
-        let showPath = showPathURL.URLByAppendingPathComponent(self.filename)
-        
-        if NSKeyedArchiver.archiveRootObject(self, toFile: showPath.path!)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \( self.date ) \( self.year ) to the device.")
-        }
-    }
-    */
 }

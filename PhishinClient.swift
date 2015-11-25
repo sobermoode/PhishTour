@@ -83,8 +83,6 @@ class PhishinClient: NSObject
                             if let intYear = Int(year)
                             {
                                 let newYear = PhishYear(year: intYear)
-                                // newYear.save()
-                                // CoreDataStack.sharedInstance().saveContext()
                                 
                                 phishYears.append(newYear)
                                 
@@ -103,14 +101,6 @@ class PhishinClient: NSObject
                             
                             Int(year1.year) > Int(year2.year)
                         }
-                        
-                        /*
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
-                        {
-                            CoreDataStack.sharedInstance().saveContext()
-                        }
-                        */
                         
                         /// send it back through the completion handler
                         completionHandler(yearsRequestError: nil, years: phishYears)
@@ -158,10 +148,6 @@ class PhishinClient: NSObject
                         {
                             /// create a new PhishShow
                             let newShow = PhishShow(showInfoFromYear: show)
-                            // print("newShow lat/long: \(newShow.showLatitude), \(newShow.showLongitude)")
-                            // print("Created show: \(newShow)")
-                            // newShow.save()
-                            // CoreDataStack.sharedInstance().saveContext()
                             
                             /// only append unique tour IDs
                             let tourID = show["tour_id"] as! Int
@@ -188,19 +174,6 @@ class PhishinClient: NSObject
                             }
                             else
                             {
-                                /// set the tours (being set by core data relationship)
-                                // year.tours = tours
-                                // year.save()
-                                
-                                /*
-                                /// save new and updated objects to the context
-                                self.context.performBlockAndWait()
-                                {
-                                    CoreDataStack.sharedInstance().saveContext()
-                                }
-                                */
-                                
-                                // print("Sending these tours back (2): \(tours!)")
                                 /// send the tours back through the completion handler
                                 completionHandler(toursRequestError: nil, tours: tours)
                             }
@@ -246,17 +219,11 @@ class PhishinClient: NSObject
                     for show in shows
                     {
                         let newShow = PhishShow(showInfoFromYear: show)
-                        // newShow.save()
                         
                         showArray.append(newShow)
                     }
                     
-                    /*
-                    /// create the tour
-                    let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id, shows: showArray)
-                    newTour.associateShows()
-                    newTour.createLocationDictionary()
-                    */
+                    /// get a year to fetch a PhishYear with
                     let startDate = tourData["starts_on"] as! String
                     let intYear = Int(NSString(string: startDate).substringToIndex(4))!
                     let nsNumberYear = NSNumber(integer: intYear) 
@@ -265,9 +232,12 @@ class PhishinClient: NSObject
                     yearFetchRequest.predicate = yearFetchPredicate
                     do
                     {
+                        /// fetch the specified year
                         let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
                         let year: PhishYear = years.first!
                         PhishModel.sharedInstance().selectedYear = year
+                        
+                        /// create a tour and set relationships
                         let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
                         for show in showArray
                         {
@@ -287,14 +257,6 @@ class PhishinClient: NSObject
                     {
                         print("Couldn't fetch \(intYear) from Core Data.")
                     }
-                    
-                    
-                    // newTour.createLocationDictionary()
-                    
-                    // newTour.save()
-                    // newTour.year!.save()
-                    
-                    
                 }
                 catch
                 {
@@ -331,30 +293,6 @@ class PhishinClient: NSObject
                         
                         /// create the new tour
                         let newTour = PhishTour(tourInfo: tourData)
-                        // newTour.associateShows()
-                        // newTour.createLocationDictionary()
-                        // newTour.save()
-                        
-                        // if let tourYear = newTour.year
-                        /*
-                        if let _ = newTour.year
-                        {
-                            // tourYear.save()
-                            /// save new and updated objects to the context
-                            self.context.performBlockAndWait()
-                            {
-                                CoreDataStack.sharedInstance().saveContext()
-                            }
-                        }
-                        */
-                        
-                        /*
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
-                        {
-                            CoreDataStack.sharedInstance().saveContext()
-                        }
-                        */
                         
                         /// send the tour name back through the completion handler
                         completionHandler(tourNameRequestError: nil, tourName: newTour.name)
@@ -421,7 +359,6 @@ class PhishinClient: NSObject
                             let shows = showsForID[tourID]!
                             for show in shows
                             {
-                                print("Set \(show.showID) to \(newTour.name)")
                                 show.tour = newTour
                             }
                             let _ = newTour.locationDictionary!
@@ -461,7 +398,7 @@ class PhishinClient: NSObject
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            // construct a URL to the setlist and start a task
+            /// construct a URL to the setlist and start a task
             let setlistRequestString = self.endpoint + Routes.Shows + "/\(show.showID)"
             let setlistRequestURL = NSURL(string: setlistRequestString)!
             let setlistRequestTask = self.session.dataTaskWithURL(setlistRequestURL)
@@ -477,10 +414,10 @@ class PhishinClient: NSObject
                 {
                     do
                     {
-                        // turn the received data into a JSON object
+                        /// turn the received data into a JSON object
                         let setlistResults = try NSJSONSerialization.JSONObjectWithData(setlistData!, options: []) as! [String : AnyObject]
                         
-                        // get the songs
+                        /// get the songs
                         let resultsData = setlistResults["data"] as! [String : AnyObject]
                         let tracks = resultsData["tracks"] as! [[String : AnyObject]]
                         
@@ -493,15 +430,13 @@ class PhishinClient: NSObject
                             progressBump = 0.2 / Float(tracks.count)
                         }
                         
-                        // var songs = [PhishSong]()
+                        /// create each song and update the progress bar
                         for track in tracks
                         {
                             let _ = PhishSong(songInfo: track, forShow: show)
-                            // songs.append(newSong)
                             
                             if currentProgress != nil
                             {
-                                /// increment the progress bar
                                 currentProgress! += progressBump!
                                 dispatch_async(dispatch_get_main_queue())
                                 {
@@ -509,16 +444,6 @@ class PhishinClient: NSObject
                                 }
                             }
                         }
-                        
-                        print("\(show.date) \(show.year) now has \(show.songs?.count) songs.")
-                        
-                        /// set the show's setlist
-                        // show.songs = songs
-                        // show.save()
-                        // show.tour?.save()
-                        // show.tour?.year!.save()
-                        
-                        // show.saveSetlist()
                         
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
@@ -539,7 +464,7 @@ class PhishinClient: NSObject
         }
     }
     
-    /// requests all the dates (as showIDs) a song was played
+    /// requests all the dates (as showIDs) a song was played on
     func requestHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songHistory: [Int : [PhishShow]]?) -> Void)
     {
         dispatch_async(dispatch_get_main_queue())
@@ -549,14 +474,14 @@ class PhishinClient: NSObject
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            // construct the request URL and start a task
+            /// construct the request URL and start a task
             let songHistoryRequestString = self.endpoint + Routes.Songs + "/\(song.songID)"
             let songHistoryRequestURL = NSURL(string: songHistoryRequestString)!
             let songHistoryRequestTask = self.session.dataTaskWithURL(songHistoryRequestURL)
             {
                 songHistoryData, songHistoryResponse, songHistoryError in
                 
-                // something went wrong
+                /// something went wrong
                 if songHistoryError != nil
                 {
                     completionHandler(songHistoryError: songHistoryError!, songHistory: nil)
@@ -754,13 +679,8 @@ class PhishinClient: NSObject
                             }
                         }
                         
-                        /// set the history
-                        song.history = historyByYear
-                        // song.save()
-                        // song.show.save()
-                        // song.show.tour?.save()
-                        // song.show.tour?.year?.save()
-                        
+                        /// set the history and save it
+                        song.history = historyByYear                        
                         song.saveHistory()
                         
                         /// save new and updated objects to the context
@@ -787,14 +707,14 @@ class PhishinClient: NSObject
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            // construct the request URL
+            /// construct the request URL
             let showRequestString = self.endpoint + Routes.Shows + "/\(id)"
             let showRequestURL = NSURL(string: showRequestString)!
             let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
             {
                 showRequestData, showRequestResponse, showRequestError in
                 
-                // there was an error with the request
+                /// there was an error with the request
                 if showRequestError != nil
                 {
                     completionHandler(showRequestError: showRequestError!, show: nil)
@@ -803,15 +723,12 @@ class PhishinClient: NSObject
                 {
                     do
                     {
-                        // get the show data
+                        /// get the show data
                         let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
                         let showData = showResults["data"] as! [String : AnyObject]
                         
-                        // create a new show
+                        /// create a new show
                         let newShow = PhishShow(showInfoFromShow: showData)
-                        // newShow.save()
-                        // newShow.tour?.save()
-                        // newShow.tour?.year?.save()
                         
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
@@ -819,7 +736,7 @@ class PhishinClient: NSObject
                             CoreDataStack.sharedInstance().saveContext()
                         }
                         
-                        // return it through the completion handler
+                        /// return it through the completion handler
                         completionHandler(showRequestError: nil, show: newShow)
                     }
                     catch

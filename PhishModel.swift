@@ -137,93 +137,6 @@ class PhishModel: NSObject,
         }
     }
     
-    /*
-    /// get the available years or request them
-    func getYears(completionHandler: (yearsError: NSError?) -> Void)
-    {
-        guard self.years != nil
-        else
-        {
-            /// return saved years
-            if let savedYears = self.getSavedYears()
-            {
-                /// set the years
-                self.years = savedYears
-                
-                completionHandler(yearsError: nil)
-                
-                return
-            }
-            /// request the years
-            else
-            {
-                PhishinClient.sharedInstance().requestYears()
-                {
-                    yearsRequestError, years in
-                    
-                    /// something went wrong
-                    if yearsRequestError != nil
-                    {
-                        completionHandler(yearsError: yearsRequestError)
-                    }
-                    else
-                    {
-                        /// set the years
-                        self.years = years!
-                        
-                        /// the years request was successful;
-                        /// 1983-1987 all come back as one "year",
-                        /// need to add them as individual PhishYears
-                        var year: Int = 1987
-                        repeat
-                        {
-                            let newYear = PhishYear(year: year)
-                            // newYear.save()
-                            
-                            self.years?.append(newYear)
-                        }
-                        while --year >= 1983
-                        
-                        /*
-                        /// write the years to the device
-                        let documentsURL = NSURL(string: self.documentsPath)!
-                        let yearsURL = documentsURL.URLByAppendingPathComponent("allYears")
-                        NSKeyedArchiver.archiveRootObject(self.years!, toFile: yearsURL.path!)
-                        */
-                        
-                        /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
-                        
-                        completionHandler(yearsError: nil)
-                    }
-                }
-                
-                return
-            }
-        }
-        
-        completionHandler(yearsError: nil)
-    }
-    */
-    
-    /*
-    /// retrieve the saved years from the device
-    func getSavedYears() -> [PhishYear]?
-    {
-        let filename = "allyears"
-        let filepath = self.createFileURLWithFilename(filename)
-        
-        if let savedYears = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? [PhishYear]
-        {
-            return savedYears
-        }
-        else
-        {
-            return nil
-        }
-    }
-    */
-    
     /// fetch the saved tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
     {
@@ -286,60 +199,6 @@ class PhishModel: NSObject,
         }
     }
     
-    /*
-    /// retrieve the tours for a given year or request them
-    func getToursForYear(year: PhishYear, completionHandler: (toursError: NSError?, tours: [PhishTour]?) -> Void)
-    {
-        /// retrieve the tours from the device and return them
-        let filename: String = "year\(year.year)"
-        let filepath = self.createFileURLWithFilename(filename)
-        if let savedYearWithTours = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishYear
-            where savedYearWithTours.tours != nil
-        {
-            self.currentTours = savedYearWithTours.tours
-            
-            completionHandler(toursError: nil, tours: savedYearWithTours.tours!)
-        }
-        /// no saved tours, we need to request them
-        else
-        {
-            PhishinClient.sharedInstance().requestToursForYear(year)
-            {
-                toursRequestError, tours in
-                
-                /// something went wrong
-                if toursRequestError != nil
-                {
-                    completionHandler(toursError: toursRequestError!, tours: nil)
-                }
-                else
-                {
-                    /// set the tours
-                    self.currentTours = tours!
-                    
-                    /// return the tours
-                    completionHandler(toursError: nil, tours: tours!)
-                }
-            }
-        }
-    }
-    */
-    
-    /// retrieve saved tours from the device
-    func getSavedToursForYear(year: Int) -> [PhishTour]?
-    {
-        let filename = "year\(year)"
-        let filepath = self.createFileURLWithFilename(filename)
-        guard let savedYearWithTours = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishYear
-            where savedYearWithTours.tours != nil
-        else
-        {
-            return nil
-        }
-        
-        return savedYearWithTours.tours
-    }
-    
     /// retrieve a setlist from core data or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {
@@ -350,15 +209,15 @@ class PhishModel: NSObject,
         
         do
         {
+            /// fetch the shows from core data
             let shows = try self.context.executeFetchRequest(showsFetchRequest) as! [PhishShow]
             if !shows.isEmpty
             {
-                print("Got a saved show!!!")
+                /// get the show we're requesting
                 let savedShow = shows.first!
-                print("savedShow: \(savedShow)")
                 if let savedSetlist = savedShow.setlist
                 {
-                    print("Got a saved setlist!!!")
+                    /// return the setlist
                     completionHandler(setlistError: nil, setlist: savedSetlist)
                 
                     return
@@ -366,7 +225,6 @@ class PhishModel: NSObject,
                 /// no saved setlist, we need to request one
                 else
                 {
-                    print("Requesting the setlist for \(show.date), \(show.year)")
                     PhishinClient.sharedInstance().requestSetlistForShow(show)
                     {
                         setlistError, setlist in
@@ -392,60 +250,13 @@ class PhishModel: NSObject,
         catch
         {
             print("There was a problem fetching show \(show.showID) from Core Data.")
-        }
-        
-        /*
-        let filename = "setlist\(show.showID)"
-        let filepath = self.createFileURLWithFilename(filename)
-        if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? [Int : [PhishSong]]
-        {
-            completionHandler(setlistError: nil, songs: savedSetlist)
-        }
-        */
-        
+        }        
     }
     
     /// retrieve a history from the device or request one for a given song
     func getHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songWithHistory: [Int : [PhishShow]]?) -> Void)
-    {
-        /*
-        /// create a fetch request for the song and a predicate that matches the song ID
-        let songsFetchRequest = NSFetchRequest(entityName: "PhishSong")
-        let songsFetchPredicate = NSPredicate(format: "%K == %@", "songID", "\(song.songID)")
-        songsFetchRequest.predicate = songsFetchPredicate
-        
-        do
-        {
-            let songs = try self.context.executeFetchRequest(songsFetchRequest) as! [PhishSong]
-            if !songs.isEmpty
-            {
-                print("Got a saved song!!!")
-                let savedSong = songs.first!
-                if let savedHistory = savedSong.history
-                {
-                    completionHandler(songHistoryError: nil, songWithHistory: savedHistory)
-                }
-            }
-        }
-        catch
-        {
-            print("Couldn't fetch song \(song.songID) from Core Data.")
-        }
-        */
-        
+    {        
         /// check for a saved history and return it
-        // let filename = "song\(song.name)"
-        // let documentsURL = NSURL(string: self.documentsPath)!
-        // let filename = song.historyFilename
-        // let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-        // let filepath = self.createFileURLWithFilename(filename)
-        /*
-        if let savedSongWithHistory = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishSong where savedSongWithHistory.history != nil
-        {
-            completionHandler(songHistoryError: nil, songWithHistory: savedSongWithHistory.history!)
-        }
-        */
-        
         let pathArray = [self.documentsPath, song.historyFilename]
         let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
         guard !NSFileManager.defaultManager().fileExistsAtPath(historyFileURL.path!)
@@ -461,9 +272,9 @@ class PhishModel: NSObject,
                 }
                 else
                 {
+                    /// found the saved data; unarchive it and return it
                     if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
                     {
-                        print("Got a saved history for \(song.name)")
                         song.history = history
                         completionHandler(songHistoryError: nil, songWithHistory: history)
                     }
@@ -474,6 +285,7 @@ class PhishModel: NSObject,
             return
         }
         
+        /// no saved history, we need to request it
         PhishinClient.sharedInstance().requestHistoryForSong(song)
         {
             songHistoryError, songHistory in
@@ -483,51 +295,12 @@ class PhishModel: NSObject,
             {
                 completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
             }
-                /// return the history
+            /// return the history
             else
             {
                 completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
             }
         }
-        
-        /*
-        let historyTask = NSURLSession.sharedSession().dataTaskWithURL(fileURL)
-        {
-            historyData, historyResponse, historyError in
-            
-            if historyError != nil
-            {
-                completionHandler(songHistoryError: historyError!, songWithHistory: nil)
-            }
-            else
-            {
-                if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
-                {
-                    completionHandler(songHistoryError: nil, songWithHistory: history)
-                }
-                /// no saved history, we need to request one
-                else
-                {
-                    PhishinClient.sharedInstance().requestHistoryForSong(song)
-                    {
-                        songHistoryError, songHistory in
-                        
-                        /// something went wrong
-                        if songHistoryError != nil
-                        {
-                            completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
-                        }
-                        /// return the history
-                        else
-                        {
-                            completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
-                        }
-                    }
-                }
-            }
-        }
-        historyTask.resume()
-        */
     }
     
     /// retrieve a show from core data or request one for a given ID
@@ -547,9 +320,8 @@ class PhishModel: NSObject,
             /// make sure we got something from Core Data
             if !shows.isEmpty
             {
-                print("Got a saved show!!!")
+                /// get the show we're looking for
                 let show = shows.first!
-                print("\(show)")
                 
                 /// send the show back through the completion handler
                 completionHandler(showError: nil, show: show)
@@ -557,7 +329,6 @@ class PhishModel: NSObject,
             /// no saved show, we need to request it
             else
             {
-                print("Requesting a show...")
                 PhishinClient.sharedInstance().requestShowForID(id)
                 {
                     showRequestError, show in
@@ -579,16 +350,6 @@ class PhishModel: NSObject,
         {
             print("Couldn't retrieve show \(id) from Core Data.")
         }
-        
-        /*
-        let filename = "show\(id)"
-        let filepath = self.createFileURLWithFilename(filename)
-        if let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishShow
-        {
-            completionHandler(showError: nil, show: savedShow)
-        }
-        */
-        
     }
     
     /// retrieve a tour from core data or request one for a given ID
@@ -601,10 +362,12 @@ class PhishModel: NSObject,
         
         do
         {
+            /// fetch the tours from core data
             let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
             
             if !tours.isEmpty
             {
+                /// get the tour we're looking for
                 let tour = tours.first!
                 
                 completionHandler(tourError: nil, tour: tour)
@@ -633,16 +396,6 @@ class PhishModel: NSObject,
         {
             print("Couldn't retrieve tour \(id) from Core Data.")
         }
-        
-        /*
-        let filename = "tour\(id)"
-        let filepath = self.createFileURLWithFilename(filename)
-        if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
-        {
-            completionHandler(tourError: nil, tour: savedTour)
-        }
-        */
-        
     }
     
     /// retrieve a tour from core data or request a name for a given tour ID
@@ -656,7 +409,7 @@ class PhishModel: NSObject,
         
         do
         {
-            print("Making a fetch request for tour \(id)...")
+            /// fetch the tours from core data
             let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
             
             if !tours.isEmpty
@@ -668,7 +421,6 @@ class PhishModel: NSObject,
             /// no saved tour, we need to request one
             else
             {
-                print("No saved tour, requesting...")
                 PhishinClient.sharedInstance().requestTourNameForID(id)
                 {
                     tourNameRequestError, tourName in
@@ -690,14 +442,6 @@ class PhishModel: NSObject,
         {
             print("Couldn't retrieve tour \(id) from Core Data.")
         }
-        /*
-        let filename = "tour\(id)"
-        let filepath = self.createFileURLWithFilename(filename)
-        if let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishTour
-        {
-            completionHandler(tourNameError: nil, tourName: savedTour.name)
-        }
-        */
     }
     
     /// returns a string to plug into the keyed unarchiver to retrieve files

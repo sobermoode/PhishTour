@@ -37,13 +37,6 @@ class PhishSong: NSManagedObject
         return total
     }
     
-    /*
-    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
-    {
-        super.init(entity: entity, insertIntoManagedObjectContext: context)
-    }
-    */
-    
     /// filename to save the song history to for later retrieval
     var historyFilename: String
     {
@@ -101,80 +94,29 @@ class PhishSong: NSManagedObject
         
         self.position = songInfo["position"] as! NSNumber
         
-        // some songs have more than one ID...
-        // (i dunno, the value comes back as an array)
+        /// some songs have more than one ID...
         let songIDs = songInfo["song_ids"] as! [Int]
         self.songID = songIDs.first!
         
+        /// set the relationship
         self.show = show
     }
     
-    /*
-    required init?(coder aDecoder: NSCoder)
-    {
-        self.name = aDecoder.decodeObjectForKey("name") as! String
-        self.duration = aDecoder.decodeObjectForKey("duration") as! String
-        self.set = aDecoder.decodeIntegerForKey("set")
-        self.songID = aDecoder.decodeIntegerForKey("songID")
-        self.show = aDecoder.decodeObjectForKey("show") as! PhishShow
-        self.history = aDecoder.decodeObjectForKey("history") as? [Int : [PhishShow]]
-    }
-    
-    func encodeWithCoder(aCoder: NSCoder)
-    {
-        aCoder.encodeObject(self.name, forKey: "name")
-        aCoder.encodeObject(self.duration, forKey: "duration")
-        aCoder.encodeInteger(self.set, forKey: "set")
-        aCoder.encodeInteger(self.songID, forKey: "songID")
-        aCoder.encodeObject(self.show, forKey: "show")
-        aCoder.encodeObject(self.history, forKey: "history")
-    }
-    
-    func save()
-    {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let songPathURL = NSURL(string: documentsPath)!
-        let songPath = songPathURL.URLByAppendingPathComponent(self.filename)
-        
-        if NSKeyedArchiver.archiveRootObject(self, toFile: songPath.path!)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \( self.name ) to the device.")
-        }
-    }
-    */
-    
+    /// write the history to file so it doesn't need to be requested twice
     func saveHistory()
     {
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        // let historyPathURL = NSURL(string: documentsPath)!
-        // let historyPath = historyPathURL.URLByAppendingPathComponent(self.historyFilename)
         let pathArray = [documentsPath, self.historyFilename]
         let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
         
         let historyData: NSData = NSKeyedArchiver.archivedDataWithRootObject(self.history!)
         if historyData.writeToFile(historyFileURL.path!, atomically: false)
         {
-            print("Saved \(self.name)'s history to \(historyFileURL.path!)")
             return
         }
         else
         {
             print("There was an error saving \(self.name)'s history to the device.")
         }
-        
-        /*
-        if NSKeyedArchiver.archiveRootObject(self.history!, toFile: historyPath.path!)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \(self.name)'s history to the device.")
-        }
-        */
     }
 }
