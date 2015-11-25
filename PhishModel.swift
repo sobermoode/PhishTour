@@ -340,61 +340,69 @@ class PhishModel: NSObject,
         return savedYearWithTours.tours
     }
     
-    /// retrieve a setlist from the device or request one for a given show
+    /// retrieve a setlist from core data or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {
-        /// check for a saved setlist and return it
-        let filename = "setlist\(show.showID)"
-        let filepath = self.createFileURLWithFilename(filename)
-        /*
-        if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? [Int : [PhishSong]]
-        {
-            completionHandler(setlistError: nil, setlist: savedSetlist)
-        }
-        */
-        if let setlistData = NSData(contentsOfFile: filepath)
-        {
-            // print("Got saved setlist data: \(setlistData)")
-            let setlistUnarchiver = NSKeyedUnarchiver(forReadingWithData: setlistData)
-            setlistUnarchiver.
-            if let savedSetlist = NSDictionary(coder: setlistUnarchiver)
-            {
-                print("Got the saved setlist: \(savedSetlist)")
-            }
-            /*
-            do
-            {
-                if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithData(setlistData) as? [Int : [PhishSong]]
-                {
-                    print("Converted the setlist data into a saved setlist: \(savedSetlist)")
-                }
-            }
-            catch
-            {
-                print("Coudn't convert the saved setlist data into a setlist.")
-            }
-            */
-        }
+        /// create a fetch request for the show and a predicate that matches the show ID
+        let showsFetchRequest = NSFetchRequest(entityName: "PhishShow")
+        let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(show.showID)")
+        showsFetchRequest.predicate = showsFetchPredicate
         
-        /// no saved setlist, we need to request one
-        else
+        do
         {
-            PhishinClient.sharedInstance().requestSetlistForShow(show)
+            let shows = try self.context.executeFetchRequest(showsFetchRequest) as! [PhishShow]
+            if !shows.isEmpty
             {
-                setlistError, setlist in
-                
-                /// something went wrong
-                if setlistError != nil
+                print("Got a saved show!!!")
+                let savedShow = shows.first!
+                print("savedShow: \(savedShow)")
+                if let savedSetlist = savedShow.setlist
                 {
-                    completionHandler(setlistError: setlistError!, setlist: nil)
+                    print("Got a saved setlist!!!")
+                    completionHandler(setlistError: nil, setlist: savedSetlist)
+                
+                    return
                 }
-                /// return the setlist
+                /// no saved setlist, we need to request one
                 else
                 {
-                    completionHandler(setlistError: nil, setlist: setlist!)
+                    print("Requesting the setlist for \(show.date), \(show.year)")
+                    PhishinClient.sharedInstance().requestSetlistForShow(show)
+                    {
+                        setlistError, setlist in
+                        
+                        /// something went wrong
+                        if setlistError != nil
+                        {
+                            completionHandler(setlistError: setlistError!, setlist: setlist!)
+                        }
+                        /// return the setlist
+                        else
+                        {
+                            completionHandler(setlistError: nil, setlist: setlist!)
+                        }
+                    }
                 }
             }
+            else
+            {
+                print("The fetch request for \(show.date) \(show.year) returned nothing.")
+            }
         }
+        catch
+        {
+            print("There was a problem fetching show \(show.showID) from Core Data.")
+        }
+        
+        /*
+        let filename = "setlist\(show.showID)"
+        let filepath = self.createFileURLWithFilename(filename)
+        if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? [Int : [PhishSong]]
+        {
+            completionHandler(setlistError: nil, songs: savedSetlist)
+        }
+        */
+        
     }
     
     /// retrieve a history from the device or request one for a given song

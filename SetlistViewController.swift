@@ -28,6 +28,7 @@ class SetlistViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
+        print("show: \(show)")
         setupNavBar()
         createScene()
         getSetlist()
@@ -138,9 +139,11 @@ class SetlistViewController: UIViewController,
     
     func getSetlist()
     {
+        print("getSetlist...")
         /// the show already has setlist info, so we don't need to request it
         if self.show.setlist != nil
         {
+            print("\(show.date) \(show.year) had a setlist!!!")
             self.setlist = show.setlist
             self.setlistTable.reloadData()
             self.saveToUserDefaults()
@@ -148,6 +151,7 @@ class SetlistViewController: UIViewController,
         /// no setlist info, we need to request it
         else
         {
+            print("No setlist...")
             /// create a progress bar to track the progress of requesting the setlist
             /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
             let progressBar = UIProgressView(progressViewStyle: .Default)

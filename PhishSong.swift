@@ -14,9 +14,10 @@ class PhishSong: NSManagedObject
     /// specific information for the song
     @NSManaged var name: String
     @NSManaged var duration: String
-    @NSManaged var set: NSNumber!
+    @NSManaged var set: NSNumber
+    @NSManaged var position: NSNumber
     @NSManaged var songID: NSNumber
-    // @NSManaged var show: PhishShow!
+    @NSManaged var show: PhishShow
     
     /// the song has a history of every show it was played at
     var history: [Int : [PhishShow]]?
@@ -49,6 +50,11 @@ class PhishSong: NSManagedObject
         return "history\(self.songID.integerValue)"
     }
     
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
+    {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    
     init(songInfo: [String : AnyObject], forShow show: PhishShow)
     {
         /// insert the object into the core data context
@@ -68,12 +74,39 @@ class PhishSong: NSManagedObject
         let finalSecondsString = (finalSeconds < 10) ? "0\(finalSeconds) " : "\(finalSeconds)"
         self.duration = "\(finalMinutes):" + finalSecondsString
         
+        var theSet: Int
+        let setString = songInfo["set"] as! String
+        if let intSet = Int(setString)
+        {
+            theSet = intSet
+        }
+        else
+        {
+            /// the encore comes back as "E" and soundchecks come back as "S";
+            /// using 10 and 20 to avoid potential trouble with some kind of epic fifth-set madness
+            if setString == "S"
+            {
+                theSet = 10
+            }
+            else if setString == "E"
+            {
+                theSet = 20
+            }
+            else
+            {
+                theSet = 0
+            }
+        }
+        self.set = theSet
+        
+        self.position = songInfo["position"] as! NSNumber
+        
         // some songs have more than one ID...
         // (i dunno, the value comes back as an array)
         let songIDs = songInfo["song_ids"] as! [Int]
         self.songID = songIDs.first!
         
-        // self.show = show
+        self.show = show
     }
     
     /*

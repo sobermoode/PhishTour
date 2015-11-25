@@ -26,8 +26,86 @@ class PhishShow: NSManagedObject,
     @NSManaged var tourID: NSNumber?
     
     /// a show consists of sets of songs (the "setlist")
+    @NSManaged var songs: [PhishSong]?
     var setlist: [Int : [PhishSong]]?
+    {
+        if self.songs?.count == 0
+        {
+            return nil
+        }
+        else
+        {
+            /// create the setlist by creating new PhishSong objects for each song
+            var set = [PhishSong]()
+            var setlist = [Int : [PhishSong]]()
+            var currentSet: Int = 1                        
+            var previousSet: Int = currentSet
+            for (index, song) in self.songs!.enumerate()
+            {
+                // currentSet = song.set.integerValue
+                
+                /// add the first song
+                guard index != 0
+                else
+                {
+                    set.append(song)
+                    previousSet = song.set.integerValue
+                    
+                    /// maybe there's only one song
+                    if index == self.songs!.count - 1
+                    {
+                        setlist.updateValue(set, forKey: currentSet)
+                    }
+                    
+                    continue
+                }
+                
+                /// we're still in the same set, so add a new song to the set array
+                if song.set.integerValue == previousSet
+                {
+                    set.append(song)
+                    previousSet = song.set.integerValue
+                    
+                    /// update the setlist if we're at the last song
+                    if index == self.songs!.count - 1
+                    {
+                        setlist.updateValue(set, forKey: currentSet)
+                    }
+                    
+                    continue
+                }
+                /// we got to the start of the next set or encore
+                else
+                {
+                    /// update the setlist with the complete set
+                    setlist.updateValue(set, forKey: currentSet)
+                    
+                    /// update the current set
+                    currentSet = song.set.integerValue
+                    
+                    /// blank the set array, so we can start over with a new set
+                    /// and add that first song to it
+                    set.removeAll(keepCapacity: false)
+                    set.append(song)
+                    
+                    /// update the setlist if we're at the last song
+                    if index == self.songs!.count - 1
+                    {
+                        setlist.updateValue(set, forKey: currentSet)
+                    }
+                    /// otherwise, remember which set we're in
+                    else
+                    {
+                        previousSet = song.set.integerValue
+                    }
+                }
+            }
+            
+            return setlist
+        }
+    }
     
+    /*
     /// the number of songs played in the show
     var totalSongs: Int
     {
@@ -42,6 +120,7 @@ class PhishShow: NSManagedObject,
         
         return total
     }
+    */
     
     /// filename for the saved data
     var setlistFilename: String
@@ -170,6 +249,7 @@ class PhishShow: NSManagedObject,
         self.date = formattedString
     }
     
+    /*
     func saveSetlist()
     {
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
@@ -184,17 +264,6 @@ class PhishShow: NSManagedObject,
         {
             print("There was an error saving \(self.date) \(self.year)'s setlist to the device.")
         }
-    }
-    
-    /*
-    required init?(coder aDecoder: NSCoder)
-    {
-        self.setlist = aDecoder.decodeObjectForKey("setlist") as? [Int : [PhishSong]]
-    }
-    
-    func encodeWithCoder(aCoder: NSCoder)
-    {
-        aCoder.encodeObject(self.setlist!, forKey: "setlist")
     }
     */
     
