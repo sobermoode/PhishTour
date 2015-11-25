@@ -605,11 +605,40 @@ class PhishinClient: NSObject
                         // show.tour?.save()
                         // show.tour?.year!.save()
                         
+                        // show.saveSetlist()
+                        let setlistFilename = "setlist\(show.showID)"
+                        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+                        let setlistPathURL = NSURL(string: documentsPath)!
+                        let setlistPath = setlistPathURL.URLByAppendingPathComponent(setlistFilename)
+                        let setlistData: NSData = NSKeyedArchiver.archivedDataWithRootObject(setlist)
+                        let mutableSetlistData = NSMutableData(data: setlistData)
+                        let setlistArchiver = NSKeyedArchiver(forWritingWithMutableData: mutableSetlistData)
+                        let setlistKeys = Array(setlist.keys)
+                        for key in setlistKeys
+                        {
+                            let set: [PhishSong] = setlist[key]!
+                            setlistArchiver.encodeObject(set, forKey: "\(key)")
+                        }
+                        setlistData.writeToFile(setlistPath.path!, atomically: false)
+                        
+                        /*
+                        if NSKeyedArchiver.archiveRootObject(setlist, toFile: setlistPath.path!)
+                        {
+                            print("Saved the setlist to file!!!")
+                            return
+                        }
+                        else
+                        {
+                            print("There was an error saving \(show.date) \(show.year)'s setlist to the device.")
+                        }
+                        */
+                        /*
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
                         {
                             CoreDataStack.sharedInstance().saveContext()
                         }
+                        */
                         
                         // return the setlist through the completion handler
                         completionHandler(setlistError: nil, setlist: setlist)
@@ -846,11 +875,14 @@ class PhishinClient: NSObject
                         // song.show.tour?.save()
                         // song.show.tour?.year?.save()
                         
+                        song.saveHistory()
+                        /*
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
                         {
                             CoreDataStack.sharedInstance().saveContext()
                         }
+                        */
                         
                         /// send the history back through the completion handler
                         completionHandler(songHistoryError: nil, songHistory: historyByYear)

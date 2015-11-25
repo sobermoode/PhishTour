@@ -159,6 +159,69 @@ class SetlistViewController: UIViewController,
             PhishinClient.sharedInstance().setlistProgressBar = self.progressBar
             self.view.addSubview(progressBar)
             
+            PhishModel.sharedInstance().getSetlistForShow(self.show)
+            {
+                setlistError, setlist in
+                
+                /// something went wrong
+                if setlistError != nil
+                {
+                    /// create an alert for the problem and unwind back to the map
+                    let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the setlist for \(self.show.date) \(self.show.year): \(setlistError!.localizedDescription)", preferredStyle: .Alert)
+                    let alertAction = UIAlertAction(title: "OK", style: .Default)
+                    {
+                        action in
+                        
+                        self.backToMap()
+                    }
+                    alert.addAction(alertAction)
+                    
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.presentViewController(alert, animated: true, completion: nil)
+                    }
+                }
+                else
+                {
+                    self.setlist = setlist
+                    
+                    self.saveToUserDefaults()
+                    
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.setlistTable.reloadData()
+                    }
+                    
+                    /// make the progress bar green when it finishes successfully
+                    /// then, remove it after a short delay
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.progressBar?.progressTintColor = UIColor.greenColor()
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                            dispatch_after(delayTime, dispatch_get_main_queue())
+                            {
+                                self.progressBar?.removeFromSuperview()
+                                self.progressBar = nil
+                            }
+                        }
+                    }
+                }
+            }
+        }
+            /*
+            /// create a progress bar to track the progress of requesting the setlist
+            /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
+            let progressBar = UIProgressView(progressViewStyle: .Default)
+            progressBar.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: CGRectGetMinY(self.view.bounds) + UIApplication.sharedApplication().statusBarFrame.height + self.navigationController!.navigationBar.bounds.height, width: CGRectGetWidth(self.view.bounds), height: 10)
+            progressBar.progressTintColor = UIColor.blueColor()
+            progressBar.trackTintColor = UIColor.lightGrayColor()
+            progressBar.transform = CGAffineTransformMakeScale(1, 2.5)
+            self.progressBar = progressBar
+            PhishinClient.sharedInstance().setlistProgressBar = self.progressBar
+            self.view.addSubview(progressBar)
+            
             PhishinClient.sharedInstance().requestSetlistForShow(show)
             {
                 setlistError, setlist in
@@ -209,7 +272,7 @@ class SetlistViewController: UIViewController,
                     }
                 }
             }
-        }
+            */
     }
     
     func saveToUserDefaults()

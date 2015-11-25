@@ -43,13 +43,11 @@ class PhishShow: NSManagedObject,
         return total
     }
     
-    /*
     /// filename for the saved data
-    var filename: String
+    var setlistFilename: String
     {
-        return "show\( self.showID )"
+        return "setlist\(self.showID)"
     }
-    */
     
     /// location information for the show
     @NSManaged var showLatitude: NSNumber
@@ -171,6 +169,34 @@ class PhishShow: NSManagedObject,
         let formattedString = dateFormatter.stringFromDate(formattedDate)
         self.date = formattedString
     }
+    
+    func saveSetlist()
+    {
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+        let setlistPathURL = NSURL(string: documentsPath)!
+        let setlistPath = setlistPathURL.URLByAppendingPathComponent(self.setlistFilename)
+        
+        if NSKeyedArchiver.archiveRootObject(self.setlist!, toFile: setlistPath.path!)
+        {
+            return
+        }
+        else
+        {
+            print("There was an error saving \(self.date) \(self.year)'s setlist to the device.")
+        }
+    }
+    
+    /*
+    required init?(coder aDecoder: NSCoder)
+    {
+        self.setlist = aDecoder.decodeObjectForKey("setlist") as? [Int : [PhishSong]]
+    }
+    
+    func encodeWithCoder(aCoder: NSCoder)
+    {
+        aCoder.encodeObject(self.setlist!, forKey: "setlist")
+    }
+    */
     
     /*
     required init?(coder aDecoder: NSCoder)

@@ -344,13 +344,38 @@ class PhishModel: NSObject,
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {
         /// check for a saved setlist and return it
-        let filename = "show\(show.showID)"
+        let filename = "setlist\(show.showID)"
         let filepath = self.createFileURLWithFilename(filename)
-        if let savedShowWithSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishShow
-            where savedShowWithSetlist.setlist != nil
+        /*
+        if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? [Int : [PhishSong]]
         {
-            completionHandler(setlistError: nil, setlist: savedShowWithSetlist.setlist!)
+            completionHandler(setlistError: nil, setlist: savedSetlist)
         }
+        */
+        if let setlistData = NSData(contentsOfFile: filepath)
+        {
+            // print("Got saved setlist data: \(setlistData)")
+            let setlistUnarchiver = NSKeyedUnarchiver(forReadingWithData: setlistData)
+            setlistUnarchiver.
+            if let savedSetlist = NSDictionary(coder: setlistUnarchiver)
+            {
+                print("Got the saved setlist: \(savedSetlist)")
+            }
+            /*
+            do
+            {
+                if let savedSetlist = NSKeyedUnarchiver.unarchiveObjectWithData(setlistData) as? [Int : [PhishSong]]
+                {
+                    print("Converted the setlist data into a saved setlist: \(savedSetlist)")
+                }
+            }
+            catch
+            {
+                print("Coudn't convert the saved setlist data into a setlist.")
+            }
+            */
+        }
+        
         /// no saved setlist, we need to request one
         else
         {

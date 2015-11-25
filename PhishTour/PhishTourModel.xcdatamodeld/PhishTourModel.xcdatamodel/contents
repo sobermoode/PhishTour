@@ -16,10 +16,8 @@
     </entity>
     <entity name="PhishSong" representedClassName=".PhishSong" syncable="YES">
         <attribute name="duration" attributeType="String" syncable="YES"/>
-        <attribute name="history" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
         <attribute name="set" attributeType="Integer 16" syncable="YES"/>
-        <attribute name="show" attributeType="Transformable" syncable="YES"/>
         <attribute name="songID" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
     <entity name="PhishTour" representedClassName=".PhishTour" syncable="YES">
@@ -34,7 +32,7 @@
     </entity>
     <elements>
         <element name="PhishShow" positionX="-36" positionY="9" width="128" height="225"/>
-        <element name="PhishSong" positionX="-18" positionY="27" width="128" height="135"/>
+        <element name="PhishSong" positionX="-18" positionY="27" width="128" height="105"/>
         <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="105"/>
         <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
     </elements>

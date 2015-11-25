@@ -16,10 +16,10 @@ class PhishSong: NSManagedObject
     @NSManaged var duration: String
     @NSManaged var set: NSNumber!
     @NSManaged var songID: NSNumber
-    @NSManaged var show: PhishShow!
+    // @NSManaged var show: PhishShow!
     
     /// the song has a history of every show it was played at
-    @NSManaged var history: [Int : [PhishShow]]?
+    var history: [Int : [PhishShow]]?
     
     /// the total number of times the song has been played
     var totalPlays: Int
@@ -43,13 +43,11 @@ class PhishSong: NSManagedObject
     }
     */
     
-    /*
-    /// filename to save the song data to for later retrieval
-    var filename: String
+    /// filename to save the song history to for later retrieval
+    var historyFilename: String
     {
-        return "song\(self.name)"
+        return "history\(self.songID.integerValue)"
     }
-    */
     
     init(songInfo: [String : AnyObject], forShow show: PhishShow)
     {
@@ -75,7 +73,7 @@ class PhishSong: NSManagedObject
         let songIDs = songInfo["song_ids"] as! [Int]
         self.songID = songIDs.first!
         
-        self.show = show
+        // self.show = show
     }
     
     /*
@@ -115,4 +113,20 @@ class PhishSong: NSManagedObject
         }
     }
     */
+    
+    func saveHistory()
+    {
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
+        let historyPathURL = NSURL(string: documentsPath)!
+        let historyPath = historyPathURL.URLByAppendingPathComponent(self.historyFilename)
+        
+        if NSKeyedArchiver.archiveRootObject(self.history!, toFile: historyPath.path!)
+        {
+            return
+        }
+        else
+        {
+            print("There was an error saving \(self.name)'s history to the device.")
+        }
+    }
 }
