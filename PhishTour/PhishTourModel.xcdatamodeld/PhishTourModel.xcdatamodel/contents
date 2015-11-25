@@ -21,7 +21,7 @@
         <attribute name="position" attributeType="Integer 16" syncable="YES"/>
         <attribute name="set" attributeType="Integer 16" syncable="YES"/>
         <attribute name="songID" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <relationship name="show" maxCount="1" deletionRule="Nullify" destinationEntity="PhishShow" inverseName="songs" inverseEntity="PhishShow" syncable="YES"/>
+        <relationship name="show" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishShow" inverseName="songs" inverseEntity="PhishShow" syncable="YES"/>
     </entity>
     <entity name="PhishTour" representedClassName=".PhishTour" syncable="YES">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>

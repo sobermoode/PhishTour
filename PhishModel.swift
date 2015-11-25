@@ -408,32 +408,121 @@ class PhishModel: NSObject,
     /// retrieve a history from the device or request one for a given song
     func getHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songWithHistory: [Int : [PhishShow]]?) -> Void)
     {
+        /*
+        /// create a fetch request for the song and a predicate that matches the song ID
+        let songsFetchRequest = NSFetchRequest(entityName: "PhishSong")
+        let songsFetchPredicate = NSPredicate(format: "%K == %@", "songID", "\(song.songID)")
+        songsFetchRequest.predicate = songsFetchPredicate
+        
+        do
+        {
+            let songs = try self.context.executeFetchRequest(songsFetchRequest) as! [PhishSong]
+            if !songs.isEmpty
+            {
+                print("Got a saved song!!!")
+                let savedSong = songs.first!
+                if let savedHistory = savedSong.history
+                {
+                    completionHandler(songHistoryError: nil, songWithHistory: savedHistory)
+                }
+            }
+        }
+        catch
+        {
+            print("Couldn't fetch song \(song.songID) from Core Data.")
+        }
+        */
+        
         /// check for a saved history and return it
-        let filename = "song\(song.name)"
-        let filepath = self.createFileURLWithFilename(filename)
+        // let filename = "song\(song.name)"
+        let documentsURL = NSURL(string: self.documentsPath)!
+        let filename = song.historyFilename
+        let fileURL = documentsURL.URLByAppendingPathComponent(filename)
+        // let filepath = self.createFileURLWithFilename(filename)
+        /*
         if let savedSongWithHistory = NSKeyedUnarchiver.unarchiveObjectWithFile(filepath) as? PhishSong where savedSongWithHistory.history != nil
         {
             completionHandler(songHistoryError: nil, songWithHistory: savedSongWithHistory.history!)
         }
-        /// no saved history, we need to request one
+        */
+        guard !NSFileManager.defaultManager().fileExistsAtPath(fileURL.path!)
         else
         {
-            PhishinClient.sharedInstance().requestHistoryForSong(song)
+            let historyTask = NSURLSession.sharedSession().dataTaskWithURL(fileURL)
             {
-                songHistoryError, songHistory in
+                historyData, historyResponse, historyError in
                 
-                /// something went wrong
-                if songHistoryError != nil
+                if historyError != nil
                 {
-                    completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
+                    completionHandler(songHistoryError: historyError!, songWithHistory: nil)
                 }
-                /// return the history
                 else
                 {
-                    completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
+                    if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
+                    {
+                        completionHandler(songHistoryError: nil, songWithHistory: history)
+                    }
+                }
+            }
+            historyTask.resume()
+            
+            return
+        }
+        
+        PhishinClient.sharedInstance().requestHistoryForSong(song)
+        {
+            songHistoryError, songHistory in
+            
+            /// something went wrong
+            if songHistoryError != nil
+            {
+                completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
+            }
+                /// return the history
+            else
+            {
+                completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
+            }
+        }
+        
+        /*
+        let historyTask = NSURLSession.sharedSession().dataTaskWithURL(fileURL)
+        {
+            historyData, historyResponse, historyError in
+            
+            if historyError != nil
+            {
+                completionHandler(songHistoryError: historyError!, songWithHistory: nil)
+            }
+            else
+            {
+                if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
+                {
+                    completionHandler(songHistoryError: nil, songWithHistory: history)
+                }
+                /// no saved history, we need to request one
+                else
+                {
+                    PhishinClient.sharedInstance().requestHistoryForSong(song)
+                    {
+                        songHistoryError, songHistory in
+                        
+                        /// something went wrong
+                        if songHistoryError != nil
+                        {
+                            completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
+                        }
+                        /// return the history
+                        else
+                        {
+                            completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
+                        }
+                    }
                 }
             }
         }
+        historyTask.resume()
+        */
     }
     
     /// retrieve a show from core data or request one for a given ID

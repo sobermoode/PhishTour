@@ -153,6 +153,17 @@ class PhishSong: NSManagedObject
         let historyPathURL = NSURL(string: documentsPath)!
         let historyPath = historyPathURL.URLByAppendingPathComponent(self.historyFilename)
         
+        let historyData: NSData = NSKeyedArchiver.archivedDataWithRootObject(self.history!)
+        if historyData.writeToFile(historyPath.path!, atomically: false)
+        {
+            return
+        }
+        else
+        {
+            print("There was an error saving \(self.name)'s history to the device.")
+        }
+        
+        /*
         if NSKeyedArchiver.archiveRootObject(self.history!, toFile: historyPath.path!)
         {
             return
@@ -161,5 +172,6 @@ class PhishSong: NSManagedObject
         {
             print("There was an error saving \(self.name)'s history to the device.")
         }
+        */
     }
 }

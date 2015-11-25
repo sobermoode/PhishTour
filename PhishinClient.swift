@@ -348,11 +348,13 @@ class PhishinClient: NSObject
                         }
                         */
                         
+                        /*
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
                         {
                             CoreDataStack.sharedInstance().saveContext()
                         }
+                        */
                         
                         /// send the tour name back through the completion handler
                         completionHandler(tourNameRequestError: nil, tourName: newTour.name)
@@ -760,13 +762,12 @@ class PhishinClient: NSObject
                         // song.show.tour?.year?.save()
                         
                         song.saveHistory()
-                        /*
+                        
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
                         {
                             CoreDataStack.sharedInstance().saveContext()
                         }
-                        */
                         
                         /// send the history back through the completion handler
                         completionHandler(songHistoryError: nil, songHistory: historyByYear)

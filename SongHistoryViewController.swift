@@ -9,7 +9,7 @@
 import UIKit
 
 class SongHistoryViewController: UIViewController,
-    UITableViewDataSource, UITableViewDelegate
+    UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate
 {
     /// the song who's history is being displayed
     var song: PhishSong!
@@ -127,6 +127,59 @@ class SongHistoryViewController: UIViewController,
             PhishinClient.sharedInstance().historyProgressBar = self.progressBar
             self.view.addSubview(progressBar)
             
+            PhishModel.sharedInstance().getHistoryForSong(self.song)
+            {
+                historyError, history in
+                
+                if historyError != nil
+                {
+                    /// create an alert for the problem and unwind back to the setlist
+                    let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the history for \(self.song.name): \(historyError!.localizedDescription)", preferredStyle: .Alert)
+                    let alertAction = UIAlertAction(title: "OK", style: .Default)
+                    {
+                        action in
+                        
+                        self.backToSetlist()
+                    }
+                    alert.addAction(alertAction)
+                    
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.presentViewController(alert, animated: true, completion: nil)
+                    }
+                }
+                else
+                {
+                    /// save the history
+                    self.history = history
+                    
+                    self.saveToUserDefaults()
+                    
+                    /// reload the table on the main thread
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
+                        self.totalPlaysLabel.hidden = false
+                        self.historyTable.reloadData()
+                    }
+                    
+                    /// make the progress bar green when it finishes successfully
+                    /// then, remove it after a short delay
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.progressBar?.progressTintColor = UIColor.greenColor()
+                        
+                        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                        dispatch_after(delayTime, dispatch_get_main_queue())
+                        {
+                            self.progressBar?.removeFromSuperview()
+                            self.progressBar = nil
+                        }
+                    }
+                }
+            }
+            
+            /*
             PhishinClient.sharedInstance().requestHistoryForSong(song)
             {
                 historyError, history in
@@ -179,6 +232,7 @@ class SongHistoryViewController: UIViewController,
                     }
                 }
             }
+            */
         }
     }
     
@@ -543,6 +597,17 @@ class SongHistoryViewController: UIViewController,
                     self.navigationController?.popToRootViewControllerAnimated(true)
                 }
             }
+        }
+    }
+    
+    /// save the context after the table view stops scrolling, because tour objects are created as cells scroll into view;
+    /// otherwise, the app crashes when saving tons of times consecutively
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView)
+    {
+        /// save new and updated objects to the context
+        CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
+        {
+            CoreDataStack.sharedInstance().saveContext()
         }
     }
 }
