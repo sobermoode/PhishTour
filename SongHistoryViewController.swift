@@ -532,6 +532,9 @@ class SongHistoryViewController: UIViewController,
                 /// set the selected tour
                 PhishModel.sharedInstance().selectedTour = tour
                 
+                /// let the tour selecter know what to set the year picker to
+                PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(tour!.year!)
+                
                 /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
                 let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
                 tourMap.isComingFromSongHistory = true

@@ -243,6 +243,7 @@ class PhishinClient: NSObject
                         {
                             show.tour = newTour
                         }
+                        let _ = newTour.locationDictionary!
                         
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
