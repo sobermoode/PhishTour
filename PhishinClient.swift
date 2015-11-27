@@ -218,7 +218,9 @@ class PhishinClient: NSObject
                     var showArray = [PhishShow]()
                     for show in shows
                     {
-                        let newShow = PhishShow(showInfoFromYear: show)
+                        // let newShow = PhishShow(showInfoFromYear: show)
+                        let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
+                        newShow.updateProperties(showInfoFromYear: show)
                         
                         showArray.append(newShow)
                     }
@@ -230,34 +232,50 @@ class PhishinClient: NSObject
                     let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
                     let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", nsNumberYear)
                     yearFetchRequest.predicate = yearFetchPredicate
-                    do
+                    
+                    self.context.performBlockAndWait()
                     {
-                        /// fetch the specified year
-                        let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
-                        let year: PhishYear = years.first!
-                        PhishModel.sharedInstance().selectedYear = year
-                        
-                        /// create a tour and set relationships
-                        let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
-                        for show in showArray
+                        do
                         {
-                            show.tour = newTour
+                            /// fetch the specified year
+                            let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+                            if let year: PhishYear = years.first
+                            {
+                                print("year: \(year)")
+                                PhishModel.sharedInstance().selectedYear = year
+                            }
+                            else
+                            {
+                                print("I dunno what happened with the fetched year...")
+                            }
+                            
+                            /// create a tour and set relationships
+                            // let newTour = PhishTour(year: PhishModel.sharedInstance().selectedYear!, name: tourName, tourID: id)
+                            let newTour = NSEntityDescription.insertNewObjectForEntityForName("PhishTour", inManagedObjectContext: self.context) as! PhishTour
+                            newTour.year = PhishModel.sharedInstance().selectedYear!
+                            newTour.name = tourName
+                            newTour.tourID = id
+                            for show in showArray
+                            {
+                                show.tour = newTour
+                            }
+                            let _ = newTour.locationDictionary!
+                            
+                            /// save new and updated objects to the context
+                            self.context.performBlockAndWait()
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
+                            
+                            /// send the tour back through the completion handler
+                            completionHandler(tourRequestError: nil, tour: newTour)
                         }
-                        let _ = newTour.locationDictionary!
-                        
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
+                        catch
                         {
-                            CoreDataStack.sharedInstance().saveContext()
+                            print("Couldn't fetch \(intYear) from Core Data.")
                         }
-                        
-                        /// send the tour back through the completion handler
-                        completionHandler(tourRequestError: nil, tour: newTour)
                     }
-                    catch
-                    {
-                        print("Couldn't fetch \(intYear) from Core Data.")
-                    }
+                    
                 }
                 catch
                 {
@@ -434,7 +452,10 @@ class PhishinClient: NSObject
                         /// create each song and update the progress bar
                         for track in tracks
                         {
-                            let _ = PhishSong(songInfo: track, forShow: show)
+                            // let _ = PhishSong(songInfo: track, forShow: show)
+                            let newSong = NSEntityDescription.insertNewObjectForEntityForName("PhishSong", inManagedObjectContext: self.context) as! PhishSong
+                            newSong.updateProperties(track)
+                            newSong.show = show
                             
                             if currentProgress != nil
                             {
@@ -540,7 +561,13 @@ class PhishinClient: NSObject
                             guard index != 0
                             else
                             {
-                                let newShow = PhishShow()
+                                // let newShow = PhishShow()
+                                let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
+                                newShow.date = ""
+                                newShow.year = 9999
+                                newShow.venue = ""
+                                newShow.city = ""
+                                newShow.showID = 0
                                 newShow.showID = showID
                                 newShow.createDate(date)
                                 newShow.day = day
@@ -579,7 +606,13 @@ class PhishinClient: NSObject
                             /// if we're in the same year, add the show to the current array
                             if currentYear == previousYear
                             {
-                                let newShow = PhishShow()
+                                // let newShow = PhishShow()
+                                let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
+                                newShow.date = ""
+                                newShow.year = 9999
+                                newShow.venue = ""
+                                newShow.city = ""
+                                newShow.showID = 0
                                 newShow.showID = showID
                                 newShow.createDate(date)
                                 newShow.day = day
@@ -642,7 +675,13 @@ class PhishinClient: NSObject
                                 showsForTheYear.removeAll()
                                 
                                 /// create the new show and add it to the array for the new year
-                                let newShow = PhishShow()
+                                // let newShow = PhishShow()
+                                let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
+                                newShow.date = ""
+                                newShow.year = 9999
+                                newShow.venue = ""
+                                newShow.city = ""
+                                newShow.showID = 0
                                 newShow.showID = showID
                                 newShow.createDate(date)
                                 newShow.day = day
@@ -730,6 +769,7 @@ class PhishinClient: NSObject
                         
                         /// create a new show
                         let newShow = PhishShow(showInfoFromShow: showData)
+                        print("requestShowForID: created this show: \(newShow)")
                         
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()

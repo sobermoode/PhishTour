@@ -102,6 +102,52 @@ class PhishSong: NSManagedObject
         self.show = show
     }
     
+    func updateProperties(songInfo: [String : AnyObject])
+    {
+        self.name = songInfo["title"] as! String
+        
+        /// create a nicely formatted mm:ss string out of an amount of milliseconds
+        let milliseconds = songInfo["duration"] as! Float
+        let seconds = milliseconds / 1000
+        let minutes = seconds / 60
+        let finalMinutes = Int(minutes)
+        let remainder = minutes - Float(finalMinutes)
+        let finalSeconds = Int(floor(remainder * 60))
+        let finalSecondsString = (finalSeconds < 10) ? "0\(finalSeconds) " : "\(finalSeconds)"
+        self.duration = "\(finalMinutes):" + finalSecondsString
+        
+        var theSet: Int
+        let setString = songInfo["set"] as! String
+        if let intSet = Int(setString)
+        {
+            theSet = intSet
+        }
+        else
+        {
+            /// the encore comes back as "E" and soundchecks come back as "S";
+            /// using 10 and 20 to avoid potential trouble with some kind of epic fifth-set madness
+            if setString == "S"
+            {
+                theSet = 10
+            }
+            else if setString == "E"
+            {
+                theSet = 20
+            }
+            else
+            {
+                theSet = 0
+            }
+        }
+        self.set = theSet
+        
+        self.position = songInfo["position"] as! NSNumber
+        
+        /// some songs have more than one ID...
+        let songIDs = songInfo["song_ids"] as! [Int]
+        self.songID = songIDs.first!
+    }
+    
     /// write the history to file so it doesn't need to be requested twice
     func saveHistory()
     {

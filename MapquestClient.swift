@@ -65,39 +65,60 @@ class MapquestClient: NSObject
         
         /// first, check to see if the locations need to be geocoded, and return if they already have been;
         /// only geocode every unique location, not every show (some locations have multi-night runs)
-        let uniqueLocations = tour.uniqueLocations
-        var counter: Int = 0
-        for location in uniqueLocations
+        if let uniqueLocations = tour.uniqueLocations
         {
-            /// check the coordinates
-            if location.showLatitude != 0 && location.showLongitude != 0
+            print("Checking the locations for geocoding...")
+            print("uniqueLocations: \(uniqueLocations.description)")
+            var counter: Int = 0
+            for location in uniqueLocations
             {
-                /// we checked all the locations
-                if counter == uniqueLocations.count - 1
+                if location.city == ""
                 {
-                    /// complete with no error
-                    completionHandler(geocodingError: nil)
-                    return
-                }
-                else
-                {
-                    /// check next location
-                    counter++
                     continue
                 }
-            }
-            /// there's a location that needs to be geocoded
-            else
-            {
-                /// turn the location into a string that can be appended to the request;
-                /// some locations need additional formatting
-                var city = location.city
-                city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
-                city = self.fixSpecialCities(city)
-                mapquestRequestString += "&location=\(city)"
-                counter++
+                
+                /// check the coordinates
+                if location.showLatitude != 0 && location.showLongitude != 0
+                {
+                    print("\(location.city) doesn't need to be geocoded.")
+                    /// we checked all the locations
+                    if counter == uniqueLocations.count - 1
+                    {
+                        /// complete with no error
+                        completionHandler(geocodingError: nil)
+                        return
+                    }
+                    else
+                    {
+                        /// check next location
+                        counter++
+                        continue
+                    }
+                }
+                /// there's a location that needs to be geocoded
+                else
+                {
+                    print("\(location.city) needs to be geocoded.")
+                    /// turn the location into a string that can be appended to the request;
+                    /// some locations need additional formatting
+                    var city = location.city
+                    city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
+                    city = self.fixSpecialCities(city)
+                    mapquestRequestString += "&location=\(city)"
+                    counter++
+                }
             }
         }
+        else
+        {
+            /// create an error to send back
+            var geocodingErrorDictionary = [NSObject : AnyObject]()
+            geocodingErrorDictionary.updateValue("Couldn't get the tour locations.", forKey: NSLocalizedDescriptionKey)
+            let geocodingError = NSError(domain: NSCocoaErrorDomain, code: 9999, userInfo: geocodingErrorDictionary)
+            completionHandler(geocodingError: geocodingError)
+        }
+        
+        print("mapquestRequestString: \(mapquestRequestString)")
         
         /// run the request on a background thread, update the progress bar on the main thread
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
@@ -123,22 +144,45 @@ class MapquestClient: NSObject
                     do
                     {
                         let jsonMapquestData = try NSJSONSerialization.JSONObjectWithData(mapquestData!, options: []) as! [String : AnyObject]
-                        let geocodeResults = jsonMapquestData["results"] as! [[String : AnyObject]]
+                        guard let geocodeResults = jsonMapquestData["results"] as? [[String : AnyObject]]
+                        else
+                        {
+                            print("There weren't any geocodeResults.")
+                            completionHandler(geocodingError: mapquestError!)
+                            return
+                        }
                         
                         /// extract the latitude/longitude coordinates for each location and set the values on each PhishShow object
                         /// update the progress bar on the tour map when each location is geocoded
                         var counter: Int = 0
-                        let progressBump: Float = 0.2 / Float(tour.uniqueLocations.count)
+                        let progressBump: Float = 0.2 / Float(tour.uniqueLocations!.count)
                         var totalProgress: Float = self.tourMapProgressBar.progress
                         for result in geocodeResults
                         {
                             /// get the current show, see if its part of a multi-night run, then get all the shows associated with the location
-                            let currentShow: PhishShow = tour.shows[counter]
-                            let shows: [PhishShow] = Array(tour.shows[counter...(counter + (Int(currentShow.consecutiveNights) - 1))])
+                            guard let currentShow: PhishShow = tour.shows[counter]
+                            else
+                            {
+                                print("There was no currentShow.")
+                                completionHandler(geocodingError: mapquestError!)
+                                return
+                            }
+                            guard let shows: [PhishShow] = Array(tour.shows[counter...(counter + (Int(currentShow.consecutiveNights) - 1))])
+                            else
+                            {
+                                print("Couldn't get the shows.")
+                                completionHandler(geocodingError: mapquestError!)
+                                return
+                            }
                             
                             /// get at the latitude/longitude info
                             let locations = result["locations"] as! [AnyObject]
-                            let innerLocations = locations[0] as! [String : AnyObject]
+                            print("locations: \(locations.description)")
+                            guard let innerLocations = locations[0] as? [String : AnyObject]
+                            else
+                            {
+                                continue
+                            }
                             let latLong = innerLocations["latLng"] as! [String : Double]
                             let geocodedLatitude = latLong["lat"]!
                             let geocodedLongitude = latLong["lng"]!

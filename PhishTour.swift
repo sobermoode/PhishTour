@@ -21,15 +21,22 @@ class PhishTour: NSManagedObject
     @NSManaged var shows: [PhishShow]
     
     /// unique tour locations (some shows are played at the same venue, in a multi-night run)
-    var uniqueLocations: [PhishShow]
+    var uniqueLocations: [PhishShow]?
     {
+        guard !self.shows.isEmpty
+        else
+        {
+            return nil
+        }
+        
         var uniques = [PhishShow]()
         var previousShow: PhishShow = self.shows.first!
         
         for (index, show) in self.shows.enumerate()
         {
             /// there might only be one location
-            if self.shows.count == 1
+            guard self.shows.count == 1
+            else
             {
                 uniques.append(show)
                 
@@ -153,6 +160,12 @@ class PhishTour: NSManagedObject
         }
         
         return coordinates
+    }
+    
+    /// description
+    override var description: String
+    {
+        return "\(self.name)"
     }
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)

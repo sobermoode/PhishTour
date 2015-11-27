@@ -143,7 +143,8 @@ class PhishModel: NSObject,
         /// create a fetch request with a predicate to match the year being requested
         /// and a sort descriptor to sort ascending by tour ID
         let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        let toursFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
+        // let toursFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
+        let toursFetchPredicate = NSPredicate(format: "year = %@", year)
         let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
         toursFetchRequest.predicate = toursFetchPredicate
         toursFetchRequest.sortDescriptors = [sortDescriptor]
@@ -204,7 +205,8 @@ class PhishModel: NSObject,
     {
         /// create a fetch request for the show and a predicate that matches the show ID
         let showsFetchRequest = NSFetchRequest(entityName: "PhishShow")
-        let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", show.showID)
+        // let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", show.showID)
+        let showsFetchPredicate = NSPredicate(format: "showID = %@", show.showID)
         showsFetchRequest.predicate = showsFetchPredicate
         
         do
@@ -316,7 +318,9 @@ class PhishModel: NSObject,
         /// check for a saved show
         /// create the fetch request
         let showFetchRequest = NSFetchRequest(entityName: "PhishShow")
-        let showFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(id)")
+        // let showFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(id)")
+        let nsNumberID = NSNumber(integer: id)
+        let showFetchPredicate = NSPredicate(format: "showID = %@", nsNumberID)
         showFetchRequest.predicate = showFetchPredicate
         
         do
@@ -329,7 +333,9 @@ class PhishModel: NSObject,
             {
                 /// get the show we're looking for
                 let show = shows.first!
+                print("Looking for show \(id), Core Data returned \(show)")
                 
+                print("getShowForID: returning show from Core Data: \(show)")
                 /// send the show back through the completion handler
                 completionHandler(showError: nil, show: show)
             }
@@ -348,6 +354,7 @@ class PhishModel: NSObject,
                     /// return the show
                     else
                     {
+                        print("getShowForID: returning show from Phish.in: \(show)")
                         completionHandler(showError: nil, show: show!)
                     }
                 }
@@ -364,7 +371,9 @@ class PhishModel: NSObject,
     {
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        // let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        let nsNumberID = NSNumber(integer: id)
+        let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
         
         do
@@ -411,7 +420,9 @@ class PhishModel: NSObject,
         /// check for a saved tour and return its name
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        // let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
+        let nsNumberID = NSNumber(integer: id)
+        let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
         
         do
@@ -732,7 +743,7 @@ class PhishModel: NSObject,
         /// each set of shows at a unique location will share the same background color
         let shows = PhishModel.sharedInstance().selectedTour!.locationDictionary![show.venue]!
         let firstShow = shows.first!
-        let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations.indexOf(firstShow)!
+        let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations!.indexOf(firstShow)!
         let grayFactor = CGFloat(0.02 * Double(position))
         let bgColor = UIColor(red: 1.0 - grayFactor, green: 1.0 - grayFactor, blue: 1.0 - grayFactor, alpha: 1.0)
         cell.backgroundColor = bgColor

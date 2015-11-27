@@ -356,6 +356,7 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
+                    print("Received this show: \(show)")
                     /// this will be the map annotation to select when popping back to the tour map controller
                     cell.otherTourShow = show!
                     
@@ -380,6 +381,37 @@ class SongHistoryViewController: UIViewController,
                             /// get the tour ID
                             if let tourID = show!.tourID
                             {
+                                PhishModel.sharedInstance().getTourForID(tourID.integerValue)
+                                {
+                                    tourError, tour in
+                                    
+                                    /// something went wrong
+                                    if tourError != nil
+                                    {
+                                        /// update the cell to reflect that the tour couldn't be retrieved
+                                        dispatch_async(dispatch_get_main_queue())
+                                        {
+                                            cell.detailTextLabel?.textColor = UIColor.redColor()
+                                            cell.detailTextLabel?.text = "Tour Error..."
+                                        }
+                                    }
+                                    else
+                                    {
+                                        /// set the tour<-->show relationship
+                                        show?.tour = tour!
+                                        
+                                        /// update the cell
+                                        dispatch_async(dispatch_get_main_queue())
+                                        {
+                                            cell.detailTextLabel?.text = tour!.name
+                                            cell.tourID = tour!.tourID.integerValue
+                                            
+                                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
+                                            cell.userInteractionEnabled = (tour!.tourID.integerValue == 71) ? false : true
+                                        }
+                                    }
+                                }
+                                /*
                                 PhishModel.sharedInstance().getTourNameForTourID(Int(tourID))
                                 {
                                     tourNameError, tourName in
@@ -407,6 +439,7 @@ class SongHistoryViewController: UIViewController,
                                         }
                                     }
                                 }
+                                */
                             }
                             /// no tour ID, so we need to request it
                             else
@@ -431,6 +464,38 @@ class SongHistoryViewController: UIViewController,
                                         /// set the show's tour ID
                                         show?.tourID = tourID
                                         
+                                        PhishModel.sharedInstance().getTourForID(tourID)
+                                        {
+                                            tourError, tour in
+                                            
+                                            /// something went wrong
+                                            if tourError != nil
+                                            {
+                                                /// update the cell to reflect that the tour couldn't be retrieved
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    cell.detailTextLabel?.textColor = UIColor.redColor()
+                                                    cell.detailTextLabel?.text = "Tour Error..."
+                                                }
+                                            }
+                                            else
+                                            {
+                                                /// set the tour<-->show relationship
+                                                show?.tour = tour!
+                                                
+                                                /// update the cell
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    cell.detailTextLabel?.text = tour!.name
+                                                    cell.tourID = tour!.tourID.integerValue
+                                                    
+                                                    /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
+                                                    cell.userInteractionEnabled = (tour!.tourID.integerValue == 71) ? false : true
+                                                }
+                                            }
+                                        }
+                                        
+                                        /*
                                         PhishModel.sharedInstance().getTourNameForTourID(tourID)
                                         {
                                             tourNameError, tourName in
@@ -458,6 +523,7 @@ class SongHistoryViewController: UIViewController,
                                                 }
                                             }
                                         }
+                                        */
                                     }
                                 }
                             }
@@ -492,9 +558,32 @@ class SongHistoryViewController: UIViewController,
         //// set the show that was selected
         if let show = cell.otherTourShow
         {
+            print("The selected show is: \(show)")
             PhishModel.sharedInstance().currentShow = show
+            
+            /// set the selected tour
+            PhishModel.sharedInstance().selectedTour = show.tour
+            print("The selected tour is \(show.tour?.description)")
+            print("new tour locationDictionary: \(show.tour!.locationDictionary?.description)")
+            
+            /// let the tour selecter know what to set the year picker to
+            PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(show.tour!.year!)
+            
+            /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
+            let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
+            tourMap.isComingFromSongHistory = true
+            
+            /// make the segue on the main thread, because we're modifying the map view
+            dispatch_async(dispatch_get_main_queue())
+            {
+                self.navigationController?.popToRootViewControllerAnimated(true)
+            }
         }
         
+        
+        
+        
+        /*
         /// get the tour that the show was a part of
         PhishModel.sharedInstance().getTourForID(cell.tourID)
         {
@@ -546,6 +635,7 @@ class SongHistoryViewController: UIViewController,
                 }
             }
         }
+        */
     }
     
     // MARK: UIScrollViewDelegate method

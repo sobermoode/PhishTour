@@ -114,6 +114,14 @@ class PhishShow: NSManagedObject,
         )
     }
     
+    /// description
+    /*
+    override var description: String
+    {
+        return "\(self.date) \(self.year)"
+    }
+    */
+    
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
@@ -143,6 +151,31 @@ class PhishShow: NSManagedObject,
         let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
         super.init(entity: showEntity, insertIntoManagedObjectContext: context)
         
+        /// need to convert the date to a more pleasing form;
+        /// step 1: get the date, as returned from phish.in
+        let date = showInfo["date"] as! String
+        
+        /// step 2: create a date formatter and set the input format;
+        /// create an NSDate object with the input format
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let formattedDate = dateFormatter.dateFromString(date)!
+        
+        /// step 3:
+        /// set the output date format;
+        /// create a new string with the reformatted date
+        dateFormatter.dateFormat = "MMM dd,"
+        let formattedString = dateFormatter.stringFromDate(formattedDate)
+        self.date = formattedString
+        
+        self.year = Int(NSString(string: date).substringToIndex(4))!
+        self.venue = showInfo["venue_name"] as! String
+        self.city = showInfo["location"] as! String
+        self.showID = showInfo["id"] as! Int
+    }
+    
+    func updateProperties(showInfoFromYear showInfo: [String : AnyObject])
+    {
         /// need to convert the date to a more pleasing form;
         /// step 1: get the date, as returned from phish.in
         let date = showInfo["date"] as! String
