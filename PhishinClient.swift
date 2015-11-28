@@ -486,6 +486,389 @@ class PhishinClient: NSObject
         }
     }
     
+    // new requestHistoryForSong, 11.27.2015
+    func requestHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songHistory: [Int : [PhishShow]]?) -> Void)
+    {
+        dispatch_async(dispatch_get_main_queue())
+        {
+            self.historyProgressBar.setProgress(0.8, animated: true)
+        }
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+        {
+            /// construct the request URL and start a task
+            let songHistoryRequestString = self.endpoint + Routes.Songs + "/\(song.songID)"
+            let songHistoryRequestURL = NSURL(string: songHistoryRequestString)!
+            let songHistoryRequestTask = self.session.dataTaskWithURL(songHistoryRequestURL)
+            {
+                songHistoryData, songHistoryResponse, songHistoryError in
+                
+                /// something went wrong
+                if songHistoryError != nil
+                {
+                    completionHandler(songHistoryError: songHistoryError!, songHistory: nil)
+                }
+                else
+                {
+                    do
+                    {
+                        /// turn the received data into a JSON object
+                        let songHistoryResults = try NSJSONSerialization.JSONObjectWithData(songHistoryData!, options: []) as! [String : AnyObject]
+                        
+                        /// get the info for every instance of the song being played
+                        let resultsData = songHistoryResults["data"] as! [String : AnyObject]
+                        let tracks = resultsData["tracks"] as! [[String : AnyObject]]
+                        
+                        /// the progress bar will update as each request is completed
+                        var currentProgress: Float?
+                        var progressBump: Float?
+                        if let historyProgressBar = self.historyProgressBar
+                        {
+                            currentProgress = historyProgressBar.progress
+                            progressBump = 0.2 / Float(tracks.count)
+                        }
+                        
+                        /// the history will be arrays of shows keyed by the year the show took place in
+                        var showsForTheYear = [PhishShow]()
+                        var historyByYear = [Int : [PhishShow]]()
+                        var currentYear: Int = 0
+                        var previousYear: Int = 0
+                        print("There are \(tracks.count) songs...")
+                        for (index, track) in tracks.enumerate()
+                        {
+                            print("Processing track \(index + 1)...")
+                            /// get the show id and request the show
+                            let showID = track["show_id"] as! Int
+                            
+                            var fetchedShow: PhishShow?
+                            let showFetchRequest = NSFetchRequest(entityName: "PhishShow")
+                            let nsNumberID = NSNumber(integer: showID)
+                            let showFetchPredicate = NSPredicate(format: "showID = %@", nsNumberID)
+                            showFetchRequest.predicate = showFetchPredicate
+                            
+                            do
+                            {
+                                /// execute the fetch request
+                                let shows = try self.context.executeFetchRequest(showFetchRequest) as! [PhishShow]
+                                
+                                /// make sure we got something from Core Data
+                                if !shows.isEmpty
+                                {
+                                    /// get the show we're looking for
+                                    fetchedShow = shows.first!
+                                    
+                                    showsForTheYear.append(fetchedShow!)
+                                    currentYear = fetchedShow!.year.integerValue
+                                    previousYear = currentYear
+                                    if index == tracks.count - 1
+                                    {
+                                        /// sort the shows by date, descending
+                                        showsForTheYear.sortInPlace()
+                                        {
+                                            show1, show2 in
+                                            
+                                            let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                            let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
+                                            
+                                            if show1TotalDays > show2TotalDays
+                                            {
+                                                return true
+                                            }
+                                            else
+                                            {
+                                                return false
+                                            }
+                                        }
+                                        
+                                        historyByYear.updateValue(showsForTheYear, forKey: currentYear)
+                                        
+                                        if currentProgress != nil
+                                        {
+                                            currentProgress! += progressBump!
+                                            dispatch_async(dispatch_get_main_queue())
+                                            {
+                                                self.historyProgressBar.setProgress(currentProgress!, animated: true)
+                                            }
+                                        }
+                                        
+                                        historyByYear.removeValueForKey(0)
+                                        
+                                        /// set the history and save it
+                                        song.history = historyByYear                        
+                                        song.saveHistory()
+                                        
+                                        /// save new and updated objects to the context
+                                        self.context.performBlockAndWait()
+                                        {
+                                            CoreDataStack.sharedInstance().saveContext()
+                                        }
+                                        
+                                        /// send the history back through the completion handler
+                                        completionHandler(songHistoryError: nil, songHistory: historyByYear)
+                                        
+                                        return
+                                    }
+                                    else
+                                    {
+                                        continue
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                                print("Couldn't get show \(showID) from Core Data.")
+                            }
+                            
+                            self.requestShowForID(showID)
+                                // PhishModel.sharedInstance().getShowForID(showID)
+                            {
+                                showRequestError, show in
+                                
+                                /// something went wrong
+                                if showRequestError != nil
+                                {
+                                    completionHandler(songHistoryError: showRequestError!, songHistory: nil)
+                                }
+                                else
+                                {
+                                    currentYear = show!.year.integerValue
+                                    
+                                    /// don't check that the first show has the same year as the previous year
+                                    guard index != 0
+                                    else
+                                    {
+                                        showsForTheYear.append(show!)
+                                        
+                                        previousYear = currentYear
+                                        
+                                        /// this might be the last show in the history
+                                        if index == tracks.count - 1
+                                        {
+                                            /// sort the shows by date, descending
+                                            showsForTheYear.sortInPlace()
+                                            {
+                                                show1, show2 in
+                                                
+                                                let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                                let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
+                                                
+                                                if show1TotalDays > show2TotalDays
+                                                {
+                                                    return true
+                                                }
+                                                else
+                                                {
+                                                    return false
+                                                }
+                                            }
+                                            
+                                            historyByYear.updateValue(showsForTheYear, forKey: currentYear)
+                                            
+                                            if currentProgress != nil
+                                            {
+                                                currentProgress! += progressBump!
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    self.historyProgressBar.setProgress(currentProgress!, animated: true)
+                                                }
+                                            }
+                                            
+                                            historyByYear.removeValueForKey(0)
+                                            
+                                            /// set the history and save it
+                                            song.history = historyByYear                        
+                                            song.saveHistory()
+                                            
+                                            /// save new and updated objects to the context
+                                            self.context.performBlockAndWait()
+                                            {
+                                                CoreDataStack.sharedInstance().saveContext()
+                                            }
+                                            
+                                            /// send the history back through the completion handler
+                                            completionHandler(songHistoryError: nil, songHistory: historyByYear)
+                                            
+                                            return
+                                        }
+                                        
+                                        return
+                                    }
+                                    
+                                    /// if we're in the same year, add the show to the current array
+                                    if currentYear == previousYear
+                                    {
+                                        showsForTheYear.append(show!)
+                                        
+                                        /// remember this show's year
+                                        previousYear = currentYear
+                                        
+                                        /// if this is the last show in the history, update the dictionary
+                                        if index == tracks.count - 1
+                                        {
+                                            showsForTheYear.sortInPlace()
+                                            {
+                                                show1, show2 in
+                                                
+                                                let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                                let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
+                                                
+                                                if show1TotalDays > show2TotalDays
+                                                {
+                                                    return true
+                                                }
+                                                else
+                                                {
+                                                    return false
+                                                }
+                                            }
+                                            
+                                            historyByYear.updateValue(showsForTheYear, forKey: currentYear)
+                                            
+                                            if currentProgress != nil
+                                            {
+                                                currentProgress! += progressBump!
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    self.historyProgressBar.setProgress(currentProgress!, animated: true)
+                                                }
+                                            }
+                                            
+                                            historyByYear.removeValueForKey(0)
+                                            
+                                            /// set the history and save it
+                                            song.history = historyByYear                        
+                                            song.saveHistory()
+                                            
+                                            /// save new and updated objects to the context
+                                            self.context.performBlockAndWait()
+                                            {
+                                                CoreDataStack.sharedInstance().saveContext()
+                                            }
+                                            
+                                            /// send the history back through the completion handler
+                                            completionHandler(songHistoryError: nil, songHistory: historyByYear)
+                                            
+                                            return
+                                        }
+                                        
+                                        return
+                                    }
+                                    /// we got to the next year
+                                    else
+                                    {
+                                        showsForTheYear.sortInPlace()
+                                        {
+                                            show1, show2 in
+                                            
+                                            let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                            let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
+                                            
+                                            if show1TotalDays > show2TotalDays
+                                            {
+                                                return true
+                                            }
+                                            else
+                                            {
+                                                return false
+                                            }
+                                        }
+                                        
+                                        /// update the dictionary with last year's array of shows
+                                        historyByYear.updateValue(showsForTheYear, forKey: previousYear)
+                                        
+                                        /// prepare the array for the new year by blanking it
+                                        showsForTheYear.removeAll()
+                                        
+                                        /// then, add the current show as the first for the new year
+                                        showsForTheYear.append(show!)
+                                        
+                                        // currentYear = show!.year.integerValue
+                                        
+                                        /// if this is the last show in the history, update the dictionary
+                                        if index == tracks.count - 1
+                                        {
+                                            showsForTheYear.sortInPlace()
+                                            {
+                                                show1, show2 in
+                                                
+                                                let show1TotalDays = (Int(show1.month!) * 31) + Int(show1.day!)
+                                                let show2TotalDays = (Int(show2.month!) * 31) + Int(show2.day!)
+                                                
+                                                if show1TotalDays > show2TotalDays
+                                                {
+                                                    return true
+                                                }
+                                                else
+                                                {
+                                                    return false
+                                                }
+                                            }
+                                            
+                                            historyByYear.updateValue(showsForTheYear, forKey: currentYear)
+                                            
+                                            if currentProgress != nil
+                                            {
+                                                currentProgress! += progressBump!
+                                                dispatch_async(dispatch_get_main_queue())
+                                                {
+                                                    self.historyProgressBar.setProgress(currentProgress!, animated: true)
+                                                }
+                                            }
+                                            
+                                            historyByYear.removeValueForKey(0)
+                                            
+                                            /// set the history and save it
+                                            song.history = historyByYear                        
+                                            song.saveHistory()
+                                            
+                                            /// save new and updated objects to the context
+                                            self.context.performBlockAndWait()
+                                            {
+                                                CoreDataStack.sharedInstance().saveContext()
+                                            }
+                                            
+                                            /// send the history back through the completion handler
+                                            completionHandler(songHistoryError: nil, songHistory: historyByYear)
+                                            
+                                            return
+                                        }
+                                        /// otherwise, remember the year for the next iteration
+                                        else
+                                        {
+                                            previousYear = currentYear
+                                            return
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        /*
+                        /// set the history and save it
+                        song.history = historyByYear                        
+                        song.saveHistory()
+                        
+                        /// save new and updated objects to the context
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        
+                        /// send the history back through the completion handler
+                        completionHandler(songHistoryError: nil, songHistory: historyByYear)
+                        */
+                    }
+                    catch
+                    {
+                        print("There was an error requesting the history for \(song.name)")
+                    }
+                }
+            }
+            songHistoryRequestTask.resume()
+        }
+    }
+    
+    /*
     /// requests all the dates (as showIDs) a song was played on
     func requestHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songHistory: [Int : [PhishShow]]?) -> Void)
     {
@@ -741,6 +1124,7 @@ class PhishinClient: NSObject
             songHistoryRequestTask.resume()
         }
     }
+    */
     
     /// requests a specfic show given an ID
     func requestShowForID(id: Int, completionHandler: (showRequestError: NSError?, show: PhishShow?) -> Void)

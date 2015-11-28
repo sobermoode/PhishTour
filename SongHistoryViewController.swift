@@ -150,6 +150,7 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
+                    print("Got history: \(history!)")
                     /// save the history
                     self.history = history
                     

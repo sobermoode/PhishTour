@@ -114,6 +114,16 @@ class PhishShow: NSManagedObject,
         )
     }
     
+    /*
+    private var months: [String : Int] =
+    [
+        "Jan" : 1,
+        "Feb" : 2,
+        "Mar" : 3,
+        "Apr"
+    ]
+    */
+    
     /// description
     /*
     override var description: String
@@ -129,6 +139,7 @@ class PhishShow: NSManagedObject,
     
     /// shows are initialized from different requests, which all provide different information;
     /// in this case, we need a default show object, which will get specific information later
+    /*
     init()
     {
         /// insert the object into the core data context
@@ -143,6 +154,7 @@ class PhishShow: NSManagedObject,
         self.city = ""
         self.showID = 0
     }
+    */
     
     init(showInfoFromYear showInfo: [String : AnyObject])
     {
@@ -168,7 +180,13 @@ class PhishShow: NSManagedObject,
         let formattedString = dateFormatter.stringFromDate(formattedDate)
         self.date = formattedString
         
-        self.year = Int(NSString(string: date).substringToIndex(4))!
+        /// set the day/month/year
+        let datePieces = date.componentsSeparatedByString("-")
+        self.year = NSNumber(integer: Int(datePieces[0])!)
+        self.month = NSNumber(integer: Int(datePieces[1])!)
+        self.day = NSNumber(integer: Int(datePieces[2])!)
+        
+        // self.year = Int(NSString(string: date).substringToIndex(4))!
         self.venue = showInfo["venue_name"] as! String
         self.city = showInfo["location"] as! String
         self.showID = showInfo["id"] as! Int
@@ -193,7 +211,13 @@ class PhishShow: NSManagedObject,
         let formattedString = dateFormatter.stringFromDate(formattedDate)
         self.date = formattedString
         
-        self.year = Int(NSString(string: date).substringToIndex(4))!
+        /// set the day/month/year
+        let datePieces = date.componentsSeparatedByString("-")
+        self.year = NSNumber(integer: Int(datePieces[0])!)
+        self.month = NSNumber(integer: Int(datePieces[1])!)
+        self.day = NSNumber(integer: Int(datePieces[2])!)
+        
+        // self.year = Int(NSString(string: date).substringToIndex(4))!
         self.venue = showInfo["venue_name"] as! String
         self.city = showInfo["location"] as! String
         self.showID = showInfo["id"] as! Int
@@ -215,8 +239,16 @@ class PhishShow: NSManagedObject,
         let formattedString = dateFormatter.stringFromDate(formattedDate)
         self.date = formattedString
         
+        /// set the day/month/year
+        let datePieces = date.componentsSeparatedByString("-")
+        self.year = NSNumber(integer: Int(datePieces[0])!)
+        self.month = NSNumber(integer: Int(datePieces[1])!)
+        self.day = NSNumber(integer: Int(datePieces[2])!)
+        
+        /*
         /// cast the date string to NSString, extract the first four characters, then cast *that* to an Int
         self.year = Int(NSString(string: date).substringToIndex(4))!
+        */
         
         /// get to the venue, location, and coordinates, and set the properties
         let venueData = showInfo["venue"] as! [String : AnyObject]
