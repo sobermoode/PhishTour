@@ -345,11 +345,121 @@ class SongHistoryViewController: UIViewController,
             // let show: PhishShow = shows[indexPath.row]
             // let showID: Int = Int(show.showID)
             let performance: PhishSongPerformance = performances[indexPath.row]
-            let showID: Int = performance.showID.integerValue
             
             /// set the cell's date
             cell.textLabel?.text = performance.date
             
+            if let tourName = performance.tourName
+            {
+                cell.detailTextLabel?.text = tourName
+            }
+            else
+            {
+                if let tourID = performance.tourID
+                {
+                    PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
+                    {
+                        tourNameError, tourName in
+                        
+                        /// something went wrong
+                        if tourNameError != nil
+                        {
+                            /// update the cell to reflect that the tour couldn't be retrieved
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                cell.detailTextLabel?.textColor = UIColor.redColor()
+                                cell.detailTextLabel?.text = "Tour Error..."
+                            }
+                        }
+                        else
+                        {
+                            /// set the tour name and save the context
+                            performance.tourName = tourName
+                            
+                            /// update the cell with the tour name on the main thread and enable the cell
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                cell.detailTextLabel?.text = tourName
+                                
+                                /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
+                                cell.userInteractionEnabled = (tourID == 71) ? false : true
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    PhishinClient.sharedInstance().requestTourIDFromShowForID(performance.showID.integerValue)
+                    {
+                        tourIDRequestError, tourID in
+                        
+                        /// something went wrong
+                        if tourIDRequestError != nil
+                        {
+                            /// update the cell to reflect that the tour couldn't be retrieved
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                cell.detailTextLabel?.textColor = UIColor.redColor()
+                                cell.detailTextLabel?.text = "Tour Error..."
+                            }
+                        }
+                        /// we got the tour ID, now we can request the tour name with it
+                        else
+                        {
+                            /// set the show's tour ID
+                            performance.tourID = tourID
+                            
+                            PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
+                            {
+                                tourNameError, tourName in
+                                
+                                /// something went wrong
+                                if tourNameError != nil
+                                {
+                                    /// update the cell to reflect that the tour couldn't be retrieved
+                                    dispatch_async(dispatch_get_main_queue())
+                                    {
+                                        cell.detailTextLabel?.textColor = UIColor.redColor()
+                                        cell.detailTextLabel?.text = "Tour Error..."
+                                    }
+                                }
+                                else
+                                {
+                                    /// set the tour name
+                                    performance.tourName = tourName
+                                    
+                                    /// update the cell with the tour name on the main thread and enable the cell
+                                    dispatch_async(dispatch_get_main_queue())
+                                    {
+                                        cell.detailTextLabel?.text = tourName
+                                        cell.tourID = tourID.integerValue
+                                        
+                                        /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
+                                        cell.userInteractionEnabled = (tourID == 71) ? false : true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            
+            cell.textLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
+            cell.textLabel?.textColor = UIColor.blackColor()
+            cell.textLabel?.text = "Requesting date..."
+            cell.detailTextLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
+            cell.detailTextLabel?.textColor = UIColor.grayColor()
+            cell.detailTextLabel?.text = "Requesting tour..."
+            cell.userInteractionEnabled = false
+        }
+        
+        return cell
+    }
+            
+            /*
             /// get the show data
             PhishModel.sharedInstance().getShowForID(showID)
             {
@@ -541,21 +651,8 @@ class SongHistoryViewController: UIViewController,
                     }
                 }
             }
-        }
-        else
-        {
-            
-            cell.textLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
-            cell.textLabel?.textColor = UIColor.blackColor()
-            cell.textLabel?.text = "Requesting date..."
-            cell.detailTextLabel?.font = UIFont(name: "Apple SD Gothic Neo", size: 14)
-            cell.detailTextLabel?.textColor = UIColor.grayColor()
-            cell.detailTextLabel?.text = "Requesting tour..."
-            cell.userInteractionEnabled = false
-        }
-        
-        return cell
     }
+    */
     
     // MARK: UITableViewDelegate method
     

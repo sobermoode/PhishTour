@@ -309,12 +309,13 @@ class PhishinClient: NSObject
                     {
                         let tourResults = try NSJSONSerialization.JSONObjectWithData(tourData!, options: []) as! [String : AnyObject]
                         let tourData = tourResults["data"] as! [String : AnyObject]
+                        let tourName = tourData["name"] as! String
                         
                         /// create the new tour
-                        let newTour = PhishTour(tourInfo: tourData)
+                        //let newTour = PhishTour(tourInfo: tourData)
                         
                         /// send the tour name back through the completion handler
-                        completionHandler(tourNameRequestError: nil, tourName: newTour.name)
+                        completionHandler(tourNameRequestError: nil, tourName: tourName)
                     }
                     catch
                     {
@@ -545,6 +546,11 @@ class PhishinClient: NSObject
                             newPerformance.showID = showID
                             newPerformance.date = performanceDate
                             newPerformance.year = NSNumber(integer: year)
+                        }
+                        
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
                         }
                         
                         /// update the progress bar
