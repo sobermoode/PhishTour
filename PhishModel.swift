@@ -388,7 +388,10 @@ class PhishModel: NSObject,
                 /// get the tour we're looking for
                 let tour = tours.first!
                 
+                print("Returning \(tour.name) from Core Data...")
                 completionHandler(tourError: nil, tour: tour)
+                
+                return
             }
             /// no saved tour, we need to request it
             else
@@ -405,6 +408,7 @@ class PhishModel: NSObject,
                     /// return the tour
                     else
                     {
+                        print("Returning \(tour?.name) from Phish.in...")
                         completionHandler(tourError: nil, tour: tour!)
                     }
                 }

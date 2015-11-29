@@ -106,10 +106,10 @@ class SongHistoryViewController: UIViewController,
     func getHistory()
     {
         /// the song already has a history
-        if self.song.history != nil
+        if let history = self.song.history
         {
             print("There's a history?!")
-            self.history = self.song!.history
+            self.history = history
             self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
             self.totalPlaysLabel.hidden = false
             self.historyTable.reloadData()
@@ -346,12 +346,16 @@ class SongHistoryViewController: UIViewController,
             // let showID: Int = Int(show.showID)
             let performance: PhishSongPerformance = performances[indexPath.row]
             
+            /// set the cell's performance
+            cell.performance = performance
+            
             /// set the cell's date
             cell.textLabel?.text = performance.date
             
             if let tourName = performance.tourName
             {
                 cell.detailTextLabel?.text = tourName
+                cell.userInteractionEnabled = (performance.tourID?.integerValue == 71) ? false : true
             }
             else
             {
@@ -432,10 +436,10 @@ class SongHistoryViewController: UIViewController,
                                     dispatch_async(dispatch_get_main_queue())
                                     {
                                         cell.detailTextLabel?.text = tourName
-                                        cell.tourID = tourID.integerValue
+                                        // cell.tourID = tourID.integerValue
                                         
                                         /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                                        cell.userInteractionEnabled = (tourID == 71) ? false : true
+                                        cell.userInteractionEnabled = (tourID.integerValue == 71) ? false : true
                                     }
                                 }
                             }
@@ -662,6 +666,81 @@ class SongHistoryViewController: UIViewController,
         /// get the cell that was selected
         let cell = tableView.cellForRowAtIndexPath( indexPath ) as! SongCell
         
+        let performance = cell.performance
+        
+        /// get or create the tour that was selected
+        PhishModel.sharedInstance().getTourForID(performance.tourID!.integerValue)
+        {
+            tourError, tour in
+            
+            if tourError != nil
+            {
+                /// create an alert for the problem and unwind back to the setlist
+                let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!.localizedDescription)", preferredStyle: .Alert)
+                let alertAction = UIAlertAction(title: "OK", style: .Default)
+                {
+                    action in
+                    
+                    tableView.deselectRowAtIndexPath(indexPath, animated: true)
+                }
+                alert.addAction(alertAction)
+                
+                dispatch_async(dispatch_get_main_queue())
+                {
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
+            }
+            else
+            {
+                print("Got tour: \(tour!)")
+                /// set the selected tour
+                PhishModel.sharedInstance().selectedTour = tour
+                
+                /// let the tour selecter know what to set the year picker to
+                PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(tour!.year!)
+                
+                /// get the selected show
+                PhishModel.sharedInstance().getShowForID(performance.showID.integerValue)
+                {
+                    showError, show in
+                    
+                    if showError != nil
+                    {
+                        /// create an alert for the problem and unwind back to the setlist
+                        let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!.localizedDescription)", preferredStyle: .Alert)
+                        let alertAction = UIAlertAction(title: "OK", style: .Default)
+                        {
+                            action in
+                            
+                            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+                        }
+                        alert.addAction(alertAction)
+                        
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.presentViewController(alert, animated: true, completion: nil)
+                        }
+                    }
+                    else
+                    {
+                        /// set the selected show
+                        PhishModel.sharedInstance().currentShow = show
+                        
+                        /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
+                        let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
+                        tourMap.isComingFromSongHistory = true
+                        
+                        /// make the segue on the main thread, because we're modifying the map view
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.navigationController?.popToRootViewControllerAnimated(true)
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
         //// set the show that was selected
         if let show = cell.otherTourShow
         {
@@ -686,6 +765,7 @@ class SongHistoryViewController: UIViewController,
                 self.navigationController?.popToRootViewControllerAnimated(true)
             }
         }
+        */
         
         
         

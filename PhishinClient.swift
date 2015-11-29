@@ -221,6 +221,7 @@ class PhishinClient: NSObject
                         // let newShow = PhishShow(showInfoFromYear: show)
                         let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
                         newShow.updateProperties(showInfoFromYear: show)
+                        print("Created \(newShow.date) \(newShow.year): \(newShow)")
                         
                         showArray.append(newShow)
                     }
@@ -230,7 +231,8 @@ class PhishinClient: NSObject
                     let intYear = Int(NSString(string: startDate).substringToIndex(4))!
                     let nsNumberYear = NSNumber(integer: intYear) 
                     let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-                    let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", nsNumberYear)
+                    // let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", nsNumberYear)
+                    let yearFetchPredicate = NSPredicate(format: "year = %@", nsNumberYear)
                     yearFetchRequest.predicate = yearFetchPredicate
                     
                     self.context.performBlockAndWait()
@@ -258,8 +260,11 @@ class PhishinClient: NSObject
                             for show in showArray
                             {
                                 show.tour = newTour
+                                print("Related \(show.date) \(show.year) to \(newTour.name)")
                             }
                             let _ = newTour.locationDictionary!
+                            print("\(newTour.name) has \(newTour.shows.count) shows.")
+                            print("\(newTour.name) has \(newTour.uniqueLocations!.count) unique locations.")
                             
                             /// save new and updated objects to the context
                             self.context.performBlockAndWait()
@@ -559,7 +564,7 @@ class PhishinClient: NSObject
                             self.historyProgressBar.setProgress(1.0, animated: true)
                         }
                         
-                        print("\(song.name)'s performances is now \(song.performances!)")
+                        // print("\(song.name)'s performances is now \(song.performances!)")
                         
                         completionHandler(songHistoryError: nil)
                     }

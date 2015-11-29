@@ -34,9 +34,10 @@ class PhishTour: NSManagedObject
         
         for (index, show) in self.shows.enumerate()
         {
+            print("index: \(index)")
+            print("previous venue: \(previousShow.venue), current venue: \(show.venue)")
             /// there might only be one location
-            guard self.shows.count == 1
-            else
+            if self.shows.count == 1
             {
                 uniques.append(show)
                 
@@ -46,6 +47,7 @@ class PhishTour: NSManagedObject
             /// add the first show
             if index == 0
             {
+                print("Added \(show.venue)")
                 uniques.append(show)
                 
                 continue
@@ -55,11 +57,13 @@ class PhishTour: NSManagedObject
                 /// we're still at the same place
                 if show.venue == previousShow.venue
                 {
+                    print("Still at \(show.venue)")
                     previousShow = show
                 }
                 /// new location
                 else
                 {
+                    print("Added \(show.venue)")
                     uniques.append(show)
                     previousShow = show
                 }
