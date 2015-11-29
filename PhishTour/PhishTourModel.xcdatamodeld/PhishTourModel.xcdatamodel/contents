@@ -21,7 +21,15 @@
         <attribute name="position" attributeType="Integer 16" syncable="YES"/>
         <attribute name="set" attributeType="Integer 16" syncable="YES"/>
         <attribute name="songID" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <relationship name="performances" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishSongPerformance" inverseName="song" inverseEntity="PhishSongPerformance" syncable="YES"/>
         <relationship name="show" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishShow" inverseName="songs" inverseEntity="PhishShow" syncable="YES"/>
+    </entity>
+    <entity name="PhishSongPerformance" representedClassName=".PhishSongPerformance" syncable="YES">
+        <attribute name="date" attributeType="String" syncable="YES"/>
+        <attribute name="showID" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="tourID" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="year" attributeType="Integer 16" syncable="YES"/>
+        <relationship name="song" maxCount="1" deletionRule="Nullify" destinationEntity="PhishSong" inverseName="performances" inverseEntity="PhishSong" syncable="YES"/>
     </entity>
     <entity name="PhishTour" representedClassName=".PhishTour" syncable="YES">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -35,8 +43,9 @@
     </entity>
     <elements>
         <element name="PhishShow" positionX="-36" positionY="9" width="128" height="240"/>
-        <element name="PhishSong" positionX="-18" positionY="27" width="128" height="135"/>
+        <element name="PhishSong" positionX="-18" positionY="27" width="128" height="150"/>
         <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="105"/>
         <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
+        <element name="PhishSongPerformance" positionX="-45" positionY="99" width="128" height="120"/>
     </elements>
 </model>

@@ -486,6 +486,88 @@ class PhishinClient: NSObject
         }
     }
     
+    // even newer requestHistoryForSong, 11.28.2015
+    func requestHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?) -> Void)
+    {
+        dispatch_async(dispatch_get_main_queue())
+        {
+            self.historyProgressBar.setProgress(0.8, animated: true)
+        }
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+        {
+            /// construct the request URL and start a task
+            let songHistoryRequestString = self.endpoint + Routes.Songs + "/\(song.songID)"
+            let songHistoryRequestURL = NSURL(string: songHistoryRequestString)!
+            let songHistoryRequestTask = self.session.dataTaskWithURL(songHistoryRequestURL)
+            {
+                songHistoryData, songHistoryResponse, songHistoryError in
+                
+                /// something went wrong
+                if songHistoryError != nil
+                {
+                    completionHandler(songHistoryError: songHistoryError!)
+                }
+                else
+                {
+                    do
+                    {
+                        /// turn the received data into a JSON object
+                        let songHistoryResults = try NSJSONSerialization.JSONObjectWithData(songHistoryData!, options: []) as! [String : AnyObject]
+                        
+                        /// get the info for every instance of the song being played
+                        let resultsData = songHistoryResults["data"] as! [String : AnyObject]
+                        let tracks = resultsData["tracks"] as! [[String : AnyObject]]
+                        
+                        /// construct the history as arrays of performances keyed by year
+                        for track in tracks
+                        {
+                            /// get the show ID
+                            let showID = track["show_id"] as! Int
+                            
+                            /// get a nicely formatted date
+                            let date = track["show_date"] as! String
+                            let dateFormatter = NSDateFormatter()
+                            dateFormatter.dateFormat = "yyyy-MM-dd"
+                            let formattedDate = dateFormatter.dateFromString(date)!
+                            dateFormatter.dateFormat = "MMM dd,"
+                            let formattedString = dateFormatter.stringFromDate(formattedDate)
+                            
+                            /// get the year
+                            let datePieces = date.componentsSeparatedByString("-")
+                            let year = Int(datePieces[0])!
+                            
+                            let performanceDate = formattedString + " \(year)"
+                            
+                            /// create a new PhishShowPerformance
+                            let newPerformance = NSEntityDescription.insertNewObjectForEntityForName("PhishSongPerformance", inManagedObjectContext: self.context) as! PhishSongPerformance
+                            newPerformance.song = song
+                            newPerformance.showID = showID
+                            newPerformance.date = performanceDate
+                            newPerformance.year = NSNumber(integer: year)
+                        }
+                        
+                        /// update the progress bar
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.historyProgressBar.setProgress(1.0, animated: true)
+                        }
+                        
+                        print("\(song.name)'s performances is now \(song.performances!)")
+                        
+                        completionHandler(songHistoryError: nil)
+                    }
+                    catch
+                    {
+                        print("There was an error requesting the history for \(song.name)")
+                    }
+                }
+            }
+            songHistoryRequestTask.resume()
+        }
+    }
+    
+    /*
     // new requestHistoryForSong, 11.27.2015
     func requestHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songHistory: [Int : [PhishShow]]?) -> Void)
     {
@@ -867,6 +949,7 @@ class PhishinClient: NSObject
             songHistoryRequestTask.resume()
         }
     }
+    */
     
     /*
     /// requests all the dates (as showIDs) a song was played on
@@ -1174,7 +1257,7 @@ class PhishinClient: NSObject
         }
     }
     
-    func requestTourIDFromShowForID(id: Int, completionHandler: (tourIDRequestError: NSError?, tourID: Int!) -> Void)
+    func requestTourIDFromShowForID(id: Int, completionHandler: (tourIDRequestError: NSError?, tourID: NSNumber!) -> Void)
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
@@ -1200,9 +1283,10 @@ class PhishinClient: NSObject
                         
                         /// get the tour ID
                         let tourID = showData["tour_id"] as! Int
+                        let nsNumberTourID = NSNumber(integer: tourID)
                         
                         /// return it
-                        completionHandler(tourIDRequestError: nil, tourID: tourID)
+                        completionHandler(tourIDRequestError: nil, tourID: nsNumberTourID)
                     }
                     catch
                     {

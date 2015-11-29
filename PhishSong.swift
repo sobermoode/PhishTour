@@ -18,13 +18,106 @@ class PhishSong: NSManagedObject
     @NSManaged var position: NSNumber
     @NSManaged var songID: NSNumber
     @NSManaged var show: PhishShow
+    @NSManaged var performances: [PhishSongPerformance]?
     
     /// the song has a history of every show it was played at
-    var history: [Int : [PhishShow]]?
+    var history: [Int : [PhishSongPerformance]]?
+    {
+        if self.performances?.count == 0
+        {
+            print("\(self.name)'s performances is nil.")
+            return nil
+        }
+        else
+        {
+            print("Trying to create the history...")
+            var history = [Int : [PhishSongPerformance]]()
+            
+            var performancesForTheYear = [PhishSongPerformance]()
+            var previousYear: Int = self.performances!.first!.year.integerValue
+            
+            for (index, performance) in self.performances!.enumerate()
+            {
+                let currentYear: Int = performance.year.integerValue
+                
+                /// still in the same year
+                if currentYear == previousYear
+                {
+                    /// add the performance to the current array
+                    performancesForTheYear.append(performance)
+                    
+                    /// remember the year
+                    previousYear = currentYear
+                    
+                    /// we're at the last track?
+                    if index == self.performances!.count - 1
+                    {
+                        let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                        history.updateValue(reversedPerformances, forKey: currentYear)
+                    }
+                    
+                    continue
+                }
+                /// got to a new year
+                else
+                {
+                    /// update the history
+                    let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                    history.updateValue(reversedPerformances, forKey: previousYear)
+                    
+                    /// blank the performances for last year and add the first show for the new year
+                    performancesForTheYear.removeAll()
+                    performancesForTheYear.append(performance)
+                    
+                    /// remember the year
+                    previousYear = currentYear
+                    
+                    /// we're at the last track?
+                    if index == self.performances!.count - 1
+                    {
+                        let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                        history.updateValue(reversedPerformances, forKey: currentYear)
+                    }
+                    
+                    continue
+                }
+            }
+            
+            return history
+        }
+        
+        
+        /*
+        for (index, performance) in self.performances.enumerate()
+        {
+            let currentYear = performance.year.integerValue
+            
+            if currentYear == previousYear
+            {
+                performancesForTheYear.append(performance)
+                
+                previousYear = currentYear
+                
+                if index == self.performances.count - 1
+                {
+                    history.updateValue(performancesForTheYear, forKey: currentYear)
+                }
+                
+                continue
+            }
+            else
+            {
+                
+            }
+        }
+        */
+    }
     
     /// the total number of times the song has been played
     var totalPlays: Int
     {
+        return self.performances!.count
+        /*
         var total: Int = 0
         let keys = self.history!.keys
         
@@ -35,6 +128,7 @@ class PhishSong: NSManagedObject
         }
         
         return total
+        */
     }
     
     /// filename to save the song history to for later retrieval
@@ -148,6 +242,7 @@ class PhishSong: NSManagedObject
         self.songID = songIDs.first!
     }
     
+    /*
     /// write the history to file so it doesn't need to be requested twice
     func saveHistory()
     {
@@ -165,4 +260,5 @@ class PhishSong: NSManagedObject
             print("There was an error saving \(self.name)'s history to the device.")
         }
     }
+    */
 }

@@ -262,6 +262,7 @@ class PhishModel: NSObject,
         }        
     }
     
+    /*
     /// retrieve a history from the device or request one for a given song
     func getHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songWithHistory: [Int : [PhishShow]]?) -> Void)
     {        
@@ -311,6 +312,7 @@ class PhishModel: NSObject,
             }
         }
     }
+    */
     
     /// retrieve a show from core data or request one for a given ID
     func getShowForID(id: Int, completionHandler: (showError: NSError?, show: PhishShow?) -> Void)

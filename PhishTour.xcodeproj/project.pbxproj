@@ -29,6 +29,7 @@
 		810779A91BF964B700756A0C /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 810779A61BF964B700756A0C /* SMCalloutView.m */; };
 		81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9D1BFBD33700408BDD /* CoreDataStack.swift */; };
 		81979DA11BFC0ED300408BDD /* PhishTourModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9F1BFC0ED300408BDD /* PhishTourModel.xcdatamodeld */; };
+		81B23C021C0A3C00005AA00B /* PhishSongPerformance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
 		81979D9D1BFBD33700408BDD /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		81979DA01BFC0ED300408BDD /* PhishTourModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PhishTourModel.xcdatamodel; sourceTree = "<group>"; };
+		81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishSongPerformance.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +126,7 @@
 				8107798E1BF963C700756A0C /* PhishTour.swift */,
 				8107798C1BF963C700756A0C /* PhishShow.swift */,
 				8107798D1BF963C700756A0C /* PhishSong.swift */,
+				81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */,
 			);
 			name = "Model Classes";
 			sourceTree = "<group>";
@@ -240,6 +243,7 @@
 				810779941BF963C700756A0C /* PhishYear.swift in Sources */,
 				81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */,
 				810779711BF9629800756A0C /* AppDelegate.swift in Sources */,
+				81B23C021C0A3C00005AA00B /* PhishSongPerformance.swift in Sources */,
 				8107799E1BF9646D00756A0C /* TourNavControls.swift in Sources */,
 				810779911BF963C700756A0C /* PhishShow.swift in Sources */,
 				810779991BF9640D00756A0C /* PhishinClient.swift in Sources */,

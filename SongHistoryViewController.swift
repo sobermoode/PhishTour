@@ -13,7 +13,8 @@ class SongHistoryViewController: UIViewController,
 {
     /// the song who's history is being displayed
     var song: PhishSong!
-    var history: [Int : [PhishShow]]?
+    // var history: [Int : [PhishShow]]?
+    var history: [Int : [PhishSongPerformance]]?
     
     /// associated info for the song
     var date: String!
@@ -107,6 +108,7 @@ class SongHistoryViewController: UIViewController,
         /// the song already has a history
         if self.song.history != nil
         {
+            print("There's a history?!")
             self.history = self.song!.history
             self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
             self.totalPlaysLabel.hidden = false
@@ -116,6 +118,7 @@ class SongHistoryViewController: UIViewController,
         /// otherwise, we need to request it
         else
         {
+            print("There shouldn't be a history, requesting...")
             /// create a progress bar to track the progress of requesting the history
             /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
             let progressBar = UIProgressView(progressViewStyle: .Default)
@@ -127,9 +130,9 @@ class SongHistoryViewController: UIViewController,
             PhishinClient.sharedInstance().historyProgressBar = self.progressBar
             self.view.addSubview(progressBar)
             
-            PhishModel.sharedInstance().getHistoryForSong(self.song)
+            PhishinClient.sharedInstance().requestHistoryForSong(self.song)
             {
-                historyError, history in
+                historyError in
                 
                 if historyError != nil
                 {
@@ -150,11 +153,11 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
-                    print("Got history: \(history!)")
+                    print("Is this before or after the history request?")
                     /// save the history
-                    self.history = history
+                    self.history = self.song.history!
                     
-                    self.saveToUserDefaults()
+                    // self.saveToUserDefaults()
                     
                     /// reload the table on the main thread
                     dispatch_async(dispatch_get_main_queue())
@@ -298,9 +301,10 @@ class SongHistoryViewController: UIViewController,
             let years: [Int] = Array(self.history!.keys)
             let sortedYears: [Int] = years.sort().reverse()
             let year: Int = sortedYears[section]
-            let shows: [PhishShow] = self.history![year]!
+            // let shows: [PhishShow] = self.history![year]!
+            let performances: [PhishSongPerformance] = self.history![year]!
             
-            return shows.count
+            return performances.count
         }
         else
         {
@@ -334,11 +338,17 @@ class SongHistoryViewController: UIViewController,
             let years: [Int] = Array(self.history!.keys)
             let sortedYears: [Int] = years.sort().reverse()
             let year: Int = sortedYears[indexPath.section]
-            let shows: [PhishShow] = self.history![year]!
+            // let shows: [PhishShow] = self.history![year]!
+            let performances: [PhishSongPerformance] = self.history![year]!
             
             /// get the ID of the show
-            let show: PhishShow = shows[indexPath.row]
-            let showID: Int = Int(show.showID)
+            // let show: PhishShow = shows[indexPath.row]
+            // let showID: Int = Int(show.showID)
+            let performance: PhishSongPerformance = performances[indexPath.row]
+            let showID: Int = performance.showID.integerValue
+            
+            /// set the cell's date
+            cell.textLabel?.text = performance.date
             
             /// get the show data
             PhishModel.sharedInstance().getShowForID(showID)
@@ -364,7 +374,7 @@ class SongHistoryViewController: UIViewController,
                     /// the request was successful; update the cell with the show date on the main thread
                     dispatch_async(dispatch_get_main_queue())
                     {
-                        cell.textLabel?.text = "\(show!.date) \(show!.year)"
+                        // cell.textLabel?.text = "\(show!.date) \(show!.year)"
                         
                         /// the show may or may not have tour info;
                         /// set the cell properties and enable the cell if it does
@@ -376,12 +386,13 @@ class SongHistoryViewController: UIViewController,
                             /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                             cell.userInteractionEnabled = (tour.tourID == 71) ? false : true
                         }
-                        /// if no tour info, then we need to request it
+                        /// if no tour info, then we need to request the tour name
                         else
                         {
                             /// get the tour ID
                             if let tourID = show!.tourID
                             {
+                                /*
                                 PhishModel.sharedInstance().getTourForID(tourID.integerValue)
                                 {
                                     tourError, tour in
@@ -412,8 +423,8 @@ class SongHistoryViewController: UIViewController,
                                         }
                                     }
                                 }
-                                /*
-                                PhishModel.sharedInstance().getTourNameForTourID(Int(tourID))
+                                */
+                                PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
                                 {
                                     tourNameError, tourName in
                                     
@@ -433,14 +444,13 @@ class SongHistoryViewController: UIViewController,
                                         dispatch_async(dispatch_get_main_queue())
                                         {
                                             cell.detailTextLabel?.text = tourName
-                                            cell.tourID = Int(show!.tourID!)
+                                            cell.tourID = show!.tourID!.integerValue
                                             
                                             /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                             cell.userInteractionEnabled = (tourID == 71) ? false : true
                                         }
                                     }
                                 }
-                                */
                             }
                             /// no tour ID, so we need to request it
                             else
@@ -465,6 +475,7 @@ class SongHistoryViewController: UIViewController,
                                         /// set the show's tour ID
                                         show?.tourID = tourID
                                         
+                                        /*
                                         PhishModel.sharedInstance().getTourForID(tourID)
                                         {
                                             tourError, tour in
@@ -495,9 +506,8 @@ class SongHistoryViewController: UIViewController,
                                                 }
                                             }
                                         }
-                                        
-                                        /*
-                                        PhishModel.sharedInstance().getTourNameForTourID(tourID)
+                                        */
+                                        PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
                                         {
                                             tourNameError, tourName in
                                             
@@ -517,14 +527,13 @@ class SongHistoryViewController: UIViewController,
                                                 dispatch_async(dispatch_get_main_queue())
                                                 {
                                                     cell.detailTextLabel?.text = tourName
-                                                    cell.tourID = tourID
+                                                    cell.tourID = tourID.integerValue
                                                     
                                                     /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                                     cell.userInteractionEnabled = (tourID == 71) ? false : true
                                                 }
                                             }
                                         }
-                                        */
                                     }
                                 }
                             }
