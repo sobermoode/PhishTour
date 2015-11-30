@@ -29,6 +29,8 @@ class SongHistoryViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
+        self.restorationIdentifier = "SongHistoryViewController"
+        
         setupNavBar()
         sceneSetup()
         getHistory()

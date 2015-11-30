@@ -42,7 +42,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         CoreDataStack.sharedInstance().saveContext()
     }
+    
+    func application(application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool
+    {
+        return true
+    }
 
+    func application(application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool
+    {
+        return true
+    }
 
+    func application(application: UIApplication, willFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) -> Bool
+    {
+        self.window?.makeKeyAndVisible()
+        
+        return true
+    }
 }
 

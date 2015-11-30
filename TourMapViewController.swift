@@ -48,6 +48,9 @@ class TourMapViewController: UIViewController,
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        self.navigationController?.restorationIdentifier = "PhishTourNavController"
+        self.restorationIdentifier = "TourMapViewController"
+        
         setupNavBar()
         addMap()
     }

@@ -28,6 +28,8 @@ class SetlistViewController: UIViewController,
 
         // Do any additional setup after loading the view.
         
+        self.restorationIdentifier = "SetlistViewController"
+        
         setupNavBar()
         createScene()
         getSetlist()
