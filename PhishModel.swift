@@ -705,15 +705,6 @@ class PhishModel: NSObject,
         /// set the delegate
         cell.delegate = self.tourMapVC
         
-        /// create the gradient effect with the cells' background colors;
-        /// each set of shows at a unique location will share the same background color
-        let shows = PhishModel.sharedInstance().selectedTour!.locationDictionary![show.venue]!
-        let firstShow = shows.first!
-        let position = PhishModel.sharedInstance().selectedTour!.uniqueLocations!.indexOf(firstShow)!
-        let grayFactor = CGFloat(0.02 * Double(position))
-        let bgColor = UIColor(red: 1.0 - grayFactor, green: 1.0 - grayFactor, blue: 1.0 - grayFactor, alpha: 1.0)
-        cell.backgroundColor = bgColor
-        
         return cell
     }
     
