@@ -725,6 +725,7 @@ class SongHistoryViewController: UIViewController,
                     {
                         /// set the selected show
                         PhishModel.sharedInstance().currentShow = show
+                        PhishModel.sharedInstance().previousTour = 0
                         
                         /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
                         let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
