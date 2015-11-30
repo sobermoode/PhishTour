@@ -13,7 +13,6 @@ class SongHistoryViewController: UIViewController,
 {
     /// the song who's history is being displayed
     var song: PhishSong!
-    // var history: [Int : [PhishShow]]?
     var history: [Int : [PhishSongPerformance]]?
     
     /// associated info for the song
@@ -108,7 +107,6 @@ class SongHistoryViewController: UIViewController,
         /// the song already has a history
         if let history = self.song.history
         {
-            print("There's a history?!")
             self.history = history
             self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
             self.totalPlaysLabel.hidden = false
@@ -118,7 +116,6 @@ class SongHistoryViewController: UIViewController,
         /// otherwise, we need to request it
         else
         {
-            print("There shouldn't be a history, requesting...")
             /// create a progress bar to track the progress of requesting the history
             /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
             let progressBar = UIProgressView(progressViewStyle: .Default)
@@ -153,7 +150,6 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
-                    print("Is this before or after the history request?")
                     /// save the history
                     self.history = self.song.history!
                     
@@ -301,7 +297,6 @@ class SongHistoryViewController: UIViewController,
             let years: [Int] = Array(self.history!.keys)
             let sortedYears: [Int] = years.sort().reverse()
             let year: Int = sortedYears[section]
-            // let shows: [PhishShow] = self.history![year]!
             let performances: [PhishSongPerformance] = self.history![year]!
             
             return performances.count
@@ -338,12 +333,9 @@ class SongHistoryViewController: UIViewController,
             let years: [Int] = Array(self.history!.keys)
             let sortedYears: [Int] = years.sort().reverse()
             let year: Int = sortedYears[indexPath.section]
-            // let shows: [PhishShow] = self.history![year]!
             let performances: [PhishSongPerformance] = self.history![year]!
             
             /// get the ID of the show
-            // let show: PhishShow = shows[indexPath.row]
-            // let showID: Int = Int(show.showID)
             let performance: PhishSongPerformance = performances[indexPath.row]
             
             /// set the cell's performance
@@ -436,7 +428,6 @@ class SongHistoryViewController: UIViewController,
                                     dispatch_async(dispatch_get_main_queue())
                                     {
                                         cell.detailTextLabel?.text = tourName
-                                        // cell.tourID = tourID.integerValue
                                         
                                         /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
                                         cell.userInteractionEnabled = (tourID.integerValue == 71) ? false : true
@@ -462,201 +453,6 @@ class SongHistoryViewController: UIViewController,
         
         return cell
     }
-            
-            /*
-            /// get the show data
-            PhishModel.sharedInstance().getShowForID(showID)
-            {
-                showError, show in
-                
-                /// something went wrong
-                if showError != nil
-                {
-                    /// update the cell to reflect that the show couldn't be retrieved
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        cell.textLabel?.textColor = UIColor.redColor()
-                        cell.textLabel?.text = "Show Error..."
-                    }
-                }
-                else
-                {
-                    print("Received this show: \(show)")
-                    /// this will be the map annotation to select when popping back to the tour map controller
-                    cell.otherTourShow = show!
-                    
-                    /// the request was successful; update the cell with the show date on the main thread
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        // cell.textLabel?.text = "\(show!.date) \(show!.year)"
-                        
-                        /// the show may or may not have tour info;
-                        /// set the cell properties and enable the cell if it does
-                        if let tour = show!.tour
-                        {
-                            cell.detailTextLabel?.text = tour.name
-                            cell.tourID = Int(tour.tourID)
-                            
-                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                            cell.userInteractionEnabled = (tour.tourID == 71) ? false : true
-                        }
-                        /// if no tour info, then we need to request the tour name
-                        else
-                        {
-                            /// get the tour ID
-                            if let tourID = show!.tourID
-                            {
-                                /*
-                                PhishModel.sharedInstance().getTourForID(tourID.integerValue)
-                                {
-                                    tourError, tour in
-                                    
-                                    /// something went wrong
-                                    if tourError != nil
-                                    {
-                                        /// update the cell to reflect that the tour couldn't be retrieved
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            cell.detailTextLabel?.textColor = UIColor.redColor()
-                                            cell.detailTextLabel?.text = "Tour Error..."
-                                        }
-                                    }
-                                    else
-                                    {
-                                        /// set the tour<-->show relationship
-                                        show?.tour = tour!
-                                        
-                                        /// update the cell
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            cell.detailTextLabel?.text = tour!.name
-                                            cell.tourID = tour!.tourID.integerValue
-                                            
-                                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                                            cell.userInteractionEnabled = (tour!.tourID.integerValue == 71) ? false : true
-                                        }
-                                    }
-                                }
-                                */
-                                PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
-                                {
-                                    tourNameError, tourName in
-                                    
-                                    /// something went wrong
-                                    if tourNameError != nil
-                                    {
-                                        /// update the cell to reflect that the tour couldn't be retrieved
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            cell.detailTextLabel?.textColor = UIColor.redColor()
-                                            cell.detailTextLabel?.text = "Tour Error..."
-                                        }
-                                    }
-                                    else
-                                    {
-                                        /// update the cell with the tour name on the main thread and enable the cell
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            cell.detailTextLabel?.text = tourName
-                                            cell.tourID = show!.tourID!.integerValue
-                                            
-                                            /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                                            cell.userInteractionEnabled = (tourID == 71) ? false : true
-                                        }
-                                    }
-                                }
-                            }
-                            /// no tour ID, so we need to request it
-                            else
-                            {
-                                PhishinClient.sharedInstance().requestTourIDFromShowForID(show!.showID.integerValue)
-                                {
-                                    tourIDRequestError, tourID in
-                                    
-                                    /// something went wrong
-                                    if tourIDRequestError != nil
-                                    {
-                                        /// update the cell to reflect that the tour couldn't be retrieved
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            cell.detailTextLabel?.textColor = UIColor.redColor()
-                                            cell.detailTextLabel?.text = "Tour Error..."
-                                        }
-                                    }
-                                    /// we got the tour ID, now we can request the tour name with it
-                                    else
-                                    {
-                                        /// set the show's tour ID
-                                        show?.tourID = tourID
-                                        
-                                        /*
-                                        PhishModel.sharedInstance().getTourForID(tourID)
-                                        {
-                                            tourError, tour in
-                                            
-                                            /// something went wrong
-                                            if tourError != nil
-                                            {
-                                                /// update the cell to reflect that the tour couldn't be retrieved
-                                                dispatch_async(dispatch_get_main_queue())
-                                                {
-                                                    cell.detailTextLabel?.textColor = UIColor.redColor()
-                                                    cell.detailTextLabel?.text = "Tour Error..."
-                                                }
-                                            }
-                                            else
-                                            {
-                                                /// set the tour<-->show relationship
-                                                show?.tour = tour!
-                                                
-                                                /// update the cell
-                                                dispatch_async(dispatch_get_main_queue())
-                                                {
-                                                    cell.detailTextLabel?.text = tour!.name
-                                                    cell.tourID = tour!.tourID.integerValue
-                                                    
-                                                    /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                                                    cell.userInteractionEnabled = (tour!.tourID.integerValue == 71) ? false : true
-                                                }
-                                            }
-                                        }
-                                        */
-                                        PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
-                                        {
-                                            tourNameError, tourName in
-                                            
-                                            /// something went wrong
-                                            if tourNameError != nil
-                                            {
-                                                /// update the cell to reflect that the tour couldn't be retrieved
-                                                dispatch_async(dispatch_get_main_queue())
-                                                {
-                                                    cell.detailTextLabel?.textColor = UIColor.redColor()
-                                                    cell.detailTextLabel?.text = "Tour Error..."
-                                                }
-                                            }
-                                            else
-                                            {
-                                                /// update the cell with the tour name on the main thread and enable the cell
-                                                dispatch_async(dispatch_get_main_queue())
-                                                {
-                                                    cell.detailTextLabel?.text = tourName
-                                                    cell.tourID = tourID.integerValue
-                                                    
-                                                    /// tour ID 71 means, "Not Part of a Tour"; these cells are disabled
-                                                    cell.userInteractionEnabled = (tourID == 71) ? false : true
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-    }
-    */
     
     // MARK: UITableViewDelegate method
     
@@ -692,7 +488,6 @@ class SongHistoryViewController: UIViewController,
             }
             else
             {
-                print("Got tour: \(tour!)")
                 /// set the selected tour
                 PhishModel.sharedInstance().selectedTour = tour
                 
@@ -740,90 +535,6 @@ class SongHistoryViewController: UIViewController,
                 }
             }
         }
-        
-        /*
-        //// set the show that was selected
-        if let show = cell.otherTourShow
-        {
-            print("The selected show is: \(show)")
-            PhishModel.sharedInstance().currentShow = show
-            
-            /// set the selected tour
-            PhishModel.sharedInstance().selectedTour = show.tour
-            print("The selected tour is \(show.tour?.description)")
-            print("new tour locationDictionary: \(show.tour!.locationDictionary?.description)")
-            
-            /// let the tour selecter know what to set the year picker to
-            PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(show.tour!.year!)
-            
-            /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
-            let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
-            tourMap.isComingFromSongHistory = true
-            
-            /// make the segue on the main thread, because we're modifying the map view
-            dispatch_async(dispatch_get_main_queue())
-            {
-                self.navigationController?.popToRootViewControllerAnimated(true)
-            }
-        }
-        */
-        
-        
-        
-        
-        /*
-        /// get the tour that the show was a part of
-        PhishModel.sharedInstance().getTourForID(cell.tourID)
-        {
-            tourError, tour in
-            
-            /// something went wrong
-            if tourError != nil
-            {
-                /// create an alert for the problem and unwind back to the setlist
-                let alert = UIAlertController(title: "Whoops!", message: "There was an error getting info for the \(cell.detailTextLabel?.text): \(tourError!.localizedDescription).", preferredStyle: .Alert)
-                let alertAction = UIAlertAction(title: "OK", style: .Default)
-                {
-                    action in
-                    
-                    self.backToSetlist()
-                }
-                alert.addAction(alertAction)
-                
-                dispatch_async(dispatch_get_main_queue())
-                {
-                    self.presentViewController(alert, animated: true, completion: nil)
-                }
-            }
-            /// we got the tour
-            else
-            {
-                /// don't save the history view controller data if we leave it;
-                /// remove the setlist data as well
-                NSUserDefaults.standardUserDefaults().removeObjectForKey("previousHistorySettings")
-                if let _ = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
-                {
-                    NSUserDefaults.standardUserDefaults().removeObjectForKey("previousSetlistSettings")
-                }
-                
-                /// set the selected tour
-                PhishModel.sharedInstance().selectedTour = tour
-                
-                /// let the tour selecter know what to set the year picker to
-                PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(tour!.year!)
-                
-                /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
-                let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController
-                tourMap.isComingFromSongHistory = true
-                
-                /// make the segue on the main thread, because we're modifying the map view
-                dispatch_async(dispatch_get_main_queue())
-                {
-                    self.navigationController?.popToRootViewControllerAnimated(true)
-                }
-            }
-        }
-        */
     }
     
     // MARK: UIScrollViewDelegate method

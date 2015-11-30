@@ -34,8 +34,6 @@ class PhishTour: NSManagedObject
         
         for (index, show) in self.shows.enumerate()
         {
-            print("index: \(index)")
-            print("previous venue: \(previousShow.venue), current venue: \(show.venue)")
             /// there might only be one location
             if self.shows.count == 1
             {
@@ -47,7 +45,6 @@ class PhishTour: NSManagedObject
             /// add the first show
             if index == 0
             {
-                print("Added \(show.venue)")
                 uniques.append(show)
                 
                 continue
@@ -57,13 +54,11 @@ class PhishTour: NSManagedObject
                 /// we're still at the same place
                 if show.venue == previousShow.venue
                 {
-                    print("Still at \(show.venue)")
                     previousShow = show
                 }
                 /// new location
                 else
                 {
-                    print("Added \(show.venue)")
                     uniques.append(show)
                     previousShow = show
                 }
@@ -149,8 +144,6 @@ class PhishTour: NSManagedObject
             }
         }
         
-        // CoreDataStack.sharedInstance().saveContext()
-        
         return locationDictionary
     }()
     
@@ -214,7 +207,7 @@ class PhishTour: NSManagedObject
         {
             let startDate = tourInfo["starts_on"] as! String
             let intYear = Int(NSString(string: startDate).substringToIndex(4))!
-            year = NSNumber(integer: intYear) // intYear
+            year = NSNumber(integer: intYear)
         }
         
         /// 2002 had no shows that were part of a valid tour
@@ -226,7 +219,8 @@ class PhishTour: NSManagedObject
         {
             /// make a fetch request for the year, if it has been saved to Core Data
             let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-            let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
+            // let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
+            let yearFetchPredicate = NSPredicate(format: "year = %@", year)
             yearFetchRequest.predicate = yearFetchPredicate
             
             do

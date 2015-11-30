@@ -25,12 +25,10 @@ class PhishSong: NSManagedObject
     {
         if self.performances?.count == 0
         {
-            print("\(self.name)'s performances is nil.")
             return nil
         }
         else
         {
-            print("Trying to create the history...")
             var history = [Int : [PhishSongPerformance]]()
             
             var performancesForTheYear = [PhishSongPerformance]()
@@ -85,50 +83,12 @@ class PhishSong: NSManagedObject
             
             return history
         }
-        
-        
-        /*
-        for (index, performance) in self.performances.enumerate()
-        {
-            let currentYear = performance.year.integerValue
-            
-            if currentYear == previousYear
-            {
-                performancesForTheYear.append(performance)
-                
-                previousYear = currentYear
-                
-                if index == self.performances.count - 1
-                {
-                    history.updateValue(performancesForTheYear, forKey: currentYear)
-                }
-                
-                continue
-            }
-            else
-            {
-                
-            }
-        }
-        */
     }
     
     /// the total number of times the song has been played
     var totalPlays: Int
     {
         return self.performances!.count
-        /*
-        var total: Int = 0
-        let keys = self.history!.keys
-        
-        for key in keys
-        {
-            let shows: [PhishShow] = self.history![key]!
-            total += shows.count
-        }
-        
-        return total
-        */
     }
     
     /// filename to save the song history to for later retrieval
@@ -241,24 +201,4 @@ class PhishSong: NSManagedObject
         let songIDs = songInfo["song_ids"] as! [Int]
         self.songID = songIDs.first!
     }
-    
-    /*
-    /// write the history to file so it doesn't need to be requested twice
-    func saveHistory()
-    {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let pathArray = [documentsPath, self.historyFilename]
-        let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
-        
-        let historyData: NSData = NSKeyedArchiver.archivedDataWithRootObject(self.history!)
-        if historyData.writeToFile(historyFileURL.path!, atomically: false)
-        {
-            return
-        }
-        else
-        {
-            print("There was an error saving \(self.name)'s history to the device.")
-        }
-    }
-    */
 }

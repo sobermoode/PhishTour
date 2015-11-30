@@ -22,9 +22,6 @@ class PhishModel: NSObject,
     /// the available years
     var years: [PhishYear]?
     
-    /// flags for whether the tours for a year have been requested, or not
-    // var tourRequestor = [Int : Bool]()
-    
     /// previous selections
     var previousYear: Int?
     var previousTour: Int?
@@ -124,14 +121,6 @@ class PhishModel: NSObject,
                         while --year >= 1983
                     }
                     
-                    /*
-                    /// initialize the tour requestor flags
-                    for year in self.years!
-                    {
-                        self.tourRequestor.updateValue(false, forKey: year.year.integerValue)
-                    }
-                    */
-                    
                     /// save new objects to the context
                     self.context.performBlockAndWait()
                     {
@@ -148,7 +137,6 @@ class PhishModel: NSObject,
         }
     }
     
-    // NEW getToursForYear, 11.29.2015
     /// fetch the saved tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
     {
@@ -235,87 +223,11 @@ class PhishModel: NSObject,
         }
     }
     
-    /*
-    /// fetch the saved tours for a given year or request them
-    func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
-    {
-        /// create a fetch request with a predicate to match the year being requested
-        /// and a sort descriptor to sort ascending by tour ID
-        let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        // let toursFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
-        let toursFetchPredicate = NSPredicate(format: "year = %@", year)
-        let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
-        toursFetchRequest.predicate = toursFetchPredicate
-        toursFetchRequest.sortDescriptors = [sortDescriptor]
-        
-        do
-        {
-            /// fetch the tours from core data
-            let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
-            
-            /// make sure we got the saved tours
-            if !tours.isEmpty
-            {
-                /// set the current tours
-                self.currentTours = tours
-                
-                /// return the tours
-                completionHandler(toursError: nil, tours: tours)
-                
-                return
-            }
-            /// no saved tours, we need to request them
-            else
-            {
-                PhishinClient.sharedInstance().requestToursForYear(year)
-                {
-                    toursRequestError, requestedTours in
-                    
-                    /// something went wrong
-                    if toursRequestError != nil
-                    {
-                        completionHandler(toursError: toursRequestError!, tours: nil)
-                    }
-                    else
-                    {
-                        /// set the tours
-                        self.currentTours = requestedTours!
-                        
-                        /// set the flag for the year
-                        self.tourRequestor.updateValue(true, forKey: year.year.integerValue)
-                    }
-                    
-                    /// save the new tours to the context
-                    self.context.performBlockAndWait()
-                    {
-                        CoreDataStack.sharedInstance().saveContext()
-                    }
-                    
-                    /// return the tours
-                    completionHandler(toursError: nil, tours: requestedTours!)
-                }
-            }
-        }
-        catch
-        {
-            completionHandler(toursError: error, tours: nil)
-        }
-    }
-    */
-    
-    /*
-    func didRequestToursForYear(year: Int) -> Bool
-    {
-        return self.tourRequestor[year]!
-    }
-    */
-    
     /// retrieve a setlist from core data or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {
         /// create a fetch request for the show and a predicate that matches the show ID
         let showsFetchRequest = NSFetchRequest(entityName: "PhishShow")
-        // let showsFetchPredicate = NSPredicate(format: "%K == %@", "showID", show.showID)
         let showsFetchPredicate = NSPredicate(format: "showID = %@", show.showID)
         showsFetchRequest.predicate = showsFetchPredicate
         
@@ -356,8 +268,6 @@ class PhishModel: NSObject,
             }
             else
             {
-                print("The fetch request for \(show.date) \(show.year) returned nothing.")
-                
                 /// create an error to send back
                 var errorDictionary = [NSObject : AnyObject]()
                 errorDictionary.updateValue("Couldn't find the setlist.", forKey: NSLocalizedDescriptionKey)
@@ -372,65 +282,12 @@ class PhishModel: NSObject,
         }        
     }
     
-    /*
-    /// retrieve a history from the device or request one for a given song
-    func getHistoryForSong(song: PhishSong, completionHandler: (songHistoryError: NSError?, songWithHistory: [Int : [PhishShow]]?) -> Void)
-    {        
-        /// check for a saved history and return it
-        let pathArray = [self.documentsPath, song.historyFilename]
-        let historyFileURL = NSURL.fileURLWithPathComponents(pathArray)!
-        guard !NSFileManager.defaultManager().fileExistsAtPath(historyFileURL.path!)
-        else
-        {
-            let historyTask = NSURLSession.sharedSession().dataTaskWithURL(historyFileURL)
-            {
-                historyData, historyResponse, historyError in
-                
-                if historyError != nil
-                {
-                    completionHandler(songHistoryError: historyError!, songWithHistory: nil)
-                }
-                else
-                {
-                    /// found the saved data; unarchive it and return it
-                    if let history = NSKeyedUnarchiver.unarchiveObjectWithData(historyData!) as? [Int : [PhishShow]]
-                    {
-                        song.history = history
-                        completionHandler(songHistoryError: nil, songWithHistory: history)
-                    }
-                }
-            }
-            historyTask.resume()
-            
-            return
-        }
-        
-        /// no saved history, we need to request it
-        PhishinClient.sharedInstance().requestHistoryForSong(song)
-        {
-            songHistoryError, songHistory in
-            
-            /// something went wrong
-            if songHistoryError != nil
-            {
-                completionHandler(songHistoryError: songHistoryError, songWithHistory: nil)
-            }
-            /// return the history
-            else
-            {
-                completionHandler(songHistoryError: nil, songWithHistory: songHistory!)
-            }
-        }
-    }
-    */
-    
     /// retrieve a show from core data or request one for a given ID
     func getShowForID(id: Int, completionHandler: (showError: NSError?, show: PhishShow?) -> Void)
     {
         /// check for a saved show
         /// create the fetch request
         let showFetchRequest = NSFetchRequest(entityName: "PhishShow")
-        // let showFetchPredicate = NSPredicate(format: "%K == %@", "showID", "\(id)")
         let nsNumberID = NSNumber(integer: id)
         let showFetchPredicate = NSPredicate(format: "showID = %@", nsNumberID)
         showFetchRequest.predicate = showFetchPredicate
@@ -445,9 +302,7 @@ class PhishModel: NSObject,
             {
                 /// get the show we're looking for
                 let show = shows.first!
-                print("Looking for show \(id), Core Data returned \(show)")
                 
-                print("getShowForID: returning show from Core Data: \(show)")
                 /// send the show back through the completion handler
                 completionHandler(showError: nil, show: show)
             }
@@ -466,7 +321,6 @@ class PhishModel: NSObject,
                     /// return the show
                     else
                     {
-                        print("getShowForID: returning show from Phish.in: \(show)")
                         completionHandler(showError: nil, show: show!)
                     }
                 }
@@ -483,7 +337,6 @@ class PhishModel: NSObject,
     {
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        // let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
         let nsNumberID = NSNumber(integer: id)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
@@ -498,7 +351,6 @@ class PhishModel: NSObject,
                 /// get the tour we're looking for
                 let tour = tours.first!
                 
-                print("Returning \(tour.name) from Core Data...")
                 completionHandler(tourError: nil, tour: tour)
                 
                 return
@@ -518,7 +370,6 @@ class PhishModel: NSObject,
                     /// return the tour
                     else
                     {
-                        print("Returning \(tour?.name) from Phish.in...")
                         completionHandler(tourError: nil, tour: tour!)
                     }
                 }
@@ -536,7 +387,6 @@ class PhishModel: NSObject,
         /// check for a saved tour and return its name
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
-        // let tourFetchPredicate = NSPredicate(format: "%K == %@", "tourID", "\(id)")
         let nsNumberID = NSNumber(integer: id)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
@@ -881,7 +731,6 @@ class PhishModel: NSObject,
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! TourListCell
         
         /// annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
-        // get the venue and use it to find the location
         let venue = cell.venueLabel.text!
         let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
         let show = locations!.first!
