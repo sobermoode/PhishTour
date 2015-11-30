@@ -39,14 +39,15 @@
         <relationship name="year" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhishYear" inverseName="tours" inverseEntity="PhishYear" syncable="YES"/>
     </entity>
     <entity name="PhishYear" representedClassName=".PhishYear" syncable="YES">
+        <attribute name="didRequestAllTours" attributeType="Boolean" syncable="YES"/>
         <attribute name="year" attributeType="Integer 16" syncable="YES"/>
         <relationship name="tours" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PhishTour" inverseName="year" inverseEntity="PhishTour" syncable="YES"/>
     </entity>
     <elements>
         <element name="PhishShow" positionX="-36" positionY="9" width="128" height="240"/>
         <element name="PhishSong" positionX="-18" positionY="27" width="128" height="150"/>
-        <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="105"/>
-        <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="75"/>
         <element name="PhishSongPerformance" positionX="-45" positionY="99" width="128" height="135"/>
+        <element name="PhishTour" positionX="-54" positionY="-9" width="128" height="105"/>
+        <element name="PhishYear" positionX="-63" positionY="-18" width="128" height="90"/>
     </elements>
 </model>

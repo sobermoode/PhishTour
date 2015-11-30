@@ -669,14 +669,14 @@ class SongHistoryViewController: UIViewController,
         let performance = cell.performance
         
         /// get or create the tour that was selected
-        PhishModel.sharedInstance().getTourForID(performance.tourID!.integerValue)
+        PhishModel.sharedInstance().getTourForID(performance.tourID!.integerValue, inYear: performance.year.integerValue)
         {
             tourError, tour in
             
             if tourError != nil
             {
                 /// create an alert for the problem and unwind back to the setlist
-                let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!.localizedDescription)", preferredStyle: .Alert)
+                let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!)", preferredStyle: .Alert)
                 let alertAction = UIAlertAction(title: "OK", style: .Default)
                 {
                     action in
@@ -707,7 +707,7 @@ class SongHistoryViewController: UIViewController,
                     if showError != nil
                     {
                         /// create an alert for the problem and unwind back to the setlist
-                        let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!.localizedDescription)", preferredStyle: .Alert)
+                        let alert = UIAlertController(title: "Whoops!", message: "There was an error with the tour for \(performance.date) \(performance.year): \(tourError!)", preferredStyle: .Alert)
                         let alertAction = UIAlertAction(title: "OK", style: .Default)
                         {
                             action in

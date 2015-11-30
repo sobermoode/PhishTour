@@ -22,6 +22,9 @@ class PhishModel: NSObject,
     /// the available years
     var years: [PhishYear]?
     
+    /// flags for whether the tours for a year have been requested, or not
+    // var tourRequestor = [Int : Bool]()
+    
     /// previous selections
     var previousYear: Int?
     var previousTour: Int?
@@ -121,6 +124,14 @@ class PhishModel: NSObject,
                         while --year >= 1983
                     }
                     
+                    /*
+                    /// initialize the tour requestor flags
+                    for year in self.years!
+                    {
+                        self.tourRequestor.updateValue(false, forKey: year.year.integerValue)
+                    }
+                    */
+                    
                     /// save new objects to the context
                     self.context.performBlockAndWait()
                     {
@@ -137,6 +148,94 @@ class PhishModel: NSObject,
         }
     }
     
+    // NEW getToursForYear, 11.29.2015
+    /// fetch the saved tours for a given year or request them
+    func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
+    {
+        /// create a fetch request with a predicate to match the year being requested
+        /// and a sort descriptor to sort ascending by tour ID
+        let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let toursFetchPredicate = NSPredicate(format: "year = %@", year)
+        let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
+        toursFetchRequest.predicate = toursFetchPredicate
+        toursFetchRequest.sortDescriptors = [sortDescriptor]
+        
+        /// a specific tour might have been requested from the song history;
+        /// we'll need to get the other tours for that year
+        if !year.didRequestAllTours
+        {
+            do
+            {
+                /// remove the previously created tour;
+                /// we'll get all of them for the specified year
+                let previousTours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
+                for tour in previousTours
+                {
+                    self.context.deleteObject(tour)
+                }
+            }
+            catch
+            {
+                print("There was a problem fetching tours from Core Data.")
+            }
+            
+            /// request the tours for the year
+            PhishinClient.sharedInstance().requestToursForYear(year)
+            {
+                toursRequestError, requestedTours in
+                
+                /// something went wrong
+                if toursRequestError != nil
+                {
+                    completionHandler(toursError: toursRequestError!, tours: nil)
+                }
+                else
+                {
+                    /// set the tours
+                    self.currentTours = requestedTours!
+                    
+                    /// set the flag for the year
+                    year.didRequestAllTours = true
+                }
+                
+                /// save the new tours to the context
+                self.context.performBlockAndWait()
+                {
+                    CoreDataStack.sharedInstance().saveContext()
+                }
+                
+                /// return the tours
+                completionHandler(toursError: nil, tours: requestedTours!)
+            }
+        }
+        /// we've got all the tours, so fetch them from core data
+        else
+        {
+            do
+            {
+                /// fetch the tours from core data
+                let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
+                
+                /// make sure we got the saved tours
+                if !tours.isEmpty
+                {
+                    /// set the current tours
+                    self.currentTours = tours
+                    
+                    /// return the tours
+                    completionHandler(toursError: nil, tours: tours)
+                    
+                    return
+                }
+            }
+            catch
+            {
+                completionHandler(toursError: error, tours: nil)
+            }
+        }
+    }
+    
+    /*
     /// fetch the saved tours for a given year or request them
     func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
     {
@@ -181,6 +280,9 @@ class PhishModel: NSObject,
                     {
                         /// set the tours
                         self.currentTours = requestedTours!
+                        
+                        /// set the flag for the year
+                        self.tourRequestor.updateValue(true, forKey: year.year.integerValue)
                     }
                     
                     /// save the new tours to the context
@@ -199,6 +301,14 @@ class PhishModel: NSObject,
             completionHandler(toursError: error, tours: nil)
         }
     }
+    */
+    
+    /*
+    func didRequestToursForYear(year: Int) -> Bool
+    {
+        return self.tourRequestor[year]!
+    }
+    */
     
     /// retrieve a setlist from core data or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
@@ -369,7 +479,7 @@ class PhishModel: NSObject,
     }
     
     /// retrieve a tour from core data or request one for a given ID
-    func getTourForID(id: Int, completionHandler: (tourError: NSError?, tour: PhishTour?) -> Void)
+    func getTourForID(id: Int, inYear year: Int, completionHandler: (tourError: ErrorType?, tour: PhishTour?) -> Void)
     {
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")

@@ -17,6 +17,8 @@ class PhishYear: NSManagedObject
     /// a year is composed of a set of tours
     @NSManaged var tours: [PhishTour]?
     
+    @NSManaged var didRequestAllTours: Bool
+    
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)
     {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
@@ -30,5 +32,6 @@ class PhishYear: NSManagedObject
         super.init(entity: yearEntity, insertIntoManagedObjectContext: context)
         
         self.year = year
+        self.didRequestAllTours = false
     }
 }
