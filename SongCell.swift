@@ -12,9 +12,6 @@ class SongCell: UITableViewCell
 {
     /// for use with the setlist
     var song: PhishSong!
-    // var tourID: Int!
-    
-    // var otherTourShow: PhishShow?
     
     /// for use with the history
     var performance: PhishSongPerformance!
