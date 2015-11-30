@@ -19,9 +19,6 @@ class SetlistViewController: UIViewController,
     var setlistTable: UITableView!
     var progressBar: UIProgressView!
     
-    /// flag to know if the view controller is being loaded directly after app-relaunch
-    var isRelaunchingApp: Bool = false
-    
     override func viewDidLoad()
     {
         super.viewDidLoad()
@@ -33,36 +30,6 @@ class SetlistViewController: UIViewController,
         setupNavBar()
         createScene()
         getSetlist()
-    }
-    
-    /// if the app was re-launched, check to see if the app was previously on the song history
-    override func viewDidAppear(animated: Bool)
-    {
-        if self.isRelaunchingApp
-        {
-            self.isRelaunchingApp = false
-            
-            /// get the previous song history information
-            if let previousHistorySettings = NSUserDefaults.standardUserDefaults().objectForKey("previousHistorySettings")
-            {
-                if let previousDateData = previousHistorySettings["previousDate"] as? NSData, let previousSongNameData = previousHistorySettings["previousSong"] as? NSData
-                {
-                    /// retrieve the information from the device and segue to the history
-                    let previousDate = NSKeyedUnarchiver.unarchiveObjectWithData(previousDateData) as! String
-                    let previousSongName = NSKeyedUnarchiver.unarchiveObjectWithData(previousSongNameData) as! String
-                    let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-                    let documentsURL = NSURL(string: documentsPath)!
-                    let filename = "song\(previousSongName)"
-                    let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-                    let savedSong = NSKeyedUnarchiver.unarchiveObjectWithFile(fileURL.path!) as! PhishSong
-                    
-                    let historyViewController = SongHistoryViewController()
-                    historyViewController.date = previousDate
-                    historyViewController.song = savedSong
-                    self.showViewController(historyViewController, sender: self)
-                }
-            }
-        }
     }
     
     /// create the back button and nav bar title
@@ -145,7 +112,6 @@ class SetlistViewController: UIViewController,
         {
             self.setlist = show.setlist
             self.setlistTable.reloadData()
-            self.saveToUserDefaults()
         }
         /// no setlist info, we need to request it
         else
@@ -187,8 +153,6 @@ class SetlistViewController: UIViewController,
                 {
                     self.setlist = setlist
                     
-                    self.saveToUserDefaults()
-                    
                     dispatch_async(dispatch_get_main_queue())
                     {
                         self.setlistTable.reloadData()
@@ -214,26 +178,8 @@ class SetlistViewController: UIViewController,
         }
     }
     
-    func saveToUserDefaults()
-    {
-        /// encode info for the history as NSData and save it into a dictionary
-        var previousSetlistSettings = [String : AnyObject]()
-        
-        if let show = self.show
-        {
-            let previousShowIDData: NSData = NSKeyedArchiver.archivedDataWithRootObject(show.showID)
-            previousSetlistSettings.updateValue(previousShowIDData, forKey: "previousShow")
-        }
-        
-        NSUserDefaults.standardUserDefaults().setObject(previousSetlistSettings, forKey: "previousSetlistSettings")
-        NSUserDefaults.standardUserDefaults().synchronize()
-    }
-    
     func backToMap()
     {
-        /// don't save the setlist view controller data if we leave it
-        NSUserDefaults.standardUserDefaults().removeObjectForKey("previousSetlistSettings")
-        
         self.navigationController?.popToRootViewControllerAnimated(true)
     }
     

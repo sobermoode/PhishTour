@@ -68,72 +68,6 @@ class TourMapViewController: UIViewController,
             self.reset(true)
             self.followTour()
         }
-        /*
-        else
-        {
-            // return
-            
-            /// we might need to re-launch to the setlist view controller
-            if let previousSetlistSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSetlistSettings")
-            {
-                if let previousShowIDData = previousSetlistSettings["previousShow"] as? NSData
-                {
-                    /// the previous show was saved as a showID. get the showID and use it to retrieve a PhishShow object,
-                    /// then segue to the setlist view controller
-                    let previousShowID = NSKeyedUnarchiver.unarchiveObjectWithData(previousShowIDData) as! Int
-                    let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-                    let documentsURL = NSURL(string: documentsPath)!
-                    let filename = "show\(previousShowID)"
-                    let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-                    let savedShow = NSKeyedUnarchiver.unarchiveObjectWithFile(fileURL.path!) as! PhishShow
-                    
-                    let setlistViewController = SetlistViewController()
-                    setlistViewController.show = savedShow
-                    setlistViewController.isRelaunchingApp = true
-                    self.showViewController(setlistViewController, sender: self)
-                }
-            }
-            
-            /// there might be a previous tour to load;
-            /// the information is saved as IDs which can be used to retrieve model objects
-            if let previousSettings = NSUserDefaults.standardUserDefaults().objectForKey("previousSettings")
-            {
-                if let previousYearData = previousSettings["previousYear"] as? NSData
-                {
-                    let previousYear = NSKeyedUnarchiver.unarchiveObjectWithData(previousYearData) as! Int
-                    PhishModel.sharedInstance().previousYear = previousYear
-                }
-                
-                if let previousTourData = previousSettings["previousTour"] as? NSData
-                {
-                    let previousTour = NSKeyedUnarchiver.unarchiveObjectWithData(previousTourData) as! Int
-                    PhishModel.sharedInstance().previousTour = previousTour
-                }
-                
-                if let selectedTourIDData = previousSettings["selectedTourID"] as? NSData
-                {                
-                    let selectedTourID = NSKeyedUnarchiver.unarchiveObjectWithData(selectedTourIDData) as! Int
-                    
-                    let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-                    let documentsURL = NSURL(string: documentsPath)!
-                    let filename = "tour\(selectedTourID)"
-                    let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-                    let savedTour = NSKeyedUnarchiver.unarchiveObjectWithFile(fileURL.path!) as! PhishTour
-                    PhishModel.sharedInstance().selectedTour = savedTour
-                }
-                
-                /// reload the previously selected tour, but do nothing if the app was shut down after a map reset
-                if let _ = previousSettings["didReset"] as? Bool
-                {
-                    
-                }
-                else
-                {
-                    self.followTour()
-                }
-            }
-        }
-        */
     }
     
     func setupNavBar()
@@ -185,39 +119,6 @@ class TourMapViewController: UIViewController,
         
         PhishModel.sharedInstance().tourMap = self.tourMap
         PhishModel.sharedInstance().tourMapVC = self
-    }
-    
-    func saveToUserDefaults()
-    {
-        /// encode info for the current tour as NSData and save it into a dictionary
-        var previousSettings = [String : AnyObject]()
-        
-        if let previousYear = PhishModel.sharedInstance().previousYear
-        {
-            let previousYearData: NSData = NSKeyedArchiver.archivedDataWithRootObject(previousYear)
-            previousSettings.updateValue(previousYearData, forKey: "previousYear")
-        }
-        if let previousTour = PhishModel.sharedInstance().previousTour
-        {
-            let previousTourData: NSData = NSKeyedArchiver.archivedDataWithRootObject(previousTour)
-            previousSettings.updateValue(previousTourData, forKey: "previousTour")
-        }
-        if let selectedTour = PhishModel.sharedInstance().selectedTour
-        {
-            let selectedTourID: Int = Int(selectedTour.tourID)
-            let selectedTourIDData: NSData = NSKeyedArchiver.archivedDataWithRootObject(selectedTourID)
-            previousSettings.updateValue(selectedTourIDData, forKey: "selectedTourID")
-        }
-        
-        /// we need to know if the map has been reset before the app closes
-        if self.didReset
-        {
-            previousSettings.updateValue(self.didReset, forKey: "didReset")
-        }
-        
-        
-        NSUserDefaults.standardUserDefaults().setObject(previousSettings, forKey: "previousSettings")
-        NSUserDefaults.standardUserDefaults().synchronize()
     }
     
     // MARK: UI methods
@@ -436,7 +337,6 @@ class TourMapViewController: UIViewController,
             PhishModel.sharedInstance().previousTour = nil
             PhishModel.sharedInstance().previousYear = nil
             self.didReset = true
-            self.saveToUserDefaults()
         }
         
         /// dismiss the tour selecter
@@ -608,8 +508,6 @@ class TourMapViewController: UIViewController,
                 {
                     self.didReset = false
                 }
-                
-                self.saveToUserDefaults()
             }
         }
     }

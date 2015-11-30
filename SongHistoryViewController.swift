@@ -96,10 +96,7 @@ class SongHistoryViewController: UIViewController,
     }
     
     func backToSetlist()
-    {
-        /// don't save the history view controller data if we leave it
-        NSUserDefaults.standardUserDefaults().removeObjectForKey("previousHistorySettings")
-        
+    {        
         self.navigationController?.popViewControllerAnimated(true)
     }
     
@@ -113,7 +110,6 @@ class SongHistoryViewController: UIViewController,
             self.totalPlaysLabel.text = "Total performances: \(self.song.totalPlays)"
             self.totalPlaysLabel.hidden = false
             self.historyTable.reloadData()
-            self.saveToUserDefaults()
         }
         /// otherwise, we need to request it
         else
@@ -155,8 +151,6 @@ class SongHistoryViewController: UIViewController,
                     /// save the history
                     self.history = self.song.history!
                     
-                    // self.saveToUserDefaults()
-                    
                     /// reload the table on the main thread
                     dispatch_async(dispatch_get_main_queue())
                     {
@@ -181,26 +175,6 @@ class SongHistoryViewController: UIViewController,
                 }
             }
         }
-    }
-    
-    func saveToUserDefaults()
-    {
-        /// encode info for the history as NSData and save it into a dictionary
-        var previousHistorySettings = [String : AnyObject]()
-        
-        if let date = self.date
-        {
-            let previousDateData: NSData = NSKeyedArchiver.archivedDataWithRootObject(date)
-            previousHistorySettings.updateValue(previousDateData, forKey: "previousDate")
-        }
-        if let song = self.song
-        {
-            let previousSongNameData: NSData = NSKeyedArchiver.archivedDataWithRootObject(song.name)
-            previousHistorySettings.updateValue(previousSongNameData, forKey: "previousSong")
-        }
-        
-        NSUserDefaults.standardUserDefaults().setObject(previousHistorySettings, forKey: "previousHistorySettings")
-        NSUserDefaults.standardUserDefaults().synchronize()
     }
     
     // MARK: UITableViewDataSource methods
