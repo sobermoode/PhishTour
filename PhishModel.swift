@@ -223,6 +223,96 @@ class PhishModel: NSObject,
         }
     }
     
+    /// retrieve the shows for a tour from core data or request them for the given tour
+    func getShowsForTour(var tour: PhishTour, completionHandler: (showRequestError: NSError!) -> Void)
+    {
+        print("\(tour.name) has \(tour.shows.count) shows.")
+        /// create a fetch request for the tour and a predicate that matches the tour ID
+        let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let tourFetchPredicate = NSPredicate(format: "tourID = %@", tour.tourID)
+        tourFetchRequest.predicate = tourFetchPredicate
+        
+        do
+        {
+            /// fetch the tour from core data
+            let fetchedTours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
+            if !fetchedTours.isEmpty
+            {
+                /// get the specific tour
+                let fetchedTour = fetchedTours.first!
+                if !fetchedTour.shows.isEmpty
+                {
+                    completionHandler(showRequestError: nil)
+                    
+                    return
+                }
+                /// the tour didn't already have show info
+                else
+                {
+                    /// request the shows
+                    PhishinClient.sharedInstance().requestShowsForTour(&tour)
+                    {
+                        showsRequestError in
+                        
+                        if showsRequestError != nil
+                        {
+                            completionHandler(showRequestError: showsRequestError)
+                        }
+                        else
+                        {
+                            print("\(tour.name) has \(tour.shows.count) shows.")
+                            /// update the tour
+                            // tour.shows = shows
+                            let _ = tour.locationDictionary!
+                            
+                            /// save the context
+                            self.context.performBlockAndWait()
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
+                            
+                            completionHandler(showRequestError: nil)
+                        }
+                    }
+                }
+            }
+            /*
+            /// there was no tour in core data, or the tour didn't already have its show info
+            else
+            {
+                /// request the shows
+                PhishinClient.sharedInstance().requestShowsForTour(tour)
+                {
+                    showsRequestError, shows in
+                    
+                    if showsRequestError != nil
+                    {
+                        completionHandler(showRequestError: showsRequestError)
+                    }
+                    else
+                    {
+                        /// update the tour
+                        tour.shows = shows
+                        let _ = tour.locationDictionary!
+                        
+                        /// save the context
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        
+                        completionHandler(showRequestError: nil)
+                    }
+                }
+            }
+            */
+        }
+        catch
+        {
+            print("There was a problem fetching \(tour.name) from Core Data.")
+        }
+    }
+    
     /// retrieve a setlist from core data or request one for a given show
     func getSetlistForShow(show: PhishShow, completionHandler: (setlistError: NSError?, setlist: [Int : [PhishSong]]?) -> Void)
     {

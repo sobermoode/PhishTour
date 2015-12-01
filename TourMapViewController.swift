@@ -396,27 +396,33 @@ class TourMapViewController: UIViewController,
             return
         }
         
+        print("Selected tour is \(selectedTour.name)")
+        
         /// create a progress bar to track the progress of the location geocoding
-        /// give the MapquestClient a reference to the progress bar, so it can update the bar as it does its thing
+        /// give the PhishinClient a reference to the progress bar, so it can update the bar as it does its thing
         let progressBar = UIProgressView(progressViewStyle: .Default)
         progressBar.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: CGRectGetMinY(self.view.bounds) + UIApplication.sharedApplication().statusBarFrame.height + self.navigationController!.navigationBar.bounds.height, width: CGRectGetWidth(self.view.bounds), height: 10)
         progressBar.progressTintColor = UIColor.blueColor()
         progressBar.trackTintColor = UIColor.lightGrayColor()
         progressBar.transform = CGAffineTransformMakeScale(1, 2.5)
         self.progressBar = progressBar
-        MapquestClient.sharedInstance().tourMapProgressBar = self.progressBar
+        // MapquestClient.sharedInstance().tourMapProgressBar = self.progressBar
+        PhishinClient.sharedInstance().tourSelecterProgressBar = self.progressBar
         self.view.addSubview(progressBar)
         
-        /// geocode the show locations before dropping the pins
-        MapquestClient.sharedInstance().geocodeShowsForTour(selectedTour, withType: .Batch)
+        // geocode the show locations before dropping the pins
+        // MapquestClient.sharedInstance().geocodeShowsForTour(selectedTour, withType: .Batch)
+        PhishModel.sharedInstance().getShowsForTour(selectedTour)
         {
-            geocodingError in
+            // geocodingError in
+            showRequestError in
             
             /// something went wrong
-            if geocodingError != nil
+            // if geocodingError != nil
+            if showRequestError != nil
             {
                 /// create an alert for the problem
-                let alert = UIAlertController(title: "Whoops!", message: "There was an error getting info for the \(selectedTour.name): \(geocodingError!.localizedDescription)", preferredStyle: .Alert)
+                let alert = UIAlertController(title: "Whoops!", message: "There was an error getting info for the \(selectedTour.name): \(showRequestError!.localizedDescription)", preferredStyle: .Alert)
                 let alertAction = UIAlertAction(title: "OK", style: .Default)
                 {
                     action in
