@@ -261,9 +261,11 @@ class PhishModel: NSObject,
                         else
                         {
                             print("\(tour.name) has \(tour.shows.count) shows.")
+                            // print("tour.shows: \(tour.shows)")
+                            
                             /// update the tour
                             // tour.shows = shows
-                            let _ = tour.locationDictionary!
+                            // let _ = tour.locationDictionary!
                             
                             /// save the context
                             self.context.performBlockAndWait()

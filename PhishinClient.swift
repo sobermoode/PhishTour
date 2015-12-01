@@ -403,16 +403,6 @@ class PhishinClient: NSObject
     /// request the shows for a tour and return the results by completion handler
     func requestShowsForTour(inout tour: PhishTour, completionHandler: (showsRequestError: NSError!) -> Void)
     {
-        print("requestShowsForTour...")
-        /// the progress bar will update as each show is created
-        var currentProgress: Float?
-        var progressBump: Float?
-        if let tourSelecterProgressBar = self.tourSelecterProgressBar
-        {
-            currentProgress = tourSelecterProgressBar.progress
-            // progressBump = 1.0 / Float(tourIDs.count)
-        }
-        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
             /// construct a URL for the tour request and start a task
@@ -435,9 +425,6 @@ class PhishinClient: NSObject
                         let tourResults = try NSJSONSerialization.JSONObjectWithData(tourRequestData!, options: []) as! [String : AnyObject]
                         let tourData = tourResults["data"] as! [String : AnyObject]
                         let shows = tourData["shows"] as! [[String : AnyObject]]
-                        
-                        /// increment the progress bar by this amount for every show that is created
-                        progressBump = 1.0 / Float(shows.count)
                         
                         /// request show data for each show
                         var showIDs = [Int]()
@@ -476,7 +463,7 @@ class PhishinClient: NSObject
                             */
                         }
                         
-                        showIDs.sortInPlace()
+                        // showIDs.sortInPlace()
                         
                         self.requestShowsForIDs(showIDs, andTour: tour)
                         {
@@ -516,49 +503,91 @@ class PhishinClient: NSObject
     
     func requestShowsForIDs(showIDs: [Int], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
     {
-        for showID in showIDs
+        /// the progress bar will update as each show is created
+        var currentProgress: Float?
+        var progressBump: Float?
+        if let tourSelecterProgressBar = self.tourSelecterProgressBar
         {
-            /// construct the request URL
-            let showRequestString = self.endpoint + Routes.Shows + "/\(showID)"
-            let showRequestURL = NSURL(string: showRequestString)!
-            let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
+            currentProgress = tourSelecterProgressBar.progress
+            progressBump = 1.0 / Float(showIDs.count)
+        }
+        
+        var shows = [PhishShow]()
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+        {
+            for showID in showIDs
             {
-                showRequestData, showRequestResponse, showRequestError in
-                
-                if showRequestError != nil
+                /// construct the request URL
+                let showRequestString = self.endpoint + Routes.Shows + "/\(showID)"
+                let showRequestURL = NSURL(string: showRequestString)!
+                let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
                 {
-                    completionHandler(showRequestsError: showRequestError)
-                }
-                else
-                {
-                    do
+                    showRequestData, showRequestResponse, showRequestError in
+                    
+                    if showRequestError != nil
                     {
-                        /// get the show data
-                        let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
-                        let showData = showResults["data"] as! [String : AnyObject]
-                        
-                        /// create a new show
-                        let newShow = PhishShow(showInfoFromShow: showData)
-                        newShow.tour = tour
-                        
-                        /*
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
+                        completionHandler(showRequestsError: showRequestError)
+                    }
+                    else
+                    {
+                        do
                         {
-                            CoreDataStack.sharedInstance().saveContext()
+                            /// get the show data
+                            let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
+                            let showData = showResults["data"] as! [String : AnyObject]
+                            
+                            /// create a new show
+                            let newShow = PhishShow(showInfoFromShow: showData)
+                            shows.append(newShow)
+                            // newShow.tour = tour
+                            
+                            if currentProgress != nil
+                            {
+                                currentProgress! += progressBump!
+                                dispatch_async(dispatch_get_main_queue())
+                                {
+                                    self.tourSelecterProgressBar.setProgress(currentProgress!, animated: true)
+                                }
+                            }
+                            
+                            /*
+                            /// save new and updated objects to the context
+                            self.context.performBlockAndWait()
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
+                            */
+                            
+                            /// return it through the completion handler
+                            // completionHandler(showRequestsError: nil)
                         }
-                        */
-                        
-                        /// return it through the completion handler
-                        completionHandler(showRequestsError: nil)
+                        catch
+                        {
+                            print("There was an error with the show request.")
+                        }
                     }
-                    catch
+                    
+                    shows.sortInPlace()
                     {
-                        print("There was an error with the show request.")
+                        show1, show2 in
+                        
+                        return show1.showID.integerValue < show2.showID.integerValue
                     }
+                    
+                    for show in shows
+                    {
+                        show.tour = tour
+                    }
+                    
+                    let _ = tour.locationDictionary!
+                    
+                    completionHandler(showRequestsError: nil)
                 }
+                showRequestTask.resume()
+                
+                // completionHandler(showRequestsError: nil)
             }
-            showRequestTask.resume()
         }
     }
     
