@@ -520,6 +520,7 @@ class PhishinClient: NSObject
         }
         
         var shows = [PhishShow]()
+        var showsToGeocode = [PhishShow]()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
@@ -551,7 +552,19 @@ class PhishinClient: NSObject
                             
                             /// create a new show
                             let newShow = PhishShow(showInfoFromShow: showData)
-                            shows.append(newShow)
+                            if newShow.showLatitude != 0 && newShow.showLongitude != 0
+                            {
+                                shows.append(newShow)
+                                
+                                --self.showsToRequest!
+                            }
+                            else
+                            {
+                                showsToGeocode.append(newShow)
+                                
+                                --self.showsToRequest!
+                            }
+                            // shows.append(newShow)
                             // newShow.tour = tour
                             
                             if currentProgress != nil
@@ -563,13 +576,14 @@ class PhishinClient: NSObject
                                 }
                             }
                             
-                            print("Finished a request for \(showDate)")
-                            --self.showsToRequest!
+                            // print("Finished a request for \(showDate)")
+                            // --self.showsToRequest!
                             
                             if self.showsToRequest == 0
                             {
-                                // NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
-                                shows.sortInPlace()
+                                if showsToGeocode.isEmpty
+                                {
+                                    shows.sortInPlace()
                                     {
                                         show1, show2 in
                                         
@@ -577,14 +591,54 @@ class PhishinClient: NSObject
                                         let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
                                         
                                         return show1Total < show2Total
+                                    }
+                                    
+                                    for show in shows
+                                    {
+                                        show.tour = tour
+                                    }
+                                    
+                                    completionHandler(showRequestsError: nil)
                                 }
-                                
-                                for show in shows
+                                else
                                 {
-                                    show.tour = tour
+                                    MapquestClient.sharedInstance().tourMapProgressBar = self.tourSelecterProgressBar
+                                    
+                                    dispatch_sync(showDispatchQueue)
+                                    {
+                                        MapquestClient.sharedInstance().geocodeShows(showsToGeocode, withType: .Batch)
+                                        {
+                                            geocodingError in
+                                            
+                                            if geocodingError != nil
+                                            {
+                                                completionHandler(showRequestsError: geocodingError)
+                                            }
+                                            else
+                                            {
+                                                shows += showsToGeocode
+                                                
+                                                shows.sortInPlace()
+                                                {
+                                                    show1, show2 in
+                                                    
+                                                    let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                                    let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                                    
+                                                    return show1Total < show2Total
+                                                }
+                                                
+                                                for show in shows
+                                                {
+                                                    show.tour = tour
+                                                }
+                                                
+                                                completionHandler(showRequestsError: nil)
+                                            }
+                                        }
+                                    }
                                 }
-                                
-                                completionHandler(showRequestsError: nil)
+                                // NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
                             }
                             
                             /*
