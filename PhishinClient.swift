@@ -427,17 +427,14 @@ class PhishinClient: NSObject
                         let shows = tourData["shows"] as! [[String : AnyObject]]
                         
                         /// request show data for each show
-                        // var showIDs = [Int]()
-                        var showDates = [String]()
+                        var showIDs = [Int]()
                         for show in shows
                         {
-                            // let showID = show["id"] as! Int
-                            // showIDs.append(showID)
-                            let showDate = show["date"] as! String
-                            showDates.append(showDate)
+                            let showID = show["id"] as! Int
+                            showIDs.append(showID)
                         }
                         
-                        self.requestShowsForIDs(showDates, andTour: tour)
+                        self.requestShowsForIDs(showIDs, andTour: tour)
                         {
                             showRequestsError in
                             
@@ -462,7 +459,7 @@ class PhishinClient: NSObject
     }
     
     /// request show info for every show on the tour
-    func requestShowsForIDs(showDates: [String], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
+    func requestShowsForIDs(showIDs: [Int], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
     {
         /// the progress bar will update as each show is created
         var currentProgress: Float?
@@ -470,7 +467,7 @@ class PhishinClient: NSObject
         if let tourSelecterProgressBar = self.tourSelecterProgressBar
         {
             currentProgress = tourSelecterProgressBar.progress
-            progressBump = 1.0 / Float(showDates.count)
+            progressBump = 1.0 / Float(showIDs.count)
         }
         
         /// temporary holders for the new shows
@@ -484,11 +481,11 @@ class PhishinClient: NSObject
             let showDispatchQueue = dispatch_queue_create(nil, DISPATCH_QUEUE_SERIAL)
             
             /// keep track of the requests
-            var showsToRequest = showDates.count
-            for showDate in showDates
+            var showsToRequest = showIDs.count
+            for showID in showIDs
             {
                 /// construct the request URL
-                let showRequestString = self.endpoint + Routes.Shows + "/\(showDate)"
+                let showRequestString = self.endpoint + Routes.Shows + "/\(showID)"
                 let showRequestURL = NSURL(string: showRequestString)!
                 
                 dispatch_sync(showDispatchQueue)
