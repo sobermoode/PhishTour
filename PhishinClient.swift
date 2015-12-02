@@ -519,7 +519,7 @@ class PhishinClient: NSObject
             progressBump = 1.0 / Float(showDates.count)
         }
         
-        // var shows = [PhishShow]()
+        var shows = [PhishShow]()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
@@ -551,8 +551,8 @@ class PhishinClient: NSObject
                             
                             /// create a new show
                             let newShow = PhishShow(showInfoFromShow: showData)
-                            // shows.append(newShow)
-                            newShow.tour = tour
+                            shows.append(newShow)
+                            // newShow.tour = tour
                             
                             if currentProgress != nil
                             {
@@ -568,7 +568,23 @@ class PhishinClient: NSObject
                             
                             if self.showsToRequest == 0
                             {
-                                NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
+                                // NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
+                                shows.sortInPlace()
+                                    {
+                                        show1, show2 in
+                                        
+                                        let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                        let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                        
+                                        return show1Total < show2Total
+                                }
+                                
+                                for show in shows
+                                {
+                                    show.tour = tour
+                                }
+                                
+                                completionHandler(showRequestsError: nil)
                             }
                             
                             /*
