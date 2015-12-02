@@ -149,9 +149,10 @@ class PhishinClient: NSObject
                             // create a new PhishShow
                             // let newShow = PhishShow(showInfoFromYear: show)
                             
-                            /// only append unique tour IDs
+                            /// only append unique tour IDs, tour IDs that haven't already been requested,
+                            /// and tours that aren't "not part of a tour"
                             let tourID = show["tour_id"] as! Int
-                            if !tourIDs.contains(tourID) && tourID != self.notPartOfATour
+                            if !year.tourIDs!.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
                             {
                                 /// for every unique tour, create an array for its corresponding shows
                                 tourIDs.append(tourID)
@@ -175,7 +176,7 @@ class PhishinClient: NSObject
                             else
                             {
                                 /// send the tours back through the completion handler
-                                completionHandler(toursRequestError: nil, tours: tours)
+                                completionHandler(toursRequestError: nil, tours: year.tours!)
                             }
                         }
                     }
@@ -189,6 +190,13 @@ class PhishinClient: NSObject
         }
     }
     
+    // new requestTourForID, 12.1.2015
+    func requestTourForID(id: Int, givenName: String, givenYear: PhishYear, completionHandler: (tourRequestError: NSError?, tour: PhishTour?) -> Void)
+    {
+        
+    }
+    
+    /*
     /// requests tour data for a given tour ID
     func requestTourForID(id: Int, completionHandler: (tourRequestError: NSError?, tour: PhishTour?) -> Void)
     {
@@ -278,6 +286,7 @@ class PhishinClient: NSObject
         }
         tourRequestTask.resume()
     }
+    */
     
     /// requests the name of a tour for a given tour ID;
     /// the name is used in the song history table view, the PhishTour object is used when the user selects that show and pops back to the map
@@ -559,6 +568,8 @@ class PhishinClient: NSObject
                                         
                                         /// return by completion handler
                                         completionHandler(showRequestsError: nil)
+                                        
+                                        return
                                     }
                                     /// one or more shows were missing latitude/longitude info
                                     else

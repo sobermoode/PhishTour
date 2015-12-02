@@ -17,6 +17,26 @@ class PhishYear: NSManagedObject
     /// a year is composed of a set of tours
     @NSManaged var tours: [PhishTour]?
     
+    /// the IDs of the year's tours
+    var tourIDs: [Int]?
+    {
+        if self.tours == nil
+        {
+            return nil
+        }
+        else
+        {
+            var tourIDs = [Int]()
+            
+            for tour in self.tours!
+            {
+                tourIDs.append(tour.tourID.integerValue)
+            }
+            
+            return tourIDs
+        }
+    }
+    
     @NSManaged var didRequestAllTours: Bool
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?)

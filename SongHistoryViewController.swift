@@ -441,7 +441,7 @@ class SongHistoryViewController: UIViewController,
         let performance = cell.performance
         
         /// get or create the tour that was selected
-        PhishModel.sharedInstance().getTourForID(performance.tourID!.integerValue, inYear: performance.year.integerValue)
+        PhishModel.sharedInstance().getTourForID(performance.tourID!.integerValue, inYear: performance.year.integerValue, withName: performance.tourName!)
         {
             tourError, tour in
             

@@ -152,21 +152,6 @@ class PhishModel: NSObject,
         /// we'll need to get the other tours for that year
         if !year.didRequestAllTours
         {
-            do
-            {
-                /// remove the previously created tour;
-                /// we'll get all of them for the specified year
-                let previousTours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
-                for tour in previousTours
-                {
-                    self.context.deleteObject(tour)
-                }
-            }
-            catch
-            {
-                print("There was a problem fetching tours from Core Data.")
-            }
-            
             /// request the tours for the year
             PhishinClient.sharedInstance().requestToursForYear(year)
             {
@@ -425,7 +410,7 @@ class PhishModel: NSObject,
     }
     
     /// retrieve a tour from core data or request one for a given ID
-    func getTourForID(id: Int, inYear year: Int, completionHandler: (tourError: ErrorType?, tour: PhishTour?) -> Void)
+    func getTourForID(id: Int, inYear year: Int, withName name: String, completionHandler: (tourError: ErrorType?, tour: PhishTour?) -> Void)
     {
         /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
@@ -447,23 +432,54 @@ class PhishModel: NSObject,
                 
                 return
             }
-            /// no saved tour, we need to request it
+            /// no saved tour, we need to create it
             else
             {
-                PhishinClient.sharedInstance().requestTourForID(id)
+                /// fetch the tour's year from core data
+                let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
+                let nsNumberYear = NSNumber(integer: year)
+                let yearFetchPredicate = NSPredicate(format: "year = %@", nsNumberYear)
+                yearFetchRequest.predicate = yearFetchPredicate
+                
+                do
                 {
-                    tourRequestError, tour in
+                    let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
                     
-                    /// something went wrong
-                    if tourRequestError != nil
+                    if !years.isEmpty
                     {
-                        completionHandler(tourError: tourRequestError!, tour: nil)
+                        let year = years.first!
+                        
+                        let newTour = PhishTour(year: year, name: name, tourID: id)
+                        
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        
+                        completionHandler(tourError: nil, tour: newTour)
+                        
+                        /*
+                        PhishinClient.sharedInstance().requestTourForID(id, givenName: name, givenYear: year)
+                        {
+                            tourRequestError, tour in
+                            
+                            /// something went wrong
+                            if tourRequestError != nil
+                            {
+                                completionHandler(tourError: tourRequestError!, tour: nil)
+                            }
+                            /// return the tour
+                            else
+                            {
+                                completionHandler(tourError: nil, tour: tour!)
+                            }
+                        }
+                        */
                     }
-                    /// return the tour
-                    else
-                    {
-                        completionHandler(tourError: nil, tour: tour!)
-                    }
+                }
+                catch
+                {
+                    print("There was a problem fetching \(year) from Core Data.")
                 }
             }
         }

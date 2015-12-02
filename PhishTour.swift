@@ -71,7 +71,7 @@ class PhishTour: NSManagedObject
     /// lookup the shows associated with a given location
     lazy var locationDictionary: [String : [PhishShow]]? =
     {
-        print("shows before: \(self.shows)")
+        // print("shows before: \(self.shows)")
         let sortedShows = self.shows.sort()
         {
             show1, show2 in
@@ -79,11 +79,11 @@ class PhishTour: NSManagedObject
             let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
             let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
             
-            print("\(show1.date): \(show1Total), \(show2.date): \(show2Total)")
+            // print("\(show1.date): \(show1Total), \(show2.date): \(show2Total)")
             
             return show1Total < show2Total
         }
-        print("sortedShows: \(sortedShows)")
+        // print("sortedShows: \(sortedShows)")
         
         // var previousShow: PhishShow = self.shows.first!
         var previousShow: PhishShow = sortedShows.first!

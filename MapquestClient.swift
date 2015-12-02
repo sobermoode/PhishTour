@@ -58,6 +58,7 @@ class MapquestClient: NSObject
     /// any shows that don't have lat/long info will get geocoded by Mapquest
     func geocodeShows(shows: [PhishShow], withType type: Services.Geocoding.GeocodingType, completionHandler: (geocodingError: NSError!) -> Void)
     {
+        print("Geocoding shows...")
         /// construct the request URL, starting with the base
         var mapquestRequestString = mapquestBaseURL + Services.Geocoding.GeocodingURL + Versions.Version1 + type.rawValue
         mapquestRequestString += "key=\(apiKey)"
@@ -178,8 +179,13 @@ class MapquestClient: NSObject
                             }
                         }
                         
+                        /*.
                         /// save new and updated objects to the context
-                        CoreDataStack.sharedInstance().saveContext()
+                        CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        */
                         
                         /// everything completed successfully
                         completionHandler(geocodingError: nil)
