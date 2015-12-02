@@ -34,8 +34,6 @@ class PhishinClient: NSObject
     var setlistProgressBar: UIProgressView!
     var historyProgressBar: UIProgressView!
     
-    var showsToRequest: Int!
-    
     class func sharedInstance() -> PhishinClient
     {
         struct Singleton
@@ -405,8 +403,6 @@ class PhishinClient: NSObject
     /// request the shows for a tour and return the results by completion handler
     func requestShowsForTour(inout tour: PhishTour, completionHandler: (showsRequestError: NSError!) -> Void)
     {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "finishShowsRequest", name: "showRequestsDidFinishNotifcation", object: nil)
-        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
             /// construct a URL for the tour request and start a task
@@ -433,44 +429,13 @@ class PhishinClient: NSObject
                         /// request show data for each show
                         // var showIDs = [Int]()
                         var showDates = [String]()
-                        // var showCounter: Int = shows.count
                         for show in shows
                         {
                             // let showID = show["id"] as! Int
                             // showIDs.append(showID)
                             let showDate = show["date"] as! String
                             showDates.append(showDate)
-                            /*
-                            print("Requesting show \(showID)")
-                            self.requestShowForID(showID)
-                            {
-                                showRequestError, show in
-                                
-                                if showRequestError != nil
-                                {
-                                    completionHandler(showsRequestError: showRequestError)
-                                }
-                                else
-                                {
-                                    print("Got show: \(show!)")
-                                    --showCounter
-                                    // showsForTheTour.append(show!)
-                                    show!.tour = tour
-                                    
-                                    if currentProgress != nil
-                                    {
-                                        currentProgress! += progressBump!
-                                        dispatch_async(dispatch_get_main_queue())
-                                        {
-                                            self.tourSelecterProgressBar.setProgress(currentProgress!, animated: true)
-                                        }
-                                    }
-                                }
-                            }
-                            */
                         }
-                        
-                        // showIDs.sortInPlace()
                         
                         self.requestShowsForIDs(showDates, andTour: tour)
                         {
@@ -485,29 +450,18 @@ class PhishinClient: NSObject
                                 completionHandler(showsRequestError: nil)
                             }
                         }
-                        
-                        /*
-                        repeat
-                        {
-                        
-                        }
-                        while showCounter != 0
-                        */
-                        
-                        // completionHandler(showsRequestError: nil)
                     }
                     catch
                     {
                         print("There was an error with the data received for \(tour.name)")
                     }
-                    
-                    // completionHandler(showsRequestError: nil)
                 }
             }
             tourRequestTask.resume()
         }
     }
     
+    /// request show info for every show on the tour
     func requestShowsForIDs(showDates: [String], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
     {
         /// the progress bar will update as each show is created
@@ -519,184 +473,150 @@ class PhishinClient: NSObject
             progressBump = 1.0 / Float(showDates.count)
         }
         
+        /// temporary holders for the new shows
         var shows = [PhishShow]()
         var showsToGeocode = [PhishShow]()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-        let showDispatchQueue = dispatch_queue_create(nil, DISPATCH_QUEUE_SERIAL)
-            self.showsToRequest = showDates.count
+            /// create a serial dispatch queue for these requests
+            /// NOTE: insight into creating dispatch queues here: http://stackoverflow.com/a/11909880
+            let showDispatchQueue = dispatch_queue_create(nil, DISPATCH_QUEUE_SERIAL)
+            
+            /// keep track of the requests
+            var showsToRequest = showDates.count
             for showDate in showDates
             {
                 /// construct the request URL
                 let showRequestString = self.endpoint + Routes.Shows + "/\(showDate)"
                 let showRequestURL = NSURL(string: showRequestString)!
+                
                 dispatch_sync(showDispatchQueue)
-                    {
-                        print("Starting a task for \(showDate)")
-                let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
                 {
-                    showRequestData, showRequestResponse, showRequestError in
-                    
-                    if showRequestError != nil
+                    let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
                     {
-                        completionHandler(showRequestsError: showRequestError)
-                    }
-                    else
-                    {
-                        do
+                        showRequestData, showRequestResponse, showRequestError in
+                        
+                        if showRequestError != nil
                         {
-                            /// get the show data
-                            let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
-                            let showData = showResults["data"] as! [String : AnyObject]
-                            
-                            /// create a new show
-                            let newShow = PhishShow(showInfoFromShow: showData)
-                            if newShow.showLatitude != 0 && newShow.showLongitude != 0
+                            completionHandler(showRequestsError: showRequestError)
+                        }
+                        else
+                        {
+                            do
                             {
-                                shows.append(newShow)
+                                /// get the show data
+                                let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
+                                let showData = showResults["data"] as! [String : AnyObject]
                                 
-                                --self.showsToRequest!
-                            }
-                            else
-                            {
-                                showsToGeocode.append(newShow)
+                                /// create a new show
+                                let newShow = PhishShow(showInfoFromShow: showData)
                                 
-                                --self.showsToRequest!
-                            }
-                            // shows.append(newShow)
-                            // newShow.tour = tour
-                            
-                            if currentProgress != nil
-                            {
-                                currentProgress! += progressBump!
-                                dispatch_async(dispatch_get_main_queue())
+                                /// check that there was latitude/longitude info,
+                                /// otherwise, put the show in a separate array
+                                if newShow.showLatitude != 0 && newShow.showLongitude != 0
                                 {
-                                    self.tourSelecterProgressBar.setProgress(currentProgress!, animated: true)
-                                }
-                            }
-                            
-                            // print("Finished a request for \(showDate)")
-                            // --self.showsToRequest!
-                            
-                            if self.showsToRequest == 0
-                            {
-                                if showsToGeocode.isEmpty
-                                {
-                                    shows.sortInPlace()
-                                    {
-                                        show1, show2 in
-                                        
-                                        let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                                        let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                                        
-                                        return show1Total < show2Total
-                                    }
+                                    shows.append(newShow)
                                     
-                                    for show in shows
-                                    {
-                                        show.tour = tour
-                                    }
-                                    
-                                    completionHandler(showRequestsError: nil)
+                                    --showsToRequest
                                 }
                                 else
                                 {
-                                    MapquestClient.sharedInstance().tourMapProgressBar = self.tourSelecterProgressBar
+                                    showsToGeocode.append(newShow)
                                     
-                                    dispatch_sync(showDispatchQueue)
+                                    --showsToRequest
+                                }
+                                
+                                /// update the progress bar
+                                if currentProgress != nil
+                                {
+                                    currentProgress! += progressBump!
+                                    dispatch_async(dispatch_get_main_queue())
                                     {
-                                        MapquestClient.sharedInstance().geocodeShows(showsToGeocode, withType: .Batch)
+                                        self.tourSelecterProgressBar.setProgress(currentProgress!, animated: true)
+                                    }
+                                }
+                                
+                                /// all the requests have finished
+                                if showsToRequest == 0
+                                {
+                                    /// none of the shows needed geocoding
+                                    if showsToGeocode.isEmpty
+                                    {
+                                        /// sort the shows by date
+                                        shows.sortInPlace()
                                         {
-                                            geocodingError in
+                                            show1, show2 in
                                             
-                                            if geocodingError != nil
+                                            let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                            let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                            
+                                            return show1Total < show2Total
+                                        }
+                                        
+                                        /// set the relationship
+                                        for show in shows
+                                        {
+                                            show.tour = tour
+                                        }
+                                        
+                                        /// return by completion handler
+                                        completionHandler(showRequestsError: nil)
+                                    }
+                                    /// one or more shows were missing latitude/longitude info
+                                    else
+                                    {
+                                        /// give the progress bar to the Mapquest client
+                                        MapquestClient.sharedInstance().tourMapProgressBar = self.tourSelecterProgressBar
+                                        
+                                        dispatch_sync(showDispatchQueue)
+                                        {
+                                            /// geocode the shows
+                                            MapquestClient.sharedInstance().geocodeShows(showsToGeocode, withType: .Batch)
                                             {
-                                                completionHandler(showRequestsError: geocodingError)
-                                            }
-                                            else
-                                            {
-                                                shows += showsToGeocode
+                                                /// something went wrong
+                                                geocodingError in
                                                 
-                                                shows.sortInPlace()
+                                                if geocodingError != nil
                                                 {
-                                                    show1, show2 in
-                                                    
-                                                    let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                                                    let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                                                    
-                                                    return show1Total < show2Total
+                                                    completionHandler(showRequestsError: geocodingError)
                                                 }
-                                                
-                                                for show in shows
+                                                else
                                                 {
-                                                    show.tour = tour
+                                                    /// add the geocoded shows to the rest, then sort, etc.
+                                                    shows += showsToGeocode
+                                                    
+                                                    shows.sortInPlace()
+                                                    {
+                                                        show1, show2 in
+                                                        
+                                                        let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                                        let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                                        
+                                                        return show1Total < show2Total
+                                                    }
+                                                    
+                                                    for show in shows
+                                                    {
+                                                        show.tour = tour
+                                                    }
+                                                    
+                                                    completionHandler(showRequestsError: nil)
                                                 }
-                                                
-                                                completionHandler(showRequestsError: nil)
                                             }
                                         }
                                     }
                                 }
-                                // NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
                             }
-                            
-                            /*
-                            /// save new and updated objects to the context
-                            self.context.performBlockAndWait()
+                            catch
                             {
-                                CoreDataStack.sharedInstance().saveContext()
+                                print("There was an error with the show request.")
                             }
-                            */
-                            
-                            /// return it through the completion handler
-                            // completionHandler(showRequestsError: nil)
-                        }
-                        catch
-                        {
-                            print("There was an error with the show request.")
                         }
                     }
-                    
-                    /*
-                    shows.sortInPlace()
-                    {
-                        show1, show2 in
-                        
-                        return show1.showID.integerValue < show2.showID.integerValue
-                    }
-                    
-                    for show in shows
-                    {
-                        show.tour = tour
-                    }
-                    */
-                    
-                    // let _ = tour.locationDictionary!
-                    
-                    // completionHandler(showRequestsError: nil)
+                    showRequestTask.resume()
                 }
-                showRequestTask.resume()
-                }
-                
-                // completionHandler(showRequestsError: nil)
             }
-        
-            // completionHandler(showRequestsError: nil)
-        }
-    }
-    
-    func finishShowsRequest()
-    {
-        print("finishShowsRequest!!!")
-        if self.showsToRequest != 0
-            // if false
-        {
-            print("There are still \(self.showsToRequest) shows to request.")
-        }
-        else
-        {
-            print("Finished all the requests!!!")
         }
     }
     
