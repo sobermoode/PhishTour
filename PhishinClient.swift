@@ -34,6 +34,8 @@ class PhishinClient: NSObject
     var setlistProgressBar: UIProgressView!
     var historyProgressBar: UIProgressView!
     
+    var showsToRequest: Int!
+    
     class func sharedInstance() -> PhishinClient
     {
         struct Singleton
@@ -403,6 +405,8 @@ class PhishinClient: NSObject
     /// request the shows for a tour and return the results by completion handler
     func requestShowsForTour(inout tour: PhishTour, completionHandler: (showsRequestError: NSError!) -> Void)
     {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "finishShowsRequest", name: "showRequestsDidFinishNotifcation", object: nil)
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
             /// construct a URL for the tour request and start a task
@@ -427,12 +431,15 @@ class PhishinClient: NSObject
                         let shows = tourData["shows"] as! [[String : AnyObject]]
                         
                         /// request show data for each show
-                        var showIDs = [Int]()
+                        // var showIDs = [Int]()
+                        var showDates = [String]()
                         // var showCounter: Int = shows.count
                         for show in shows
                         {
-                            let showID = show["id"] as! Int
-                            showIDs.append(showID)
+                            // let showID = show["id"] as! Int
+                            // showIDs.append(showID)
+                            let showDate = show["date"] as! String
+                            showDates.append(showDate)
                             /*
                             print("Requesting show \(showID)")
                             self.requestShowForID(showID)
@@ -465,7 +472,7 @@ class PhishinClient: NSObject
                         
                         // showIDs.sortInPlace()
                         
-                        self.requestShowsForIDs(showIDs, andTour: tour)
+                        self.requestShowsForIDs(showDates, andTour: tour)
                         {
                             showRequestsError in
                             
@@ -501,7 +508,7 @@ class PhishinClient: NSObject
         }
     }
     
-    func requestShowsForIDs(showIDs: [Int], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
+    func requestShowsForIDs(showDates: [String], andTour tour: PhishTour, completionHandler: (showRequestsError: NSError!) -> Void)
     {
         /// the progress bar will update as each show is created
         var currentProgress: Float?
@@ -509,18 +516,23 @@ class PhishinClient: NSObject
         if let tourSelecterProgressBar = self.tourSelecterProgressBar
         {
             currentProgress = tourSelecterProgressBar.progress
-            progressBump = 1.0 / Float(showIDs.count)
+            progressBump = 1.0 / Float(showDates.count)
         }
         
-        var shows = [PhishShow]()
+        // var shows = [PhishShow]()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            for showID in showIDs
+        let showDispatchQueue = dispatch_queue_create(nil, DISPATCH_QUEUE_SERIAL)
+            self.showsToRequest = showDates.count
+            for showDate in showDates
             {
                 /// construct the request URL
-                let showRequestString = self.endpoint + Routes.Shows + "/\(showID)"
+                let showRequestString = self.endpoint + Routes.Shows + "/\(showDate)"
                 let showRequestURL = NSURL(string: showRequestString)!
+                dispatch_sync(showDispatchQueue)
+                    {
+                        print("Starting a task for \(showDate)")
                 let showRequestTask = self.session.dataTaskWithURL(showRequestURL)
                 {
                     showRequestData, showRequestResponse, showRequestError in
@@ -539,8 +551,8 @@ class PhishinClient: NSObject
                             
                             /// create a new show
                             let newShow = PhishShow(showInfoFromShow: showData)
-                            shows.append(newShow)
-                            // newShow.tour = tour
+                            // shows.append(newShow)
+                            newShow.tour = tour
                             
                             if currentProgress != nil
                             {
@@ -549,6 +561,14 @@ class PhishinClient: NSObject
                                 {
                                     self.tourSelecterProgressBar.setProgress(currentProgress!, animated: true)
                                 }
+                            }
+                            
+                            print("Finished a request for \(showDate)")
+                            --self.showsToRequest!
+                            
+                            if self.showsToRequest == 0
+                            {
+                                NSNotificationCenter.defaultCenter().postNotificationName("showRequestsDidFinishNotifcation", object: nil)
                             }
                             
                             /*
@@ -568,6 +588,7 @@ class PhishinClient: NSObject
                         }
                     }
                     
+                    /*
                     shows.sortInPlace()
                     {
                         show1, show2 in
@@ -579,15 +600,33 @@ class PhishinClient: NSObject
                     {
                         show.tour = tour
                     }
+                    */
                     
-                    let _ = tour.locationDictionary!
+                    // let _ = tour.locationDictionary!
                     
-                    completionHandler(showRequestsError: nil)
+                    // completionHandler(showRequestsError: nil)
                 }
                 showRequestTask.resume()
+                }
                 
                 // completionHandler(showRequestsError: nil)
             }
+        
+            // completionHandler(showRequestsError: nil)
+        }
+    }
+    
+    func finishShowsRequest()
+    {
+        print("finishShowsRequest!!!")
+        if self.showsToRequest != 0
+            // if false
+        {
+            print("There are still \(self.showsToRequest) shows to request.")
+        }
+        else
+        {
+            print("Finished all the requests!!!")
         }
     }
     

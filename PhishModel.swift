@@ -265,7 +265,7 @@ class PhishModel: NSObject,
                             
                             /// update the tour
                             // tour.shows = shows
-                            // let _ = tour.locationDictionary!
+                            let _ = tour.locationDictionary!
                             
                             /// save the context
                             self.context.performBlockAndWait()

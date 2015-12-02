@@ -71,14 +71,30 @@ class PhishTour: NSManagedObject
     /// lookup the shows associated with a given location
     lazy var locationDictionary: [String : [PhishShow]]? =
     {
-        var previousShow: PhishShow = self.shows.first!
+        print("shows before: \(self.shows)")
+        let sortedShows = self.shows.sort()
+        {
+            show1, show2 in
+            
+            let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+            let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+            
+            print("\(show1.date): \(show1Total), \(show2.date): \(show2Total)")
+            
+            return show1Total < show2Total
+        }
+        print("sortedShows: \(sortedShows)")
+        
+        // var previousShow: PhishShow = self.shows.first!
+        var previousShow: PhishShow = sortedShows.first!
         var currentVenue: String = previousShow.venue
         var multiNightRun = [PhishShow]()
         var locationDictionary = [String : [PhishShow]]()
         
         /// go through each show and add them to an array. keep adding shows to the array if the venue continues to be the same.
         /// when the next venue is reached, set the array as a value for the key of the venue.
-        for (index, show) in self.shows.enumerate()
+            // for (index, show) in self.shows.enumerate()
+        for (index, show) in sortedShows.enumerate()
         {
             /// it's possible that there's only one show for the tour
             if self.shows.count == 1
