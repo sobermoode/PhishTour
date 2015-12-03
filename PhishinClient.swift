@@ -152,12 +152,24 @@ class PhishinClient: NSObject
                             /// only append unique tour IDs, tour IDs that haven't already been requested,
                             /// and tours that aren't "not part of a tour"
                             let tourID = show["tour_id"] as! Int
+                            if let yearTourIDs = year.tourIDs
+                            {
+                                if !yearTourIDs.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
+                                {
+                                    tourIDs.append(tourID)
+                                }
+                            }
+                            else
+                            {
+                                tourIDs.append(tourID)
+                            }
+                            /*
                             if !year.tourIDs!.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
                             {
-                                /// for every unique tour, create an array for its corresponding shows
                                 tourIDs.append(tourID)
                                 // showsForID.updateValue([PhishShow](), forKey: tourID)
                             }
+                            */
                             
                             // append the show to the tour
                             // showsForID[tourID]?.append(newShow)

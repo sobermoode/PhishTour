@@ -214,8 +214,10 @@ class PhishModel: NSObject,
         print("\(tour.name) has \(tour.shows.count) shows.")
         /// create a fetch request for the tour and a predicate that matches the tour ID
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
+        let yearPredicate = NSPredicate(format: "year = %@", tour.year!)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", tour.tourID)
-        tourFetchRequest.predicate = tourFetchPredicate
+        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [yearPredicate, tourFetchPredicate])
+        tourFetchRequest.predicate = compoundPredicate // tourFetchPredicate
         
         do
         {
@@ -227,6 +229,8 @@ class PhishModel: NSObject,
                 let fetchedTour = fetchedTours.first!
                 if !fetchedTour.shows.isEmpty
                 {
+                    print("Got shows from Core Data.")
+                    print("\(fetchedTour.name) has \(fetchedTour.shows.count) shows.")
                     completionHandler(showRequestError: nil)
                     
                     return
@@ -245,6 +249,7 @@ class PhishModel: NSObject,
                         }
                         else
                         {
+                            print("Requested shows from Phish.in.")
                             print("\(tour.name) has \(tour.shows.count) shows.")
                             // print("tour.shows: \(tour.shows)")
                             
@@ -743,6 +748,7 @@ class PhishModel: NSObject,
             
             /// selected a tour
             case 202:
+                print("Selected tour: \(self.currentTours![row])")
                 /// set the selected tour and remember which row it was at
                 self.selectedTour = self.currentTours![row]
                 self.previousTour = row
