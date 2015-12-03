@@ -143,12 +143,8 @@ class PhishinClient: NSObject
                         
                         /// collect all the shows and tour IDs from the results
                         var tourIDs = [Int]()
-                        // var showsForID = [Int : [PhishShow]]()
                         for show in showsForTheYear
                         {
-                            // create a new PhishShow
-                            // let newShow = PhishShow(showInfoFromYear: show)
-                            
                             /// only append unique tour IDs, tour IDs that haven't already been requested,
                             /// and tours that aren't "not part of a tour"
                             let tourID = show["tour_id"] as! Int
@@ -163,16 +159,6 @@ class PhishinClient: NSObject
                             {
                                 tourIDs.append(tourID)
                             }
-                            /*
-                            if !year.tourIDs!.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
-                            {
-                                tourIDs.append(tourID)
-                                // showsForID.updateValue([PhishShow](), forKey: tourID)
-                            }
-                            */
-                            
-                            // append the show to the tour
-                            // showsForID[tourID]?.append(newShow)
                         }
                         
                         /// get the names of each tour
@@ -201,104 +187,6 @@ class PhishinClient: NSObject
             toursRequestTask.resume()
         }
     }
-    
-    // new requestTourForID, 12.1.2015
-    func requestTourForID(id: Int, givenName: String, givenYear: PhishYear, completionHandler: (tourRequestError: NSError?, tour: PhishTour?) -> Void)
-    {
-        
-    }
-    
-    /*
-    /// requests tour data for a given tour ID
-    func requestTourForID(id: Int, completionHandler: (tourRequestError: NSError?, tour: PhishTour?) -> Void)
-    {
-        let tourRequestString = endpoint + Routes.Tours + "/\(id)"
-        let tourRequestURL = NSURL(string: tourRequestString)!
-        let tourRequestTask = session.dataTaskWithURL(tourRequestURL)
-        {
-            tourData, tourResponse, tourError in
-            
-            /// something went wrong
-            if tourError != nil
-            {
-                completionHandler(tourRequestError: tourError!, tour: nil)
-            }
-            else
-            {
-                do
-                {
-                    let tourResults = try NSJSONSerialization.JSONObjectWithData(tourData!, options: []) as! [String : AnyObject]
-                    let tourData = tourResults["data"] as! [String : AnyObject]
-                    
-                    /// get the tour name
-                    let tourName = tourData["name"] as! String
-                    
-                    /// create the shows on the tour
-                    let shows = tourData["shows"] as! [[String : AnyObject]]
-                    var showArray = [PhishShow]()
-                    for show in shows
-                    {
-                        let newShow = NSEntityDescription.insertNewObjectForEntityForName("PhishShow", inManagedObjectContext: self.context) as! PhishShow
-                        newShow.updateProperties(showInfoFromYear: show)
-                        
-                        showArray.append(newShow)
-                    }
-                    
-                    /// get a year to fetch a PhishYear with
-                    let startDate = tourData["starts_on"] as! String
-                    let intYear = Int(NSString(string: startDate).substringToIndex(4))!
-                    let nsNumberYear = NSNumber(integer: intYear) 
-                    let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-                    let yearFetchPredicate = NSPredicate(format: "year = %@", nsNumberYear)
-                    yearFetchRequest.predicate = yearFetchPredicate
-                    
-                    self.context.performBlockAndWait()
-                    {
-                        do
-                        {
-                            /// fetch the specified year
-                            let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
-                            if let year: PhishYear = years.first
-                            {
-                                PhishModel.sharedInstance().selectedYear = year
-                            }
-                            
-                            /// create a tour and set relationships
-                            let newTour = NSEntityDescription.insertNewObjectForEntityForName("PhishTour", inManagedObjectContext: self.context) as! PhishTour
-                            newTour.year = PhishModel.sharedInstance().selectedYear!
-                            newTour.name = tourName
-                            newTour.tourID = id
-                            for show in showArray
-                            {
-                                show.tour = newTour
-                            }
-                            let _ = newTour.locationDictionary!
-                            
-                            /// save new and updated objects to the context
-                            self.context.performBlockAndWait()
-                            {
-                                CoreDataStack.sharedInstance().saveContext()
-                            }
-                            
-                            /// send the tour back through the completion handler
-                            completionHandler(tourRequestError: nil, tour: newTour)
-                        }
-                        catch
-                        {
-                            print("Couldn't fetch \(intYear) from Core Data.")
-                        }
-                    }
-                    
-                }
-                catch
-                {
-                    print("There was a problem requesting info for tour \(id)")
-                }
-            }
-        }
-        tourRequestTask.resume()
-    }
-    */
     
     /// requests the name of a tour for a given tour ID;
     /// the name is used in the song history table view, the PhishTour object is used when the user selects that show and pops back to the map
@@ -387,14 +275,6 @@ class PhishinClient: NSObject
                             
                             /// create a new tour, set the show/tour relationship, and create the location dictionary
                             let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
-                            /*
-                            let shows = showsForID[tourID]!
-                            for show in shows
-                            {
-                                show.tour = newTour
-                            }
-                            let _ = newTour.locationDictionary!
-                            */
                             
                             /// add the new tour to the array being sent back
                             tours.append(newTour)

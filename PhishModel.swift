@@ -211,8 +211,7 @@ class PhishModel: NSObject,
     /// retrieve the shows for a tour from core data or request them for the given tour
     func getShowsForTour(var tour: PhishTour, completionHandler: (showRequestError: NSError!) -> Void)
     {
-        print("\(tour.name) has \(tour.shows.count) shows.")
-        /// create a fetch request for the tour and a predicate that matches the tour ID
+        /// create a fetch request for the tour and a predicate that matches the year and tour ID
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
         let yearPredicate = NSPredicate(format: "year = %@", tour.year!)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", tour.tourID)
@@ -229,8 +228,6 @@ class PhishModel: NSObject,
                 let fetchedTour = fetchedTours.first!
                 if !fetchedTour.shows.isEmpty
                 {
-                    print("Got shows from Core Data.")
-                    print("\(fetchedTour.name) has \(fetchedTour.shows.count) shows.")
                     completionHandler(showRequestError: nil)
                     
                     return
@@ -249,12 +246,7 @@ class PhishModel: NSObject,
                         }
                         else
                         {
-                            print("Requested shows from Phish.in.")
-                            print("\(tour.name) has \(tour.shows.count) shows.")
-                            // print("tour.shows: \(tour.shows)")
-                            
                             /// update the tour
-                            // tour.shows = shows
                             let _ = tour.locationDictionary!
                             
                             /// save the context
@@ -268,36 +260,6 @@ class PhishModel: NSObject,
                     }
                 }
             }
-            /*
-            /// there was no tour in core data, or the tour didn't already have its show info
-            else
-            {
-                /// request the shows
-                PhishinClient.sharedInstance().requestShowsForTour(tour)
-                {
-                    showsRequestError, shows in
-                    
-                    if showsRequestError != nil
-                    {
-                        completionHandler(showRequestError: showsRequestError)
-                    }
-                    else
-                    {
-                        /// update the tour
-                        tour.shows = shows
-                        let _ = tour.locationDictionary!
-                        
-                        /// save the context
-                        self.context.performBlockAndWait()
-                        {
-                            CoreDataStack.sharedInstance().saveContext()
-                        }
-                        
-                        completionHandler(showRequestError: nil)
-                    }
-                }
-            }
-            */
         }
         catch
         {

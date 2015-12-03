@@ -76,12 +76,17 @@ class PhishTour: NSManagedObject
         {
             show1, show2 in
             
-            let show1Total = (show1.year.integerValue * 365) + (show1.month!.integerValue * 31) + show1.day!.integerValue
-            let show2Total = (show2.year.integerValue * 365) + (show2.month!.integerValue * 31) + show2.day!.integerValue
-            
-            // print("\(show1.date): \(show1Total), \(show2.date): \(show2Total)")
-            
-            return show1Total < show2Total
+            if show1.year.integerValue < show2.year.integerValue
+            {
+                return true
+            }
+            else
+            {
+                let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                
+                return show1Total < show2Total
+            }
         }
         // print("sortedShows: \(sortedShows)")
         
