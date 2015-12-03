@@ -441,6 +441,7 @@ class PhishinClient: NSObject
                                     /// none of the shows needed geocoding
                                     if showsToGeocode.isEmpty
                                     {
+                                        /*
                                         /// sort the shows by date
                                         shows.sortInPlace()
                                         {
@@ -458,6 +459,7 @@ class PhishinClient: NSObject
                                                 return show1Total < show2Total
                                             }
                                         }
+                                        */
                                         
                                         /// set the relationship
                                         for show in shows
@@ -493,6 +495,7 @@ class PhishinClient: NSObject
                                                     /// add the geocoded shows to the rest, then sort, etc.
                                                     shows += showsToGeocode
                                                     
+                                                    /*
                                                     shows.sortInPlace()
                                                     {
                                                         show1, show2 in
@@ -509,6 +512,7 @@ class PhishinClient: NSObject
                                                             return show1Total < show2Total
                                                         }
                                                     }
+                                                    */
                                                     
                                                     for show in shows
                                                     {
