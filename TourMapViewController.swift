@@ -708,7 +708,7 @@ class TourMapViewController: UIViewController,
         let callout = CalloutCellView()
         
         /// create a callout cell for every show at the location;
-        /// first, get the shows at the selected location
+        /// first, get the shows at the selected location, and sort them by date
         let venue = PhishModel.sharedInstance().currentShow!.venue
         var showsAtVenue = [PhishShow]()
         let locationIndices = (PhishModel.sharedInstance().selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
@@ -723,26 +723,14 @@ class TourMapViewController: UIViewController,
         {
             showsAtVenue.append(PhishModel.sharedInstance().selectedTour!.shows[index])
         }
-        showsAtVenue.sortInPlace()
-        {
-            show1, show2 in
-            
-            if show1.year.integerValue < show2.year.integerValue
-            {
-                return true
-            }
-            else
-            {
-                let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                
-                return show1Total < show2Total
-            }
-        }
+        let yearSortDescriptor = NSSortDescriptor(key: "year", ascending: true)
+        let monthSortDescriptor = NSSortDescriptor(key: "month", ascending: true)
+        let daySortDescriptor = NSSortDescriptor(key: "day", ascending: true)
+        let sortedShows = (showsAtVenue as NSArray).sortedArrayUsingDescriptors([yearSortDescriptor, monthSortDescriptor, daySortDescriptor]) as! [PhishShow]
         
         /// then, create a callout with a cell for every show at the location
         var showCells = [CalloutCell]()
-        for (index, show) in showsAtVenue.enumerate()
+        for (index, show) in sortedShows.enumerate()
         {
             let showCell = CalloutCell()
             

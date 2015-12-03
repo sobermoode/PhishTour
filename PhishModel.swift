@@ -761,35 +761,13 @@ class PhishModel: NSObject,
         /// dequeue a cell
         let cell = tableView.dequeueReusableCellWithIdentifier("tourListCell", forIndexPath: indexPath) as! TourListCell
         
-        /*
-        /// make sure we get a valid show to build the cell with
-        guard let show = PhishModel.sharedInstance().selectedTour?.shows[indexPath.row]
-        else
-        {
-            print("Couldn't get the show for cell \(indexPath.row)!!!")
-            
-            return cell
-        }
-        */
-        
-        var shows = PhishModel.sharedInstance().selectedTour!.shows
-        shows.sortInPlace()
-        {
-            show1, show2 in
-            
-            if show1.year.integerValue < show2.year.integerValue
-            {
-                return true
-            }
-            else
-            {
-                let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                
-                return show1Total < show2Total
-            }
-        }
-        let show = shows[indexPath.row]
+        /// get the correct show info
+        let shows = PhishModel.sharedInstance().selectedTour!.shows
+        let yearSortDescriptor = NSSortDescriptor(key: "year", ascending: true)
+        let monthSortDescriptor = NSSortDescriptor(key: "month", ascending: true)
+        let daySortDescriptor = NSSortDescriptor(key: "day", ascending: true)
+        let sortedShows = (shows as NSArray).sortedArrayUsingDescriptors([yearSortDescriptor, monthSortDescriptor, daySortDescriptor]) as! [PhishShow]
+        let show = sortedShows[indexPath.row]
         
         /// set the cell properties
         cell.show = show
