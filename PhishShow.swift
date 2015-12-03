@@ -21,9 +21,23 @@ class PhishShow: NSManagedObject,
     @NSManaged var venue: String
     @NSManaged var city: String
     @NSManaged var showID: NSNumber
-    @NSManaged var consecutiveNights: NSNumber
+    // @NSManaged var consecutiveNights: NSNumber
     @NSManaged var tour: PhishTour? 
     @NSManaged var tourID: NSNumber?
+    
+    var consecutiveNights: Int
+    {
+        let locationIndices = (PhishModel.sharedInstance().selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
+        {
+            object, index, stop in
+            
+            let show = object as! PhishShow
+            
+            return show.venue == self.venue
+        }
+        
+        return locationIndices.count
+    }
     
     /// a show consists of sets of songs (the "setlist")
     @NSManaged var songs: [PhishSong]?

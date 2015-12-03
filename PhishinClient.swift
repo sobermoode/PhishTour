@@ -273,7 +273,7 @@ class PhishinClient: NSObject
                             let theTourData = tourResults["data"] as! [String : AnyObject]
                             let tourName = theTourData["name"] as! String
                             
-                            /// create a new tour, set the show/tour relationship, and create the location dictionary
+                            /// create a new tour and set the show/tour relationship
                             let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
                             
                             /// add the new tour to the array being sent back

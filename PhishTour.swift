@@ -68,6 +68,7 @@ class PhishTour: NSManagedObject
         return uniques
     }
     
+    /*
     /// lookup the shows associated with a given location
     lazy var locationDictionary: [String : [PhishShow]]? =
     {
@@ -167,6 +168,7 @@ class PhishTour: NSManagedObject
         
         return locationDictionary
     }()
+    */
     
     /// the coordinates of every show
     var showCoordinates: [CLLocationCoordinate2D]
