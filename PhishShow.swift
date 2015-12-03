@@ -21,13 +21,13 @@ class PhishShow: NSManagedObject,
     @NSManaged var venue: String
     @NSManaged var city: String
     @NSManaged var showID: NSNumber
-    // @NSManaged var consecutiveNights: NSNumber
     @NSManaged var tour: PhishTour? 
     @NSManaged var tourID: NSNumber?
     
+    /// return the number of shows played at a location on the tour 
     var consecutiveNights: Int
     {
-        let locationIndices = (PhishModel.sharedInstance().selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
+        let locationIndices = (self.tour!.shows as NSArray).indexesOfObjectsPassingTest()
         {
             object, index, stop in
             
