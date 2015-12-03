@@ -566,10 +566,17 @@ class PhishinClient: NSObject
                                         {
                                             show1, show2 in
                                             
-                                            let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                                            let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                                            
-                                            return show1Total < show2Total
+                                            if show1.year.integerValue < show2.year.integerValue
+                                            {
+                                                return true
+                                            }
+                                            else
+                                            {
+                                                let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                                let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                                
+                                                return show1Total < show2Total
+                                            }
                                         }
                                         
                                         /// set the relationship
@@ -610,10 +617,17 @@ class PhishinClient: NSObject
                                                     {
                                                         show1, show2 in
                                                         
-                                                        let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
-                                                        let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
-                                                        
-                                                        return show1Total < show2Total
+                                                        if show1.year.integerValue < show2.year.integerValue
+                                                        {
+                                                            return true
+                                                        }
+                                                        else
+                                                        {
+                                                            let show1Total = (show1.month!.integerValue * 31) + show1.day!.integerValue
+                                                            let show2Total = (show2.month!.integerValue * 31) + show2.day!.integerValue
+                                                            
+                                                            return show1Total < show2Total
+                                                        }
                                                     }
                                                     
                                                     for show in shows
