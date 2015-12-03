@@ -799,8 +799,17 @@ class PhishModel: NSObject,
         
         /// annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
         let venue = cell.venueLabel.text!
-        let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
-        let show = locations!.first!
+        // let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
+        // let show = locations!.first!
+        let locationIndices = (self.selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
+        {
+            object, index, stop in
+            
+            let show = object as! PhishShow
+            
+            return show.venue == venue
+        }
+        let show = self.selectedTour!.shows[locationIndices.firstIndex]
         
         /// move the map to the annotaton, so the callout doesn't appear offscreen
         self.tourMap?.setCenterCoordinate(show.coordinate, animated: true)

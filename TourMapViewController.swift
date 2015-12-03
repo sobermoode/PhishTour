@@ -694,6 +694,7 @@ class TourMapViewController: UIViewController,
         
         /// create a callout cell for every show at the location
         let venue = PhishModel.sharedInstance().currentShow!.venue
+        /*
         var showsAtVenue = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]!
         showsAtVenue.sortInPlace()
         {
@@ -711,6 +712,21 @@ class TourMapViewController: UIViewController,
                 return show1Total < show2Total
             }
         }
+        */
+        var showsAtVenue = [PhishShow]()
+        let locationIndices = (PhishModel.sharedInstance().selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
+        {
+            object, index, stop in
+            
+            let show = object as! PhishShow
+            
+            return show.venue == venue
+        }
+        for index in locationIndices
+        {
+            showsAtVenue.append(PhishModel.sharedInstance().selectedTour!.shows[index])
+        }
+        
         var showCells = [CalloutCell]()
         for (index, show) in showsAtVenue.enumerate()
         {
