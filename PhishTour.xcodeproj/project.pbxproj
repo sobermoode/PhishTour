@@ -27,6 +27,10 @@
 		810779A71BF964B700756A0C /* CalloutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A31BF964B700756A0C /* CalloutCell.swift */; };
 		810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A41BF964B700756A0C /* CalloutCellView.swift */; };
 		810779A91BF964B700756A0C /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 810779A61BF964B700756A0C /* SMCalloutView.m */; };
+		818B924C1C1152D20005543B /* phishtour1.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92481C1152D20005543B /* phishtour1.png */; };
+		818B924D1C1152D20005543B /* phishtour2.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92491C1152D20005543B /* phishtour2.png */; };
+		818B924E1C1152D20005543B /* phishtour3.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B924A1C1152D20005543B /* phishtour3.png */; };
+		818B924F1C1152D20005543B /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 818B924B1C1152D20005543B /* README.md */; };
 		81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9D1BFBD33700408BDD /* CoreDataStack.swift */; };
 		81979DA11BFC0ED300408BDD /* PhishTourModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9F1BFC0ED300408BDD /* PhishTourModel.xcdatamodeld */; };
 		81B23C021C0A3C00005AA00B /* PhishSongPerformance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */; };
@@ -57,6 +61,10 @@
 		810779A41BF964B700756A0C /* CalloutCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCellView.swift; sourceTree = "<group>"; };
 		810779A51BF964B700756A0C /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCalloutView.h; sourceTree = "<group>"; };
 		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
+		818B92481C1152D20005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour1.png; sourceTree = "<group>"; };
+		818B92491C1152D20005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour2.png; sourceTree = "<group>"; };
+		818B924A1C1152D20005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour3.png; sourceTree = "<group>"; };
+		818B924B1C1152D20005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		81979D9D1BFBD33700408BDD /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		81979DA01BFC0ED300408BDD /* PhishTourModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PhishTourModel.xcdatamodel; sourceTree = "<group>"; };
 		81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishSongPerformance.swift; sourceTree = "<group>"; };
@@ -92,6 +100,10 @@
 		8107796F1BF9629800756A0C /* PhishTour */ = {
 			isa = PBXGroup;
 			children = (
+				818B92481C1152D20005543B /* phishtour1.png */,
+				818B92491C1152D20005543B /* phishtour2.png */,
+				818B924A1C1152D20005543B /* phishtour3.png */,
+				818B924B1C1152D20005543B /* README.md */,
 				810779701BF9629800756A0C /* AppDelegate.swift */,
 				81979D9D1BFBD33700408BDD /* CoreDataStack.swift */,
 				81979D9F1BFC0ED300408BDD /* PhishTourModel.xcdatamodeld */,
@@ -224,6 +236,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				818B924E1C1152D20005543B /* phishtour3.png in Resources */,
+				818B924D1C1152D20005543B /* phishtour2.png in Resources */,
+				818B924C1C1152D20005543B /* phishtour1.png in Resources */,
 				810779831BF9631D00756A0C /* Main.storyboard in Resources */,
 				8107797B1BF9629800756A0C /* LaunchScreen.storyboard in Resources */,
 				810779781BF9629800756A0C /* Assets.xcassets in Resources */,
@@ -240,6 +255,7 @@
 				81979DA11BFC0ED300408BDD /* PhishTourModel.xcdatamodeld in Sources */,
 				810779931BF963C700756A0C /* PhishTour.swift in Sources */,
 				8107799F1BF9646D00756A0C /* SongCell.swift in Sources */,
+				818B924F1C1152D20005543B /* README.md in Sources */,
 				810779941BF963C700756A0C /* PhishYear.swift in Sources */,
 				81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */,
 				810779711BF9629800756A0C /* AppDelegate.swift in Sources */,
