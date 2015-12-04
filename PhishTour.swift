@@ -65,19 +65,11 @@ class PhishTour: NSManagedObject
             }
         }
         
-        return uniques
-    }
-    
-    /// the coordinates of every show
-    var showCoordinates: [CLLocationCoordinate2D]
-    {
-        var coordinates = [CLLocationCoordinate2D]()
-        for show in shows
-        {
-            coordinates.append(show.coordinate)
-        }
+        let monthSortDescriptor = NSSortDescriptor(key: "month", ascending: true)
+        let daySortDescriptor = NSSortDescriptor(key: "day", ascending: true)
+        let sortedUniques = (uniques as NSArray).sortedArrayUsingDescriptors([monthSortDescriptor, daySortDescriptor]) as! [PhishShow]
         
-        return coordinates
+        return sortedUniques
     }
     
     /// description

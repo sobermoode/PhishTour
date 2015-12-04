@@ -636,7 +636,7 @@ class TourMapViewController: UIViewController,
         /// set the map to be centered on the first show of the tour and zoomed far out
         else
         {
-            firstShowRegion = MKCoordinateRegion(center: selectedTour.showCoordinates.first!, span: MKCoordinateSpan(latitudeDelta: 50.0, longitudeDelta: 50.0))
+            firstShowRegion = MKCoordinateRegion(center: selectedTour.uniqueLocations!.first!.coordinate, span: MKCoordinateSpan(latitudeDelta: 50.0, longitudeDelta: 50.0))
         }
         
         tourMap.setRegion(firstShowRegion, animated: true)
@@ -656,9 +656,10 @@ class TourMapViewController: UIViewController,
         
         /// get the coordinates for every location on the tour
         var showCoordinates = [CLLocationCoordinate2D]()
-        for index in selectedTour.showCoordinates.indices
+        let locations = selectedTour.uniqueLocations!
+        for location in locations
         {
-            showCoordinates.append(selectedTour.showCoordinates[index])
+            showCoordinates.append(location.coordinate)
         }
         
         dispatch_async(dispatch_get_main_queue())
