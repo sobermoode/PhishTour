@@ -258,11 +258,11 @@ class TourMapViewController: UIViewController,
                                     if let previousTour = PhishModel.sharedInstance().previousTour
                                     {
                                         tourPicker.selectRow(previousTour, inComponent: 0, animated: false)
-                                        PhishModel.sharedInstance().selectedTour = tours![previousTour]
+                                        // PhishModel.sharedInstance().selectedTour = tours![previousTour]
                                     }
                                     else
                                     {
-                                        PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
+                                        // PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
                                         PhishModel.sharedInstance().previousTour = 0
                                     }
                                 }
@@ -297,6 +297,11 @@ class TourMapViewController: UIViewController,
             
             self.tourSelecter?.removeFromSuperview()
             self.tourSelecter = nil
+            
+            if let previousTourSelection = PhishModel.sharedInstance().previousTourSelection
+            {
+                PhishModel.sharedInstance().previousTour = previousTourSelection
+            }
         }
     }
     

@@ -25,6 +25,7 @@ class PhishModel: NSObject,
     /// previous selections
     var previousYear: Int?
     var previousTour: Int?
+    var previousTourSelection: Int?
     
     /// the tours for the currently selected year and their names
     var currentTours: [PhishTour]?
@@ -246,7 +247,7 @@ class PhishModel: NSObject,
                         }
                         else
                         {
-                            /// update the tour
+                            // update the tour
                             // let _ = tour.locationDictionary!
                             
                             /// save the context
@@ -710,6 +711,12 @@ class PhishModel: NSObject,
             
             /// selected a tour
             case 202:
+                /*
+                if let previousTour = self.previousTour
+                {
+                    self.previousTourSelection = previousTour
+                }
+                */
                 print("Selected tour: \(self.currentTours![row])")
                 /// set the selected tour and remember which row it was at
                 self.selectedTour = self.currentTours![row]
