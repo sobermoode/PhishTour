@@ -701,6 +701,7 @@ class PhishModel: NSObject,
                         dispatch_async(dispatch_get_main_queue())
                         {
                             tourPicker.reloadAllComponents()
+                            tourPicker.selectRow(0, inComponent: 0, animated: false)
                         }
                         
                         /// indicate that the request has completed successfully by making the progress bar green;

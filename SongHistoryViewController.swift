@@ -464,12 +464,11 @@ class SongHistoryViewController: UIViewController,
             }
             else
             {
-                /// set the selected tour
-                PhishModel.sharedInstance().selectedTour = tour
-                
                 /// set the selected year
                 PhishModel.sharedInstance().selectedYear = tour?.year!
                 
+                /// set the selected tour and the rest of the tours in the year
+                PhishModel.sharedInstance().selectedTour = tour
                 PhishModel.sharedInstance().currentTours = tour!.year!.tours!
                 
                 /// let the tour selecter know what to set the year and tour pickers to
