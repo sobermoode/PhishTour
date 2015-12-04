@@ -61,10 +61,10 @@
 		810779A41BF964B700756A0C /* CalloutCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCellView.swift; sourceTree = "<group>"; };
 		810779A51BF964B700756A0C /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCalloutView.h; sourceTree = "<group>"; };
 		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
-		818B92481C1152D20005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour1.png; sourceTree = "<group>"; };
-		818B92491C1152D20005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour2.png; sourceTree = "<group>"; };
-		818B924A1C1152D20005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour3.png; sourceTree = "<group>"; };
-		818B924B1C1152D20005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		818B92481C1152D20005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour1.png; path = PhishTour/phishtour1.png; sourceTree = "<group>"; };
+		818B92491C1152D20005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour2.png; path = PhishTour/phishtour2.png; sourceTree = "<group>"; };
+		818B924A1C1152D20005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour3.png; path = PhishTour/phishtour3.png; sourceTree = "<group>"; };
+		818B924B1C1152D20005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = PhishTour/README.md; sourceTree = "<group>"; };
 		81979D9D1BFBD33700408BDD /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		81979DA01BFC0ED300408BDD /* PhishTourModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PhishTourModel.xcdatamodel; sourceTree = "<group>"; };
 		81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishSongPerformance.swift; sourceTree = "<group>"; };
@@ -86,6 +86,10 @@
 			children = (
 				8107796F1BF9629800756A0C /* PhishTour */,
 				8107796E1BF9629800756A0C /* Products */,
+				818B92481C1152D20005543B /* phishtour1.png */,
+				818B92491C1152D20005543B /* phishtour2.png */,
+				818B924A1C1152D20005543B /* phishtour3.png */,
+				818B924B1C1152D20005543B /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,10 +116,6 @@
 				810779771BF9629800756A0C /* Assets.xcassets */,
 				810779791BF9629800756A0C /* LaunchScreen.storyboard */,
 				8107797C1BF9629800756A0C /* Info.plist */,
-				818B92481C1152D20005543B /* phishtour1.png */,
-				818B92491C1152D20005543B /* phishtour2.png */,
-				818B924A1C1152D20005543B /* phishtour3.png */,
-				818B924B1C1152D20005543B /* README.md */,
 			);
 			path = PhishTour;
 			sourceTree = "<group>";
