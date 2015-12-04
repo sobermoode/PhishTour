@@ -174,8 +174,6 @@ class PhishTour: NSManagedObject
     }
     
     // TODO: Re-instate?
-    // I commented it out, while making changes to the shows property to be a Set, to work with Core Data.
-    // However, it turned out, that in its initial submit form, I wasn't using this method, anyway.
     /*
     /// for use with highlighting the correct rows in the show list table view
     /// returns the row number of the show to highlight and the row number of the last show of a multi-night run

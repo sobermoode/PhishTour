@@ -258,45 +258,4 @@ class PhishShow: NSManagedObject,
         let formattedString = dateFormatter.stringFromDate(formattedDate)
         self.date = formattedString
     }
-    
-    /*
-    /// PhishShow objects are archived as part of a PhishSong history
-    required init?(coder aDecoder: NSCoder)
-    {
-        let context = CoreDataStack.sharedInstance().managedObjectContext
-        let showEntity = NSEntityDescription.entityForName("PhishShow", inManagedObjectContext: context)!
-        super.init(entity: showEntity, insertIntoManagedObjectContext: context)
-        
-        self.date = aDecoder.decodeObjectForKey("date") as! String
-        self.day = aDecoder.decodeObjectForKey("day") as? NSNumber
-        self.month = aDecoder.decodeObjectForKey("month") as? NSNumber
-        self.year = aDecoder.decodeObjectForKey("year") as! NSNumber
-        self.venue = aDecoder.decodeObjectForKey("venue") as! String
-        self.city = aDecoder.decodeObjectForKey("city") as! String
-        self.showID = aDecoder.decodeObjectForKey("showID") as! NSNumber
-        self.consecutiveNights = aDecoder.decodeObjectForKey("consecutiveNights") as! NSNumber
-        self.tour = aDecoder.decodeObjectForKey("tour") as? PhishTour
-        self.tourID = aDecoder.decodeObjectForKey("tourID") as? NSNumber
-        self.songs = aDecoder.decodeObjectForKey("songs") as? [PhishSong]
-        self.showLatitude = aDecoder.decodeObjectForKey("latitude") as! NSNumber
-        self.showLongitude = aDecoder.decodeObjectForKey("longitude") as! NSNumber
-    }
-    
-    func encodeWithCoder(aCoder: NSCoder)
-    {
-        aCoder.encodeObject(self.date, forKey: "date")
-        aCoder.encodeObject(self.day, forKey: "day")
-        aCoder.encodeObject(self.month, forKey: "month")
-        aCoder.encodeObject(self.year, forKey: "year")
-        aCoder.encodeObject(self.venue, forKey: "venue")
-        aCoder.encodeObject(self.city, forKey: "city")
-        aCoder.encodeObject(self.showID, forKey: "showID")
-        aCoder.encodeObject(self.consecutiveNights, forKey: "consecutiveNights")
-        aCoder.encodeObject(self.tour, forKey: "tour")
-        aCoder.encodeObject(self.tourID, forKey: "tourID")
-        aCoder.encodeObject(self.songs, forKey: "songs")
-        aCoder.encodeObject(self.showLatitude, forKey: "latitude")
-        aCoder.encodeObject(self.showLongitude, forKey: "longitude")
-    }
-    */
 }

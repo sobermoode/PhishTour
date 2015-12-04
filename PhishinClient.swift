@@ -664,7 +664,6 @@ class PhishinClient: NSObject
     /// requests a specfic show given an ID
     func requestShowForID(id: Int, completionHandler: (showRequestError: NSError?, show: PhishShow?) -> Void)
     {
-        print("requestShowForID...")
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
             /// construct the request URL

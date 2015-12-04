@@ -327,6 +327,7 @@ class SongHistoryViewController: UIViewController,
             }
             else
             {
+                /// get the tour ID to request
                 if let tourID = performance.tourID
                 {
                     PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
@@ -361,6 +362,7 @@ class SongHistoryViewController: UIViewController,
                 }
                 else
                 {
+                    /// we didn't have the tour ID, but we can get it from the show
                     PhishinClient.sharedInstance().requestTourIDFromShowForID(performance.showID.integerValue)
                     {
                         tourIDRequestError, tourID in
@@ -501,7 +503,6 @@ class SongHistoryViewController: UIViewController,
                     {
                         /// set the selected show
                         PhishModel.sharedInstance().currentShow = show
-                        //PhishModel.sharedInstance().previousTour = 0
                         
                         /// get a reference to the tour map view controller, to let it know the song history view controller is updating it
                         let tourMap = self.navigationController?.viewControllers.first! as! TourMapViewController

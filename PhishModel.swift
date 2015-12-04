@@ -25,26 +25,9 @@ class PhishModel: NSObject,
     /// previous selections
     var previousYear: Int?
     var previousTour: Int?
-    var previousTourSelection: Int?
     
     /// the tours for the currently selected year and their names
     var currentTours: [PhishTour]?
-    var currentTourNames: [String]?
-    {
-        guard self.currentTours != nil
-        else
-        {
-            return nil
-        }
-        
-        var tourNames = [String]()
-        for tour in self.currentTours!
-        {
-            tourNames.append(tour.name)
-        }
-        
-        return tourNames
-    }
     
     /// current selections
     var currentShow: PhishShow?
@@ -142,12 +125,9 @@ class PhishModel: NSObject,
     func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
     {
         /// create a fetch request with a predicate to match the year being requested
-        /// and a sort descriptor to sort ascending by tour ID
         let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
         let toursFetchPredicate = NSPredicate(format: "year = %@", year)
-        // let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
         toursFetchRequest.predicate = toursFetchPredicate
-        // toursFetchRequest.sortDescriptors = [sortDescriptor]
         
         /// a specific tour might have been requested from the song history;
         /// we'll need to get the other tours for that year
@@ -247,9 +227,6 @@ class PhishModel: NSObject,
                         }
                         else
                         {
-                            // update the tour
-                            // let _ = tour.locationDictionary!
-                            
                             /// save the context
                             self.context.performBlockAndWait()
                             {
@@ -425,24 +402,6 @@ class PhishModel: NSObject,
                         }
                         
                         completionHandler(tourError: nil, tour: newTour)
-                        
-                        /*
-                        PhishinClient.sharedInstance().requestTourForID(id, givenName: name, givenYear: year)
-                        {
-                            tourRequestError, tour in
-                            
-                            /// something went wrong
-                            if tourRequestError != nil
-                            {
-                                completionHandler(tourError: tourRequestError!, tour: nil)
-                            }
-                            /// return the tour
-                            else
-                            {
-                                completionHandler(tourError: nil, tour: tour!)
-                            }
-                        }
-                        */
                     }
                 }
                 catch
@@ -461,7 +420,6 @@ class PhishModel: NSObject,
     func getTourNameForTourID(id: Int, completionHandler: (tourNameError: NSError?, tourName: String?) -> Void)
     {
         /// check for a saved tour and return its name
-        /// check for a saved tour and return it
         let tourFetchRequest = NSFetchRequest(entityName: "PhishTour")
         let nsNumberID = NSNumber(integer: id)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
@@ -504,15 +462,6 @@ class PhishModel: NSObject,
         }
     }
     
-    /// returns a string to plug into the keyed unarchiver to retrieve files
-    func createFileURLWithFilename(filename: String) -> String
-    {
-        let documentsURL = NSURL(string: self.documentsPath)!
-        let fileURL = documentsURL.URLByAppendingPathComponent(filename)
-        
-        return fileURL.path!
-    }
-    
     // MARK: UIPickerViewDataSource, UIPickerViewDelegate methods
     
     /// the PhishModel is delegate of the year picker and the tour picker on the TourMapViewController's tour selecter
@@ -549,13 +498,13 @@ class PhishModel: NSObject,
             
             /// the tour picker has a row for each tour in the year
             case 202:
-                guard let currentTourNames = self.currentTourNames
+                guard let currentTours = self.currentTours
                 else
                 {
                     return 0
                 }
                 
-                return currentTourNames.count
+                return currentTours.count
                 
             default:
                 return 0
@@ -602,17 +551,6 @@ class PhishModel: NSObject,
                     return label!
                 }
                 label?.text = currentTours[row].name
-                /*
-                guard let currentTourNames = self.currentTourNames
-                else
-                {
-                    label?.text = ". . ."
-                    
-                    return label!
-                }
-                
-                label?.text = currentTourNames[row]
-                */
                 
             default:
                 label?.text =  ". . ."
@@ -722,13 +660,6 @@ class PhishModel: NSObject,
             
             /// selected a tour
             case 202:
-                /*
-                if let previousTour = self.previousTour
-                {
-                    self.previousTourSelection = previousTour
-                }
-                */
-                print("Selected tour: \(self.currentTours![row])")
                 /// set the selected tour and remember which row it was at
                 self.selectedTour = self.currentTours![row]
                 self.previousTour = row
@@ -816,8 +747,6 @@ class PhishModel: NSObject,
         
         /// annotations are added by location, not by show, so we need to find the location that corresponds to the annotation
         let venue = cell.venueLabel.text!
-        // let locations = PhishModel.sharedInstance().selectedTour!.locationDictionary![venue]
-        // let show = locations!.first!
         let locationIndices = (self.selectedTour!.shows as NSArray).indexesOfObjectsPassingTest()
         {
             object, index, stop in
