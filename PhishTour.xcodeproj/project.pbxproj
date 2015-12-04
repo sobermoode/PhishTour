@@ -31,6 +31,10 @@
 		818B924D1C1152D20005543B /* phishtour2.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92491C1152D20005543B /* phishtour2.png */; };
 		818B924E1C1152D20005543B /* phishtour3.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B924A1C1152D20005543B /* phishtour3.png */; };
 		818B924F1C1152D20005543B /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 818B924B1C1152D20005543B /* README.md */; };
+		818B92541C11554A0005543B /* phishtour1.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92501C11554A0005543B /* phishtour1.png */; };
+		818B92551C11554A0005543B /* phishtour2.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92511C11554A0005543B /* phishtour2.png */; };
+		818B92561C11554A0005543B /* phishtour3.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92521C11554A0005543B /* phishtour3.png */; };
+		818B92571C11554A0005543B /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 818B92531C11554A0005543B /* README.md */; };
 		81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9D1BFBD33700408BDD /* CoreDataStack.swift */; };
 		81979DA11BFC0ED300408BDD /* PhishTourModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 81979D9F1BFC0ED300408BDD /* PhishTourModel.xcdatamodeld */; };
 		81B23C021C0A3C00005AA00B /* PhishSongPerformance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */; };
@@ -65,6 +69,10 @@
 		818B92491C1152D20005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour2.png; path = PhishTour/phishtour2.png; sourceTree = "<group>"; };
 		818B924A1C1152D20005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour3.png; path = PhishTour/phishtour3.png; sourceTree = "<group>"; };
 		818B924B1C1152D20005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = PhishTour/README.md; sourceTree = "<group>"; };
+		818B92501C11554A0005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour1.png; sourceTree = "<group>"; };
+		818B92511C11554A0005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour2.png; sourceTree = "<group>"; };
+		818B92521C11554A0005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour3.png; sourceTree = "<group>"; };
+		818B92531C11554A0005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		81979D9D1BFBD33700408BDD /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		81979DA01BFC0ED300408BDD /* PhishTourModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PhishTourModel.xcdatamodel; sourceTree = "<group>"; };
 		81B23C011C0A3C00005AA00B /* PhishSongPerformance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhishSongPerformance.swift; sourceTree = "<group>"; };
@@ -84,6 +92,10 @@
 		810779641BF9629800756A0C = {
 			isa = PBXGroup;
 			children = (
+				818B92501C11554A0005543B /* phishtour1.png */,
+				818B92511C11554A0005543B /* phishtour2.png */,
+				818B92521C11554A0005543B /* phishtour3.png */,
+				818B92531C11554A0005543B /* README.md */,
 				8107796F1BF9629800756A0C /* PhishTour */,
 				8107796E1BF9629800756A0C /* Products */,
 				818B92481C1152D20005543B /* phishtour1.png */,
@@ -237,11 +249,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				818B924E1C1152D20005543B /* phishtour3.png in Resources */,
+				818B92551C11554A0005543B /* phishtour2.png in Resources */,
 				818B924D1C1152D20005543B /* phishtour2.png in Resources */,
+				818B92561C11554A0005543B /* phishtour3.png in Resources */,
 				818B924C1C1152D20005543B /* phishtour1.png in Resources */,
 				810779831BF9631D00756A0C /* Main.storyboard in Resources */,
 				8107797B1BF9629800756A0C /* LaunchScreen.storyboard in Resources */,
 				810779781BF9629800756A0C /* Assets.xcassets in Resources */,
+				818B92541C11554A0005543B /* phishtour1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +287,7 @@
 				810779921BF963C700756A0C /* PhishSong.swift in Sources */,
 				810779881BF9636500756A0C /* SongHistoryViewController.swift in Sources */,
 				810779871BF9636500756A0C /* SetlistViewController.swift in Sources */,
+				818B92571C11554A0005543B /* README.md in Sources */,
 				810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
