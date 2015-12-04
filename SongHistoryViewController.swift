@@ -467,8 +467,14 @@ class SongHistoryViewController: UIViewController,
                 /// set the selected tour
                 PhishModel.sharedInstance().selectedTour = tour
                 
-                /// let the tour selecter know what to set the year picker to
+                /// set the selected year
+                PhishModel.sharedInstance().selectedYear = tour?.year!
+                
+                PhishModel.sharedInstance().currentTours = tour!.year!.tours!
+                
+                /// let the tour selecter know what to set the year and tour pickers to
                 PhishModel.sharedInstance().previousYear = PhishModel.sharedInstance().years?.indexOf(tour!.year!)
+                PhishModel.sharedInstance().previousTour = PhishModel.sharedInstance().currentTours?.indexOf(tour!)
                 
                 /// get the selected show
                 PhishModel.sharedInstance().getShowForID(performance.showID.integerValue)

@@ -145,9 +145,9 @@ class PhishModel: NSObject,
         /// and a sort descriptor to sort ascending by tour ID
         let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
         let toursFetchPredicate = NSPredicate(format: "year = %@", year)
-        let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
+        // let sortDescriptor = NSSortDescriptor(key: "tourID", ascending: true)
         toursFetchRequest.predicate = toursFetchPredicate
-        toursFetchRequest.sortDescriptors = [sortDescriptor]
+        // toursFetchRequest.sortDescriptors = [sortDescriptor]
         
         /// a specific tour might have been requested from the song history;
         /// we'll need to get the other tours for that year
@@ -594,6 +594,15 @@ class PhishModel: NSObject,
             case 202:
                 label?.font = UIFont(name: "Apple SD Gothic Neo", size: 12)
                 
+                guard let currentTours = self.currentTours
+                else
+                {
+                    label?.text = ". . ."
+                    
+                    return label!
+                }
+                label?.text = currentTours[row].name
+                /*
                 guard let currentTourNames = self.currentTourNames
                 else
                 {
@@ -603,6 +612,7 @@ class PhishModel: NSObject,
                 }
                 
                 label?.text = currentTourNames[row]
+                */
                 
             default:
                 label?.text =  ". . ."

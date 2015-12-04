@@ -218,6 +218,10 @@ class TourMapViewController: UIViewController,
                             reloadYear = PhishModel.sharedInstance().years![previousYear]                            
                             yearPicker.selectRow(previousYear, inComponent: 0, animated: false)
                         }
+                        else
+                        {
+                            PhishModel.sharedInstance().selectedYear = PhishModel.sharedInstance().years!.first!
+                        }
                         
                         /// get the tours for the most current year, or whichever year was previously selected
                         let yearToGet: PhishYear = (reloadYear != nil) ? reloadYear! : PhishModel.sharedInstance().years!.first!
@@ -254,6 +258,39 @@ class TourMapViewController: UIViewController,
                                 {
                                     tourPicker.reloadAllComponents()
                                     
+                                    if let selectedYear = PhishModel.sharedInstance().selectedYear, selectedTour = PhishModel.sharedInstance().selectedTour
+                                    {
+                                        print("Looking for \(PhishModel.sharedInstance().selectedTour!.name), id: \(PhishModel.sharedInstance().selectedTour!.tourID)")
+                                        let currentTourID: Int = selectedTour.tourID.integerValue
+                                        let tourIndices = (selectedYear.tours! as NSArray).indexesOfObjectsPassingTest()
+                                        {
+                                            object, index, stop in
+                                            
+                                            let tour = object as! PhishTour
+                                            print("Checking \(tour.name), id: \(tour.tourID.integerValue)")
+                                            
+                                            return tour.tourID.integerValue == currentTourID
+                                        }
+                                        print("tourIndices: \(tourIndices)")
+                                        let tourIndex = tourIndices.firstIndex
+                                        print("Found it at index \(tourIndex)")
+                                        
+                                        if tourIndex != NSNotFound
+                                        {
+                                            tourPicker.selectRow(tourIndex, inComponent: 0, animated: false)
+                                        }
+                                        else
+                                        {
+                                            tourPicker.selectRow(0, inComponent: 0, animated: false)
+                                        }
+                                    }
+                                    else
+                                    {
+                                        tourPicker.selectRow(0, inComponent: 0, animated: false)
+                                        PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
+                                    }
+                                    
+                                    /*
                                     /// set the tour picker to the previously selected tour, or the first item if there wasn't a previous selection
                                     if let previousTour = PhishModel.sharedInstance().previousTour
                                     {
@@ -265,6 +302,7 @@ class TourMapViewController: UIViewController,
                                         // PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
                                         PhishModel.sharedInstance().previousTour = 0
                                     }
+                                    */
                                 }
                                 
                                 /// make the progress bar green when it finishes successfully
@@ -298,10 +336,12 @@ class TourMapViewController: UIViewController,
             self.tourSelecter?.removeFromSuperview()
             self.tourSelecter = nil
             
+            /*
             if let previousTourSelection = PhishModel.sharedInstance().previousTourSelection
             {
                 PhishModel.sharedInstance().previousTour = previousTourSelection
             }
+            */
         }
     }
     
