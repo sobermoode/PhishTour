@@ -27,10 +27,6 @@
 		810779A71BF964B700756A0C /* CalloutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A31BF964B700756A0C /* CalloutCell.swift */; };
 		810779A81BF964B700756A0C /* CalloutCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810779A41BF964B700756A0C /* CalloutCellView.swift */; };
 		810779A91BF964B700756A0C /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 810779A61BF964B700756A0C /* SMCalloutView.m */; };
-		818B924C1C1152D20005543B /* phishtour1.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92481C1152D20005543B /* phishtour1.png */; };
-		818B924D1C1152D20005543B /* phishtour2.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92491C1152D20005543B /* phishtour2.png */; };
-		818B924E1C1152D20005543B /* phishtour3.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B924A1C1152D20005543B /* phishtour3.png */; };
-		818B924F1C1152D20005543B /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 818B924B1C1152D20005543B /* README.md */; };
 		818B92541C11554A0005543B /* phishtour1.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92501C11554A0005543B /* phishtour1.png */; };
 		818B92551C11554A0005543B /* phishtour2.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92511C11554A0005543B /* phishtour2.png */; };
 		818B92561C11554A0005543B /* phishtour3.png in Resources */ = {isa = PBXBuildFile; fileRef = 818B92521C11554A0005543B /* phishtour3.png */; };
@@ -65,10 +61,6 @@
 		810779A41BF964B700756A0C /* CalloutCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalloutCellView.swift; sourceTree = "<group>"; };
 		810779A51BF964B700756A0C /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCalloutView.h; sourceTree = "<group>"; };
 		810779A61BF964B700756A0C /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCalloutView.m; sourceTree = "<group>"; };
-		818B92481C1152D20005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour1.png; path = PhishTour/phishtour1.png; sourceTree = "<group>"; };
-		818B92491C1152D20005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour2.png; path = PhishTour/phishtour2.png; sourceTree = "<group>"; };
-		818B924A1C1152D20005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = phishtour3.png; path = PhishTour/phishtour3.png; sourceTree = "<group>"; };
-		818B924B1C1152D20005543B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = PhishTour/README.md; sourceTree = "<group>"; };
 		818B92501C11554A0005543B /* phishtour1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour1.png; sourceTree = "<group>"; };
 		818B92511C11554A0005543B /* phishtour2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour2.png; sourceTree = "<group>"; };
 		818B92521C11554A0005543B /* phishtour3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phishtour3.png; sourceTree = "<group>"; };
@@ -98,10 +90,6 @@
 				818B92531C11554A0005543B /* README.md */,
 				8107796F1BF9629800756A0C /* PhishTour */,
 				8107796E1BF9629800756A0C /* Products */,
-				818B92481C1152D20005543B /* phishtour1.png */,
-				818B92491C1152D20005543B /* phishtour2.png */,
-				818B924A1C1152D20005543B /* phishtour3.png */,
-				818B924B1C1152D20005543B /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -248,11 +236,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				818B924E1C1152D20005543B /* phishtour3.png in Resources */,
 				818B92551C11554A0005543B /* phishtour2.png in Resources */,
-				818B924D1C1152D20005543B /* phishtour2.png in Resources */,
 				818B92561C11554A0005543B /* phishtour3.png in Resources */,
-				818B924C1C1152D20005543B /* phishtour1.png in Resources */,
 				810779831BF9631D00756A0C /* Main.storyboard in Resources */,
 				8107797B1BF9629800756A0C /* LaunchScreen.storyboard in Resources */,
 				810779781BF9629800756A0C /* Assets.xcassets in Resources */,
@@ -270,7 +255,6 @@
 				81979DA11BFC0ED300408BDD /* PhishTourModel.xcdatamodeld in Sources */,
 				810779931BF963C700756A0C /* PhishTour.swift in Sources */,
 				8107799F1BF9646D00756A0C /* SongCell.swift in Sources */,
-				818B924F1C1152D20005543B /* README.md in Sources */,
 				810779941BF963C700756A0C /* PhishYear.swift in Sources */,
 				81979D9E1BFBD33700408BDD /* CoreDataStack.swift in Sources */,
 				810779711BF9629800756A0C /* AppDelegate.swift in Sources */,
