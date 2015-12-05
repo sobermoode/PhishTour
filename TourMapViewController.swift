@@ -444,7 +444,10 @@ class TourMapViewController: UIViewController,
                     action in
                     
                     /// set the tour selecter to display the previous successfully requested year and its tours
-                    PhishModel.sharedInstance().selectedYear = PhishModel.sharedInstance().years![PhishModel.sharedInstance().previousYear!]
+                    if let previousYear = PhishModel.sharedInstance().previousYear
+                    {
+                        PhishModel.sharedInstance().selectedYear = PhishModel.sharedInstance().years![previousYear]
+                    }
                     PhishModel.sharedInstance().currentTours = PhishModel.sharedInstance().selectedYear!.tours
                     
                     /// reset the flag
@@ -616,17 +619,64 @@ class TourMapViewController: UIViewController,
         
         /// get the coordinates for every location on the tour
         var showCoordinates = [CLLocationCoordinate2D]()
-        let locations = selectedTour.uniqueLocations!
-        for location in locations
+        if let locations = selectedTour.uniqueLocations
         {
-            showCoordinates.append(location.coordinate)
+            for location in locations
+            {
+                showCoordinates.append(location.coordinate)
+            }
+            
+            dispatch_async(dispatch_get_main_queue())
+            {
+                /// draw the trail between every coordinate
+                let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
+                self.tourMap.addOverlay(tourTrail)
+            }
         }
-        
-        dispatch_async(dispatch_get_main_queue())
+        /// if the locations aren't available yet, create an alert to let the user try the request again
+        else
         {
-            /// draw the trail between every coordinate
-            let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
-            self.tourMap.addOverlay(tourTrail)
+            /// create an alert for the problem
+            /// the user will have the option to make the request again or cancel
+            let alert = UIAlertController(title: "Whoops!", message: "There was an error with the shows for the \(selectedTour.name)", preferredStyle: .Alert)
+            let tryAgainAction = UIAlertAction(title: "Try Again", style: .Default)
+            {
+                action in
+                
+                dispatch_async(dispatch_get_main_queue())
+                {
+                    self.progressBar?.progressTintColor = UIColor.redColor()
+                    self.progressBar?.removeFromSuperview()
+                    self.progressBar = nil
+                }
+                
+                self.followTour()
+            }
+            alert.addAction(tryAgainAction)
+            let cancelAction = UIAlertAction(title: "Cancel", style: .Default)
+            {
+                action in
+                
+                /// reset the map, flash the progress bar red, then, remove it after a short delay
+                dispatch_async(dispatch_get_main_queue())
+                {
+                    self.reset()
+                    
+                    self.progressBar?.progressTintColor = UIColor.redColor()
+                    let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                    dispatch_after(delayTime, dispatch_get_main_queue())
+                    {
+                        self.progressBar?.removeFromSuperview()
+                        self.progressBar = nil
+                    }
+                }
+            }
+            alert.addAction(cancelAction)
+            
+            dispatch_async(dispatch_get_main_queue())
+            {
+                self.presentViewController(alert, animated: true, completion: nil)
+            }
         }
     }
     
