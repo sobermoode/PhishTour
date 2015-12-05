@@ -449,11 +449,14 @@ class PhishinClient: NSObject
                                 {
                                     /// none of the shows needed geocoding
                                     if showsToGeocode.isEmpty
-                                    {                                        
-                                        /// set the relationship
-                                        for show in shows
+                                    {
+                                        self.context.performBlockAndWait()
                                         {
-                                            show.tour = tour
+                                            /// set the relationship
+                                            for show in shows
+                                            {
+                                                show.tour = tour
+                                            }
                                         }
                                         
                                         /// return by completion handler
@@ -484,9 +487,13 @@ class PhishinClient: NSObject
                                                     /// add the geocoded shows to the rest, then sort, etc.
                                                     shows += showsToGeocode
                                                     
-                                                    for show in shows
+                                                    self.context.performBlockAndWait()
                                                     {
-                                                        show.tour = tour
+                                                        /// set the relationship
+                                                        for show in shows
+                                                        {
+                                                            show.tour = tour
+                                                        }
                                                     }
                                                     
                                                     completionHandler(showRequestsError: nil)

@@ -147,6 +147,7 @@ class TourMapViewController: UIViewController,
             tourPicker.frame = CGRect(x: CGRectGetMidX(self.tourSelecter!.contentView.bounds) - (tourPicker.bounds.width / 2), y: yearPicker.bounds.height + 25, width: tourPicker.bounds.width, height: tourPicker.bounds.height)
             tourPicker.dataSource = PhishModel.sharedInstance()
             tourPicker.delegate = PhishModel.sharedInstance()
+            PhishModel.sharedInstance().tourPicker = tourPicker
             
             let followTourButton = UIButton()
             followTourButton.titleLabel?.font = UIFont(name: "AppleSDGothicNeo-Bold", size: 16)
@@ -502,7 +503,54 @@ class TourMapViewController: UIViewController,
                     let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC)))
                     dispatch_after(delayTime, dispatch_get_main_queue())
                     {
-                        self.tourMap.addAnnotations(selectedTour.uniqueLocations!)
+                        guard let locations = selectedTour.uniqueLocations
+                        else
+                        {
+                            let alert = UIAlertController(title: "Whoops!", message: "There was an error with the shows for the \(selectedTour.name)", preferredStyle: .Alert)
+                            let tryAgainAction = UIAlertAction(title: "Try Again", style: .Default)
+                            {
+                                action in
+                                
+                                dispatch_async(dispatch_get_main_queue())
+                                {
+                                    self.progressBar?.progressTintColor = UIColor.redColor()
+                                    self.progressBar?.removeFromSuperview()
+                                    self.progressBar = nil
+                                }
+                                
+                                self.followTour()
+                            }
+                            alert.addAction(tryAgainAction)
+                            let cancelAction = UIAlertAction(title: "Cancel", style: .Default)
+                            {
+                                action in
+                                
+                                /// reset the map, flash the progress bar red, then, remove it after a short delay
+                                dispatch_async(dispatch_get_main_queue())
+                                {
+                                    self.reset()
+                                    
+                                    self.progressBar?.progressTintColor = UIColor.redColor()
+                                    let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                                    dispatch_after(delayTime, dispatch_get_main_queue())
+                                    {
+                                        self.progressBar?.removeFromSuperview()
+                                        self.progressBar = nil
+                                    }
+                                }
+                            }
+                            alert.addAction(cancelAction)
+                            
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                self.presentViewController(alert, animated: true, completion: nil)
+                            }
+                            
+                            return
+                        }
+                        
+                        // self.tourMap.addAnnotations(selectedTour.uniqueLocations!)
+                        self.tourMap.addAnnotations(locations)
                         
                         /// if a show was selected from the song history, select the annotation associated with the show,
                         /// so the callout will be presented
@@ -619,6 +667,25 @@ class TourMapViewController: UIViewController,
         
         /// get the coordinates for every location on the tour
         var showCoordinates = [CLLocationCoordinate2D]()
+        guard let locations = selectedTour.uniqueLocations
+        else
+        {
+            return
+        }
+        
+        for location in locations
+        {
+            showCoordinates.append(location.coordinate)
+        }
+        
+        dispatch_async(dispatch_get_main_queue())
+        {
+            /// draw the trail between every coordinate
+            let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
+            self.tourMap.addOverlay(tourTrail)
+        }
+        
+        /*
         if let locations = selectedTour.uniqueLocations
         {
             for location in locations
@@ -678,6 +745,7 @@ class TourMapViewController: UIViewController,
                 self.presentViewController(alert, animated: true, completion: nil)
             }
         }
+        */
     }
     
     // MARK: MKMapViewDelegate methods

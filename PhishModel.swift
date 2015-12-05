@@ -37,6 +37,7 @@ class PhishModel: NSObject,
     /// references to the TourMapViewController and its map view
     var tourMapVC: TourMapViewController?
     var tourMap: MKMapView?
+    var tourPicker: UIPickerView?
     
     /// a progress bar to display on the TourMapViewController as certain requests are in-progress
     var progressBar: UIProgressView!
@@ -656,14 +657,18 @@ class PhishModel: NSObject,
                         self.selectedTour = tours!.first!
                         self.previousTour = 0
                         
-                        /// get at the year picker so we can reload it with the new tours
-                        let tourSelecter = pickerView.superview! as UIView
-                        let tourPicker = tourSelecter.viewWithTag(202) as! UIPickerView
+                        // get at the year picker so we can reload it with the new tours
+                        // let tourSelecter = pickerView.superview! as UIView
+                        // let tourPicker = tourSelecter.viewWithTag(202) as! UIPickerView
                         
-                        dispatch_async(dispatch_get_main_queue())
+                        /// reload the tour picker with the new tours
+                        if let tourPicker = self.tourPicker
                         {
-                            tourPicker.reloadAllComponents()
-                            tourPicker.selectRow(0, inComponent: 0, animated: false)
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                tourPicker.reloadAllComponents()
+                                tourPicker.selectRow(0, inComponent: 0, animated: false)
+                            }
                         }
                         
                         /// indicate that the request has completed successfully by making the progress bar green;
