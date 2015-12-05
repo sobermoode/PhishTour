@@ -78,18 +78,21 @@ class PhishinClient: NSObject
                         var phishYears = [PhishYear]()
                         let progressBump: Float = 1.0 / 20.0
                         var totalProgress: Float = 0
-                        for year in years
+                        self.context.performBlockAndWait()
                         {
-                            if let intYear = Int(year)
+                            for year in years
                             {
-                                let newYear = PhishYear(year: intYear)
-                                
-                                phishYears.append(newYear)
-                                
-                                totalProgress += progressBump
-                                dispatch_async(dispatch_get_main_queue())
+                                if let intYear = Int(year)
                                 {
-                                    self.tourSelecterProgressBar.setProgress(totalProgress, animated: true)
+                                    let newYear = PhishYear(year: intYear)
+                                    
+                                    phishYears.append(newYear)
+                                    
+                                    totalProgress += progressBump
+                                    dispatch_async(dispatch_get_main_queue())
+                                    {
+                                        self.tourSelecterProgressBar.setProgress(totalProgress, animated: true)
+                                    }
                                 }
                             }
                         }
@@ -273,11 +276,14 @@ class PhishinClient: NSObject
                             let theTourData = tourResults["data"] as! [String : AnyObject]
                             let tourName = theTourData["name"] as! String
                             
-                            /// create a new tour and set the show/tour relationship
-                            let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
-                            
-                            /// add the new tour to the array being sent back
-                            tours.append(newTour)
+                            self.context.performBlockAndWait()
+                            {
+                                /// create a new tour and set the show/tour relationship
+                                let newTour = PhishTour(year: year, name: tourName, tourID: tourID)
+                                
+                                /// add the new tour to the array being sent back
+                                tours.append(newTour)
+                            }                            
                         }
                         catch
                         {
@@ -407,23 +413,26 @@ class PhishinClient: NSObject
                                 let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
                                 let showData = showResults["data"] as! [String : AnyObject]
                                 
-                                /// create a new show
-                                let newShow = PhishShow(showInfoFromShow: showData)
-                                
-                                /// check that there was latitude/longitude info,
-                                /// otherwise, put the show in a separate array
-                                if newShow.showLatitude != 0 && newShow.showLongitude != 0
+                                self.context.performBlockAndWait()
                                 {
-                                    shows.append(newShow)
+                                    /// create a new show
+                                    let newShow = PhishShow(showInfoFromShow: showData)
                                     
-                                    --showsToRequest
-                                }
-                                else
-                                {
-                                    showsToGeocode.append(newShow)
-                                    
-                                    --showsToRequest
-                                }
+                                    /// check that there was latitude/longitude info,
+                                    /// otherwise, put the show in a separate array
+                                    if newShow.showLatitude != 0 && newShow.showLongitude != 0
+                                    {
+                                        shows.append(newShow)
+                                        
+                                        --showsToRequest
+                                    }
+                                    else
+                                    {
+                                        showsToGeocode.append(newShow)
+                                        
+                                        --showsToRequest
+                                    }
+                                }                                
                                 
                                 /// update the progress bar
                                 if currentProgress != nil
@@ -541,19 +550,22 @@ class PhishinClient: NSObject
                             progressBump = 0.2 / Float(tracks.count)
                         }
                         
-                        /// create each song and update the progress bar
-                        for track in tracks
+                        self.context.performBlockAndWait()
                         {
-                            let newSong = NSEntityDescription.insertNewObjectForEntityForName("PhishSong", inManagedObjectContext: self.context) as! PhishSong
-                            newSong.updateProperties(track)
-                            newSong.show = show
-                            
-                            if currentProgress != nil
+                            /// create each song and update the progress bar
+                            for track in tracks
                             {
-                                currentProgress! += progressBump!
-                                dispatch_async(dispatch_get_main_queue())
+                                let newSong = NSEntityDescription.insertNewObjectForEntityForName("PhishSong", inManagedObjectContext: self.context) as! PhishSong
+                                newSong.updateProperties(track)
+                                newSong.show = show
+                                
+                                if currentProgress != nil
                                 {
-                                    self.setlistProgressBar.setProgress(currentProgress!, animated: true)
+                                    currentProgress! += progressBump!
+                                    dispatch_async(dispatch_get_main_queue())
+                                    {
+                                        self.setlistProgressBar.setProgress(currentProgress!, animated: true)
+                                    }
                                 }
                             }
                         }
@@ -610,32 +622,35 @@ class PhishinClient: NSObject
                         let resultsData = songHistoryResults["data"] as! [String : AnyObject]
                         let tracks = resultsData["tracks"] as! [[String : AnyObject]]
                         
-                        /// construct the history as arrays of performances keyed by year
-                        for track in tracks
+                        self.context.performBlockAndWait()
                         {
-                            /// get the show ID
-                            let showID = track["show_id"] as! Int
-                            
-                            /// get a nicely formatted date
-                            let date = track["show_date"] as! String
-                            let dateFormatter = NSDateFormatter()
-                            dateFormatter.dateFormat = "yyyy-MM-dd"
-                            let formattedDate = dateFormatter.dateFromString(date)!
-                            dateFormatter.dateFormat = "MMM dd,"
-                            let formattedString = dateFormatter.stringFromDate(formattedDate)
-                            
-                            /// get the year
-                            let datePieces = date.componentsSeparatedByString("-")
-                            let year = Int(datePieces[0])!
-                            
-                            let performanceDate = formattedString + " \(year)"
-                            
-                            /// create a new PhishShowPerformance
-                            let newPerformance = NSEntityDescription.insertNewObjectForEntityForName("PhishSongPerformance", inManagedObjectContext: self.context) as! PhishSongPerformance
-                            newPerformance.song = song
-                            newPerformance.showID = showID
-                            newPerformance.date = performanceDate
-                            newPerformance.year = NSNumber(integer: year)
+                            /// construct the history as arrays of performances keyed by year
+                            for track in tracks
+                            {
+                                /// get the show ID
+                                let showID = track["show_id"] as! Int
+                                
+                                /// get a nicely formatted date
+                                let date = track["show_date"] as! String
+                                let dateFormatter = NSDateFormatter()
+                                dateFormatter.dateFormat = "yyyy-MM-dd"
+                                let formattedDate = dateFormatter.dateFromString(date)!
+                                dateFormatter.dateFormat = "MMM dd,"
+                                let formattedString = dateFormatter.stringFromDate(formattedDate)
+                                
+                                /// get the year
+                                let datePieces = date.componentsSeparatedByString("-")
+                                let year = Int(datePieces[0])!
+                                
+                                let performanceDate = formattedString + " \(year)"
+                                
+                                /// create a new PhishShowPerformance
+                                let newPerformance = NSEntityDescription.insertNewObjectForEntityForName("PhishSongPerformance", inManagedObjectContext: self.context) as! PhishSongPerformance
+                                newPerformance.song = song
+                                newPerformance.showID = showID
+                                newPerformance.date = performanceDate
+                                newPerformance.year = NSNumber(integer: year)
+                            }
                         }
                         
                         self.context.performBlockAndWait()
@@ -686,9 +701,19 @@ class PhishinClient: NSObject
                         let showResults = try NSJSONSerialization.JSONObjectWithData(showRequestData!, options: []) as! [String : AnyObject]
                         let showData = showResults["data"] as! [String : AnyObject]
                         
-                        /// create a new show
-                        let newShow = PhishShow(showInfoFromShow: showData)
+                        self.context.performBlockAndWait()
+                        {
+                            /// create a new show
+                            let newShow = PhishShow(showInfoFromShow: showData)
+                            
+                            /// save new and updated objects to the context
+                            CoreDataStack.sharedInstance().saveContext()
+                            
+                            /// return it through the completion handler
+                            completionHandler(showRequestError: nil, show: newShow)
+                        }
                         
+                        /*
                         /// save new and updated objects to the context
                         self.context.performBlockAndWait()
                         {
@@ -697,6 +722,7 @@ class PhishinClient: NSObject
                         
                         /// return it through the completion handler
                         completionHandler(showRequestError: nil, show: newShow)
+                        */
                     }
                     catch
                     {

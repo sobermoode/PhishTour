@@ -59,65 +59,68 @@ class PhishModel: NSObject,
         let sortDescriptor = NSSortDescriptor(key: "year", ascending: false)
         yearsFetchRequest.sortDescriptors = [sortDescriptor]
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// execute the fetch request
-            let years = try self.context.executeFetchRequest(yearsFetchRequest) as! [PhishYear]
-            
-            /// make sure we got something back
-            if !years.isEmpty
+            do
             {
-                /// set the years
-                self.years = years
+                /// execute the fetch request
+                let years = try self.context.executeFetchRequest(yearsFetchRequest) as! [PhishYear]
                 
-                /// return the years
-                completionHandler(yearsError: nil)
-                
-                return
-            }
-            /// no saved years, we need to request them
-            else
-            {
-                PhishinClient.sharedInstance().requestYears()
+                /// make sure we got something back
+                if !years.isEmpty
                 {
-                    yearsRequestError, years in
+                    /// set the years
+                    self.years = years
                     
-                    /// something went wrong
-                    if yearsRequestError != nil
-                    {
-                        completionHandler(yearsError: yearsRequestError)
-                    }
-                    else
-                    {
-                        /// set the years
-                        self.years = years!
-                        
-                        /// the years request was successful;
-                        /// 1983-1987 all come back as one "year",
-                        /// need to add them as individual PhishYears
-                        var year: Int = 1987
-                        repeat
-                        {
-                            let newYear = PhishYear(year: year)
-                            
-                            self.years?.append(newYear)
-                        }
-                        while --year >= 1983
-                    }
-                    
-                    /// save new objects to the context
-                    self.context.performBlockAndWait()
-                    {
-                        CoreDataStack.sharedInstance().saveContext()
-                    }
-                    
+                    /// return the years
                     completionHandler(yearsError: nil)
+                    
+                    return
+                }
+                /// no saved years, we need to request them
+                else
+                {
+                    PhishinClient.sharedInstance().requestYears()
+                    {
+                        yearsRequestError, years in
+                        
+                        /// something went wrong
+                        if yearsRequestError != nil
+                        {
+                            completionHandler(yearsError: yearsRequestError)
+                        }
+                        else
+                        {
+                            /// set the years
+                            self.years = years!
+                            
+                            /// the years request was successful;
+                            /// 1983-1987 all come back as one "year",
+                            /// need to add them as individual PhishYears
+                            var year: Int = 1987
+                            repeat
+                            {
+                                let newYear = PhishYear(year: year)
+                                
+                                self.years?.append(newYear)
+                            }
+                            while --year >= 1983
+                        }
+                        
+                        /// save new objects to the context
+                        self.context.performBlockAndWait()
+                        {
+                            CoreDataStack.sharedInstance().saveContext()
+                        }
+                        
+                        completionHandler(yearsError: nil)
+                    }
                 }
             }
-        }
-        catch
-        {
-            completionHandler(yearsError: error)
+            catch
+            {
+                completionHandler(yearsError: error)
+            }
         }
     }
     
@@ -165,26 +168,29 @@ class PhishModel: NSObject,
         /// we've got all the tours, so fetch them from core data
         else
         {
-            do
+            self.context.performBlockAndWait()
             {
-                /// fetch the tours from core data
-                let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
-                
-                /// make sure we got the saved tours
-                if !tours.isEmpty
+                do
                 {
-                    /// set the current tours
-                    self.currentTours = tours
+                    /// fetch the tours from core data
+                    let tours = try self.context.executeFetchRequest(toursFetchRequest) as! [PhishTour]
                     
-                    /// return the tours
-                    completionHandler(toursError: nil, tours: tours)
-                    
-                    return
+                    /// make sure we got the saved tours
+                    if !tours.isEmpty
+                    {
+                        /// set the current tours
+                        self.currentTours = tours
+                        
+                        /// return the tours
+                        completionHandler(toursError: nil, tours: tours)
+                        
+                        return
+                    }
                 }
-            }
-            catch
-            {
-                completionHandler(toursError: error, tours: nil)
+                catch
+                {
+                    completionHandler(toursError: error, tours: nil)
+                }
             }
         }
     }
@@ -199,49 +205,52 @@ class PhishModel: NSObject,
         let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [yearPredicate, tourFetchPredicate])
         tourFetchRequest.predicate = compoundPredicate // tourFetchPredicate
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// fetch the tour from core data
-            let fetchedTours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
-            if !fetchedTours.isEmpty
+            do
             {
-                /// get the specific tour
-                let fetchedTour = fetchedTours.first!
-                if !fetchedTour.shows.isEmpty
+                /// fetch the tour from core data
+                let fetchedTours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
+                if !fetchedTours.isEmpty
                 {
-                    completionHandler(showRequestError: nil)
-                    
-                    return
-                }
-                /// the tour didn't already have show info
-                else
-                {
-                    /// request the shows
-                    PhishinClient.sharedInstance().requestShowsForTour(&tour)
+                    /// get the specific tour
+                    let fetchedTour = fetchedTours.first!
+                    if !fetchedTour.shows.isEmpty
                     {
-                        showsRequestError in
+                        completionHandler(showRequestError: nil)
                         
-                        if showsRequestError != nil
+                        return
+                    }
+                    /// the tour didn't already have show info
+                    else
+                    {
+                        /// request the shows
+                        PhishinClient.sharedInstance().requestShowsForTour(&tour)
                         {
-                            completionHandler(showRequestError: showsRequestError)
-                        }
-                        else
-                        {
-                            /// save the context
-                            self.context.performBlockAndWait()
-                            {
-                                CoreDataStack.sharedInstance().saveContext()
-                            }
+                            showsRequestError in
                             
-                            completionHandler(showRequestError: nil)
+                            if showsRequestError != nil
+                            {
+                                completionHandler(showRequestError: showsRequestError)
+                            }
+                            else
+                            {
+                                /// save the context
+                                self.context.performBlockAndWait()
+                                {
+                                    CoreDataStack.sharedInstance().saveContext()
+                                }
+                                
+                                completionHandler(showRequestError: nil)
+                            }
                         }
                     }
                 }
             }
-        }
-        catch
-        {
-            print("There was a problem fetching \(tour.name) from Core Data.")
+            catch
+            {
+                print("There was a problem fetching \(tour.name) from Core Data.")
+            }
         }
     }
     
@@ -253,55 +262,58 @@ class PhishModel: NSObject,
         let showsFetchPredicate = NSPredicate(format: "showID = %@", show.showID)
         showsFetchRequest.predicate = showsFetchPredicate
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// fetch the shows from core data
-            let shows = try self.context.executeFetchRequest(showsFetchRequest) as! [PhishShow]
-            if !shows.isEmpty
+            do
             {
-                /// get the show we're requesting
-                let savedShow = shows.first!
-                if let savedSetlist = savedShow.setlist
+                /// fetch the shows from core data
+                let shows = try self.context.executeFetchRequest(showsFetchRequest) as! [PhishShow]
+                if !shows.isEmpty
                 {
-                    /// return the setlist
-                    completionHandler(setlistError: nil, setlist: savedSetlist)
-                
-                    return
-                }
-                /// no saved setlist, we need to request one
-                else
-                {
-                    PhishinClient.sharedInstance().requestSetlistForShow(show)
+                    /// get the show we're requesting
+                    let savedShow = shows.first!
+                    if let savedSetlist = savedShow.setlist
                     {
-                        setlistError, setlist in
-                        
-                        /// something went wrong
-                        if setlistError != nil
-                        {
-                            completionHandler(setlistError: setlistError!, setlist: setlist!)
-                        }
                         /// return the setlist
-                        else
+                        completionHandler(setlistError: nil, setlist: savedSetlist)
+                    
+                        return
+                    }
+                    /// no saved setlist, we need to request one
+                    else
+                    {
+                        PhishinClient.sharedInstance().requestSetlistForShow(show)
                         {
-                            completionHandler(setlistError: nil, setlist: setlist!)
+                            setlistError, setlist in
+                            
+                            /// something went wrong
+                            if setlistError != nil
+                            {
+                                completionHandler(setlistError: setlistError!, setlist: setlist!)
+                            }
+                            /// return the setlist
+                            else
+                            {
+                                completionHandler(setlistError: nil, setlist: setlist!)
+                            }
                         }
                     }
                 }
+                else
+                {
+                    /// create an error to send back
+                    var errorDictionary = [NSObject : AnyObject]()
+                    errorDictionary.updateValue("Couldn't find the setlist.", forKey: NSLocalizedDescriptionKey)
+                    let fetchError = NSError(domain: NSCocoaErrorDomain, code: 9999, userInfo: errorDictionary)
+                    
+                    completionHandler(setlistError: fetchError, setlist: nil)
+                }
             }
-            else
+            catch
             {
-                /// create an error to send back
-                var errorDictionary = [NSObject : AnyObject]()
-                errorDictionary.updateValue("Couldn't find the setlist.", forKey: NSLocalizedDescriptionKey)
-                let fetchError = NSError(domain: NSCocoaErrorDomain, code: 9999, userInfo: errorDictionary)
-                
-                completionHandler(setlistError: fetchError, setlist: nil)
-            }
+                print("There was a problem fetching show \(show.showID) from Core Data.")
+            } 
         }
-        catch
-        {
-            print("There was a problem fetching show \(show.showID) from Core Data.")
-        }        
     }
     
     /// retrieve a show from core data or request one for a given ID
@@ -314,43 +326,46 @@ class PhishModel: NSObject,
         let showFetchPredicate = NSPredicate(format: "showID = %@", nsNumberID)
         showFetchRequest.predicate = showFetchPredicate
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// execute the fetch request
-            let shows = try self.context.executeFetchRequest(showFetchRequest) as! [PhishShow]
-            
-            /// make sure we got something from Core Data
-            if !shows.isEmpty
+            do
             {
-                /// get the show we're looking for
-                let show = shows.first!
+                /// execute the fetch request
+                let shows = try self.context.executeFetchRequest(showFetchRequest) as! [PhishShow]
                 
-                /// send the show back through the completion handler
-                completionHandler(showError: nil, show: show)
-            }
-            /// no saved show, we need to request it
-            else
-            {
-                PhishinClient.sharedInstance().requestShowForID(id)
+                /// make sure we got something from Core Data
+                if !shows.isEmpty
                 {
-                    showRequestError, show in
+                    /// get the show we're looking for
+                    let show = shows.first!
                     
-                    /// something went wrong
-                    if showRequestError != nil
+                    /// send the show back through the completion handler
+                    completionHandler(showError: nil, show: show)
+                }
+                /// no saved show, we need to request it
+                else
+                {
+                    PhishinClient.sharedInstance().requestShowForID(id)
                     {
-                        completionHandler(showError: showRequestError, show: nil)
-                    }
-                    /// return the show
-                    else
-                    {
-                        completionHandler(showError: nil, show: show!)
+                        showRequestError, show in
+                        
+                        /// something went wrong
+                        if showRequestError != nil
+                        {
+                            completionHandler(showError: showRequestError, show: nil)
+                        }
+                        /// return the show
+                        else
+                        {
+                            completionHandler(showError: nil, show: show!)
+                        }
                     }
                 }
             }
-        }
-        catch
-        {
-            print("Couldn't retrieve show \(id) from Core Data.")
+            catch
+            {
+                print("Couldn't retrieve show \(id) from Core Data.")
+            }
         }
     }
     
@@ -363,56 +378,62 @@ class PhishModel: NSObject,
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// fetch the tours from core data
-            let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
-            
-            if !tours.isEmpty
+            do
             {
-                /// get the tour we're looking for
-                let tour = tours.first!
+                /// fetch the tours from core data
+                let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
                 
-                completionHandler(tourError: nil, tour: tour)
-                
-                return
-            }
-            /// no saved tour, we need to create it
-            else
-            {
-                /// fetch the tour's year from core data
-                let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-                let nsNumberYear = NSNumber(integer: year)
-                let yearFetchPredicate = NSPredicate(format: "year = %@", nsNumberYear)
-                yearFetchRequest.predicate = yearFetchPredicate
-                
-                do
+                if !tours.isEmpty
                 {
-                    let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+                    /// get the tour we're looking for
+                    let tour = tours.first!
                     
-                    if !years.isEmpty
+                    completionHandler(tourError: nil, tour: tour)
+                    
+                    return
+                }
+                /// no saved tour, we need to create it
+                else
+                {
+                    /// fetch the tour's year from core data
+                    let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
+                    let nsNumberYear = NSNumber(integer: year)
+                    let yearFetchPredicate = NSPredicate(format: "year = %@", nsNumberYear)
+                    yearFetchRequest.predicate = yearFetchPredicate
+                    
+                    self.context.performBlockAndWait()
                     {
-                        let year = years.first!
-                        
-                        let newTour = PhishTour(year: year, name: name, tourID: id)
-                        
-                        self.context.performBlockAndWait()
-                        {
-                            CoreDataStack.sharedInstance().saveContext()
+                       do
+                       {
+                            let years = try self.context.executeFetchRequest(yearFetchRequest) as! [PhishYear]
+                            
+                            if !years.isEmpty
+                            {
+                                let year = years.first!
+                                
+                                let newTour = PhishTour(year: year, name: name, tourID: id)
+                                
+                                self.context.performBlockAndWait()
+                                {
+                                    CoreDataStack.sharedInstance().saveContext()
+                                }
+                                
+                                completionHandler(tourError: nil, tour: newTour)
+                            }
                         }
-                        
-                        completionHandler(tourError: nil, tour: newTour)
+                        catch
+                        {
+                            print("There was a problem fetching \(year) from Core Data.")
+                        }
                     }
                 }
-                catch
-                {
-                    print("There was a problem fetching \(year) from Core Data.")
-                }
             }
-        }
-        catch
-        {
-            print("Couldn't retrieve tour \(id) from Core Data.")
+            catch
+            {
+                print("Couldn't retrieve tour \(id) from Core Data.")
+            }
         }
     }
     
@@ -425,40 +446,43 @@ class PhishModel: NSObject,
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", nsNumberID)
         tourFetchRequest.predicate = tourFetchPredicate
         
-        do
+        self.context.performBlockAndWait()
         {
-            /// fetch the tours from core data
-            let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
-            
-            if !tours.isEmpty
+            do
             {
-                let savedTour = tours.first!
+                /// fetch the tours from core data
+                let tours = try self.context.executeFetchRequest(tourFetchRequest) as! [PhishTour]
                 
-                completionHandler(tourNameError: nil, tourName: savedTour.name)
-            }
-            /// no saved tour, we need to request one
-            else
-            {
-                PhishinClient.sharedInstance().requestTourNameForID(id)
+                if !tours.isEmpty
                 {
-                    tourNameRequestError, tourName in
+                    let savedTour = tours.first!
                     
-                    /// something went wrong
-                    if tourNameRequestError != nil
+                    completionHandler(tourNameError: nil, tourName: savedTour.name)
+                }
+                /// no saved tour, we need to request one
+                else
+                {
+                    PhishinClient.sharedInstance().requestTourNameForID(id)
                     {
-                        completionHandler(tourNameError: tourNameRequestError!, tourName: nil)
-                    }
-                    /// return the tour name
-                    else
-                    {
-                        completionHandler(tourNameError: nil, tourName: tourName!)
+                        tourNameRequestError, tourName in
+                        
+                        /// something went wrong
+                        if tourNameRequestError != nil
+                        {
+                            completionHandler(tourNameError: tourNameRequestError!, tourName: nil)
+                        }
+                        /// return the tour name
+                        else
+                        {
+                            completionHandler(tourNameError: nil, tourName: tourName!)
+                        }
                     }
                 }
             }
-        }
-        catch
-        {
-            print("Couldn't retrieve tour \(id) from Core Data.")
+            catch
+            {
+                print("Couldn't retrieve tour \(id) from Core Data.")
+            }
         }
     }
     
