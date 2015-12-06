@@ -555,7 +555,6 @@ class TourMapViewController: UIViewController,
                             return
                         }
                         
-                        // self.tourMap.addAnnotations(selectedTour.uniqueLocations!)
                         self.tourMap.addAnnotations(locations)
                         
                         /// if a show was selected from the song history, select the annotation associated with the show,
@@ -583,6 +582,18 @@ class TourMapViewController: UIViewController,
                     if self.tourNavControls == nil
                     {
                         self.showTourNavControls()
+                    }
+                    
+                    /// everything has completed, so flash the progress bar green, and dismiss it
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.progressBar?.progressTintColor = UIColor.greenColor()
+                        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                        dispatch_after(delayTime, dispatch_get_main_queue())
+                        {
+                            self.progressBar?.removeFromSuperview()
+                            self.progressBar = nil
+                        }
                     }
                 }
                 
