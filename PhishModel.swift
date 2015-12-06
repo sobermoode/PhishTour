@@ -204,7 +204,7 @@ class PhishModel: NSObject,
         let yearPredicate = NSPredicate(format: "year = %@", tour.year!)
         let tourFetchPredicate = NSPredicate(format: "tourID = %@", tour.tourID)
         let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [yearPredicate, tourFetchPredicate])
-        tourFetchRequest.predicate = compoundPredicate // tourFetchPredicate
+        tourFetchRequest.predicate = compoundPredicate
         
         self.context.performBlockAndWait()
         {
@@ -656,10 +656,6 @@ class PhishModel: NSObject,
                         /// set first tour as the current selection
                         self.selectedTour = tours!.first!
                         self.previousTour = 0
-                        
-                        // get at the year picker so we can reload it with the new tours
-                        // let tourSelecter = pickerView.superview! as UIView
-                        // let tourPicker = tourSelecter.viewWithTag(202) as! UIPickerView
                         
                         /// reload the tour picker with the new tours
                         if let tourPicker = self.tourPicker

@@ -719,17 +719,6 @@ class PhishinClient: NSObject
                             /// return it through the completion handler
                             completionHandler(showRequestError: nil, show: newShow)
                         }
-                        
-                        /*
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
-                        {
-                            CoreDataStack.sharedInstance().saveContext()
-                        }
-                        
-                        /// return it through the completion handler
-                        completionHandler(showRequestError: nil, show: newShow)
-                        */
                     }
                     catch
                     {

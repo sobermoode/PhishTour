@@ -41,8 +41,6 @@ class TourMapViewController: UIViewController,
     /// prevent the reset button from being active on app-re-launch
     var didReset: Bool = false
     
-    var isReseting: Bool = false
-    
     // MARK: Setup methods
     
     override func viewDidLoad()
@@ -692,68 +690,6 @@ class TourMapViewController: UIViewController,
             let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
             self.tourMap.addOverlay(tourTrail)
         }
-        
-        /*
-        if let locations = selectedTour.uniqueLocations
-        {
-            for location in locations
-            {
-                showCoordinates.append(location.coordinate)
-            }
-            
-            dispatch_async(dispatch_get_main_queue())
-            {
-                /// draw the trail between every coordinate
-                let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
-                self.tourMap.addOverlay(tourTrail)
-            }
-        }
-        /// if the locations aren't available yet, create an alert to let the user try the request again
-        else
-        {
-            /// create an alert for the problem
-            /// the user will have the option to make the request again or cancel
-            let alert = UIAlertController(title: "Whoops!", message: "There was an error with the shows for the \(selectedTour.name)", preferredStyle: .Alert)
-            let tryAgainAction = UIAlertAction(title: "Try Again", style: .Default)
-            {
-                action in
-                
-                dispatch_async(dispatch_get_main_queue())
-                {
-                    self.progressBar?.progressTintColor = UIColor.redColor()
-                    self.progressBar?.removeFromSuperview()
-                    self.progressBar = nil
-                }
-                
-                self.followTour()
-            }
-            alert.addAction(tryAgainAction)
-            let cancelAction = UIAlertAction(title: "Cancel", style: .Default)
-            {
-                action in
-                
-                /// reset the map, flash the progress bar red, then, remove it after a short delay
-                dispatch_async(dispatch_get_main_queue())
-                {
-                    self.reset()
-                    
-                    self.progressBar?.progressTintColor = UIColor.redColor()
-                    let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
-                    dispatch_after(delayTime, dispatch_get_main_queue())
-                    {
-                        self.progressBar?.removeFromSuperview()
-                        self.progressBar = nil
-                    }
-                }
-            }
-            alert.addAction(cancelAction)
-            
-            dispatch_async(dispatch_get_main_queue())
-            {
-                self.presentViewController(alert, animated: true, completion: nil)
-            }
-        }
-        */
     }
     
     // MARK: MKMapViewDelegate methods
@@ -853,6 +789,7 @@ class TourMapViewController: UIViewController,
             return
         }
         
+        /// ok, we're good, now
         PhishModel.sharedInstance().currentShow = selectedLocation
         
         /// create a container view to hold the callout cells
