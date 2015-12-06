@@ -23,66 +23,74 @@ class PhishSong: NSManagedObject
     /// the song has a history of every show it was played at
     var history: [Int : [PhishSongPerformance]]?
     {
-        if self.performances?.count == 0
+        var history: [Int : [PhishSongPerformance]]?
+        
+        CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
         {
-            return nil
-        }
-        else
-        {
-            var history = [Int : [PhishSongPerformance]]()
-            
-            var performancesForTheYear = [PhishSongPerformance]()
-            var previousYear: Int = self.performances!.first!.year.integerValue
-            
-            for (index, performance) in self.performances!.enumerate()
+            if self.performances?.count == 0
             {
-                let currentYear: Int = performance.year.integerValue
-                
-                /// still in the same year
-                if currentYear == previousYear
-                {
-                    /// add the performance to the current array
-                    performancesForTheYear.append(performance)
-                    
-                    /// remember the year
-                    previousYear = currentYear
-                    
-                    /// we're at the last track?
-                    if index == self.performances!.count - 1
-                    {
-                        let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
-                        history.updateValue(reversedPerformances, forKey: currentYear)
-                    }
-                    
-                    continue
-                }
-                /// got to a new year
-                else
-                {
-                    /// update the history
-                    let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
-                    history.updateValue(reversedPerformances, forKey: previousYear)
-                    
-                    /// blank the performances for last year and add the first show for the new year
-                    performancesForTheYear.removeAll()
-                    performancesForTheYear.append(performance)
-                    
-                    /// remember the year
-                    previousYear = currentYear
-                    
-                    /// we're at the last track?
-                    if index == self.performances!.count - 1
-                    {
-                        let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
-                        history.updateValue(reversedPerformances, forKey: currentYear)
-                    }
-                    
-                    continue
-                }
+                //  return nil
+                history = nil
             }
-            
-            return history
+            else
+            {
+                history = [Int : [PhishSongPerformance]]()
+                
+                var performancesForTheYear = [PhishSongPerformance]()
+                var previousYear: Int = self.performances!.first!.year.integerValue
+                
+                for (index, performance) in self.performances!.enumerate()
+                {
+                    let currentYear: Int = performance.year.integerValue
+                    
+                    /// still in the same year
+                    if currentYear == previousYear
+                    {
+                        /// add the performance to the current array
+                        performancesForTheYear.append(performance)
+                        
+                        /// remember the year
+                        previousYear = currentYear
+                        
+                        /// we're at the last track?
+                        if index == self.performances!.count - 1
+                        {
+                            let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                            history!.updateValue(reversedPerformances, forKey: currentYear)
+                        }
+                        
+                        continue
+                    }
+                    /// got to a new year
+                    else
+                    {
+                        /// update the history
+                        let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                        history!.updateValue(reversedPerformances, forKey: previousYear)
+                        
+                        /// blank the performances for last year and add the first show for the new year
+                        performancesForTheYear.removeAll()
+                        performancesForTheYear.append(performance)
+                        
+                        /// remember the year
+                        previousYear = currentYear
+                        
+                        /// we're at the last track?
+                        if index == self.performances!.count - 1
+                        {
+                            let reversedPerformances: [PhishSongPerformance] = performancesForTheYear.reverse()
+                            history!.updateValue(reversedPerformances, forKey: currentYear)
+                        }
+                        
+                        continue
+                    }
+                }
+                
+                // return history
+            }
         }
+        
+        return history
     }
     
     /// the total number of times the song has been played

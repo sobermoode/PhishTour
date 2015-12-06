@@ -380,8 +380,11 @@ class SongHistoryViewController: UIViewController,
                         /// we got the tour ID, now we can request the tour name with it
                         else
                         {
-                            /// set the show's tour ID
-                            performance.tourID = tourID
+                            CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
+                            {
+                                /// set the show's tour ID
+                                performance.tourID = tourID
+                            }
                             
                             PhishModel.sharedInstance().getTourNameForTourID(tourID.integerValue)
                             {
@@ -399,8 +402,11 @@ class SongHistoryViewController: UIViewController,
                                 }
                                 else
                                 {
-                                    /// set the tour name
-                                    performance.tourName = tourName
+                                    CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
+                                    {
+                                        /// set the tour name
+                                        performance.tourName = tourName
+                                    }
                                     
                                     /// update the cell with the tour name on the main thread and enable the cell
                                     dispatch_async(dispatch_get_main_queue())

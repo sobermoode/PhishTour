@@ -404,6 +404,12 @@ class TourMapViewController: UIViewController,
             }
         }
         
+        if self.progressBar != nil
+        {
+            self.progressBar?.removeFromSuperview()
+            self.progressBar = nil
+        }
+        
         /// put the map back at the default region
         self.tourMap.setRegion(self.defaultRegion, animated: true)
     }

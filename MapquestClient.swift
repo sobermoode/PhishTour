@@ -71,37 +71,40 @@ class MapquestClient: NSObject
         var previousFixedCity: String = ""
         for (index, show) in shows.enumerate()
         {
-            /// don't geocode the same location more than once
-            if show.city != previousCity
+            CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
             {
-                /// update the dictionary and reset the counter
-                showsWithSameLocation.updateValue(currentShowsWithSameLocation, forKey: previousFixedCity)
-                currentShowsWithSameLocation = 1
-                
-                /// turn the location into a string that can be appended to the request
-                var city = show.city
-                city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
-                mapquestRequestString += "&location=\(city)"
-                
-                /// remember the previous location
-                previousCity = show.city
-                previousFixedCity = city
-                
-                /// update the dictionary if we're at the last show
-                if index == shows.count - 1
+                /// don't geocode the same location more than once
+                if show.city != previousCity
                 {
+                    /// update the dictionary and reset the counter
                     showsWithSameLocation.updateValue(currentShowsWithSameLocation, forKey: previousFixedCity)
+                    currentShowsWithSameLocation = 1
+                    
+                    /// turn the location into a string that can be appended to the request
+                    var city = show.city
+                    city = city.stringByReplacingOccurrencesOfString(" ", withString: "")
+                    mapquestRequestString += "&location=\(city)"
+                    
+                    /// remember the previous location
+                    previousCity = show.city
+                    previousFixedCity = city
+                    
+                    /// update the dictionary if we're at the last show
+                    if index == shows.count - 1
+                    {
+                        showsWithSameLocation.updateValue(currentShowsWithSameLocation, forKey: previousFixedCity)
+                    }
                 }
-            }
-            else
-            {
-                /// more than one show at the same location
-                ++currentShowsWithSameLocation
-                
-                /// update the dictionary if we're at the last show
-                if index == shows.count - 1
+                else
                 {
-                    showsWithSameLocation.updateValue(currentShowsWithSameLocation, forKey: previousFixedCity)
+                    /// more than one show at the same location
+                    ++currentShowsWithSameLocation
+                    
+                    /// update the dictionary if we're at the last show
+                    if index == shows.count - 1
+                    {
+                        showsWithSameLocation.updateValue(currentShowsWithSameLocation, forKey: previousFixedCity)
+                    }
                 }
             }
         }
@@ -163,8 +166,11 @@ class MapquestClient: NSObject
                             /// set the latitude/longitude on the shows
                             for index in nextShow..<(nextShow + numberOfShows)
                             {
-                                shows[index].showLatitude = geocodedLatitude
-                                shows[index].showLongitude = geocodedLongitude
+                                CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
+                                {
+                                    shows[index].showLatitude = geocodedLatitude
+                                    shows[index].showLongitude = geocodedLongitude
+                                }
                             }
                             
                             /// set the next index

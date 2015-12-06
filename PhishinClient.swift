@@ -74,35 +74,45 @@ class PhishinClient: NSObject
                         theYearsMutable.removeObjectAtIndex(14)
                         let years = NSArray(array: theYearsMutable as! [AnyObject]) as! [String]
                         
-                        /// create PhishYear objects for every year and bump the progress bar
                         var phishYears = [PhishYear]()
-                        let progressBump: Float = 1.0 / 20.0
-                        var totalProgress: Float = 0
                         self.context.performBlockAndWait()
                         {
-                            for year in years
+                            /// create PhishYear objects for every year and bump the progress bar
+                            // var phishYears = [PhishYear]()
+                            let progressBump: Float = 1.0 / 20.0
+                            var totalProgress: Float = 0
+                            self.context.performBlockAndWait()
                             {
-                                if let intYear = Int(year)
+                                for year in years
                                 {
-                                    let newYear = PhishYear(year: intYear)
-                                    
-                                    phishYears.append(newYear)
-                                    
-                                    totalProgress += progressBump
-                                    dispatch_async(dispatch_get_main_queue())
+                                    if let intYear = Int(year)
                                     {
-                                        self.tourSelecterProgressBar.setProgress(totalProgress, animated: true)
+                                        self.context.performBlockAndWait()
+                                        {
+                                            let newYear = PhishYear(year: intYear)
+                                    
+                                            phishYears.append(newYear)
+                                        }
+                                        
+                                        totalProgress += progressBump
+                                        dispatch_async(dispatch_get_main_queue())
+                                        {
+                                            self.tourSelecterProgressBar.setProgress(totalProgress, animated: true)
+                                        }
                                     }
                                 }
                             }
                         }
                         
-                        /// reverse the results so that the most recent tours and shows appear first in the list
-                        phishYears.sortInPlace
+                        self.context.performBlockAndWait()
                         {
-                            year1, year2 in
-                            
-                            Int(year1.year) > Int(year2.year)
+                            /// reverse the results so that the most recent tours and shows appear first in the list
+                            phishYears.sortInPlace
+                            {
+                                year1, year2 in
+                                
+                                Int(year1.year) > Int(year2.year)
+                            }
                         }
                         
                         /// send it back through the completion handler
@@ -126,68 +136,81 @@ class PhishinClient: NSObject
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            let toursRequestString = self.endpoint + Routes.Years + "/\(year.year)"
-            let toursRequestURL = NSURL(string: toursRequestString)!
-            let toursRequestTask = self.session.dataTaskWithURL(toursRequestURL)
+            self.context.performBlockAndWait()
             {
-                toursData, toursResponse, toursError in
-                
-                /// something went wrong
-                if toursError != nil
+                let toursRequestString = self.endpoint + Routes.Years + "/\(year.year)"
+                let toursRequestURL = NSURL(string: toursRequestString)!
+                let toursRequestTask = self.session.dataTaskWithURL(toursRequestURL)
                 {
-                    completionHandler(toursRequestError: toursError, tours: nil)
-                }
-                else
-                {
-                    do
+                    toursData, toursResponse, toursError in
+                    
+                    /// something went wrong
+                    if toursError != nil
                     {
-                        let toursResults = try NSJSONSerialization.JSONObjectWithData(toursData!, options: []) as! [String : AnyObject]
-                        let showsForTheYear = toursResults["data"] as! [[String : AnyObject]]
-                        
-                        /// collect all the shows and tour IDs from the results
-                        var tourIDs = [Int]()
-                        for show in showsForTheYear
+                        completionHandler(toursRequestError: toursError, tours: nil)
+                    }
+                    else
+                    {
+                        do
                         {
-                            /// only append unique tour IDs, tour IDs that haven't already been requested,
-                            /// and tours that aren't "not part of a tour"
-                            let tourID = show["tour_id"] as! Int
-                            if let yearTourIDs = year.tourIDs
+                            let toursResults = try NSJSONSerialization.JSONObjectWithData(toursData!, options: []) as! [String : AnyObject]
+                            let showsForTheYear = toursResults["data"] as! [[String : AnyObject]]
+                            
+                            /// collect all the shows and tour IDs from the results
+                            var tourIDs = [Int]()
+                            for show in showsForTheYear
                             {
-                                if !yearTourIDs.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
+                                /// only append unique tour IDs, tour IDs that haven't already been requested,
+                                /// and tours that aren't "not part of a tour"
+                                let tourID = show["tour_id"] as! Int
+                                
+                                self.context.performBlockAndWait()
                                 {
-                                    tourIDs.append(tourID)
+                                    if let yearTourIDs = year.tourIDs
+                                    {
+                                        if !yearTourIDs.contains(tourID) && !tourIDs.contains(tourID) && tourID != self.notPartOfATour
+                                        {
+                                            tourIDs.append(tourID)
+                                        }
+                                    }
+                                    else
+                                    {
+                                        tourIDs.append(tourID)
+                                    }
                                 }
                             }
-                            else
-                            {
-                                tourIDs.append(tourID)
-                            }
-                        }
-                        
-                        /// get the names of each tour
-                        self.requestTourNamesForIDs(tourIDs, year: year)
-                        {
-                            tourNamesRequestError, tours in
                             
-                            /// something went wrong
-                            if tourNamesRequestError != nil
+                            self.context.performBlockAndWait()
                             {
-                                completionHandler(toursRequestError: tourNamesRequestError, tours: nil)
-                            }
-                            else
-                            {
-                                /// send the tours back through the completion handler
-                                completionHandler(toursRequestError: nil, tours: year.tours!)
+                                /// get the names of each tour
+                                self.requestTourNamesForIDs(tourIDs, year: year)
+                                {
+                                    tourNamesRequestError, tours in
+                                    
+                                    /// something went wrong
+                                    if tourNamesRequestError != nil
+                                    {
+                                        completionHandler(toursRequestError: tourNamesRequestError, tours: nil)
+                                    }
+                                    else
+                                    {
+                                        self.context.performBlockAndWait()
+                                        {
+                                            /// send the tours back through the completion handler
+                                            completionHandler(toursRequestError: nil, tours: year.tours!)
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                    catch
-                    {
-                        print("There was a problem processing the tours results.")
+                        catch
+                        {
+                            print("There was a problem processing the tours results.")
+                        }
                     }
                 }
+                toursRequestTask.resume()
             }
-            toursRequestTask.resume()
         }
     }
     
@@ -291,12 +314,15 @@ class PhishinClient: NSObject
                         }
                     }
                     
-                    /// sort the tours by ID
-                    tours.sortInPlace()
+                    self.context.performBlockAndWait()
                     {
-                        tour1, tour2 in
-                        
-                        Int(tour1.tourID) < Int(tour2.tourID)
+                        /// sort the tours by ID
+                        tours.sortInPlace()
+                        {
+                            tour1, tour2 in
+                            
+                            Int(tour1.tourID) < Int(tour2.tourID)
+                        }
                     }
                     
                     /// return the tours through the completion handler
@@ -312,56 +338,59 @@ class PhishinClient: NSObject
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            /// construct a URL for the tour request and start a task
-            let tourRequestString = self.endpoint + Routes.Tours + "/\(tour.tourID)"
-            let tourRequestURL = NSURL(string: tourRequestString)!
-            let tourRequestTask = self.session.dataTaskWithURL(tourRequestURL)
+            self.context.performBlockAndWait()
             {
-                tourRequestData, tourRequestResponse, tourRequestError in
-                
-                /// something went wrong
-                if tourRequestError != nil
+                /// construct a URL for the tour request and start a task
+                let tourRequestString = self.endpoint + Routes.Tours + "/\(tour.tourID)"
+                let tourRequestURL = NSURL(string: tourRequestString)!
+                let tourRequestTask = self.session.dataTaskWithURL(tourRequestURL)
                 {
-                    completionHandler(showsRequestError: tourRequestError)
-                }
-                else
-                {
-                    do
+                    tourRequestData, tourRequestResponse, tourRequestError in
+                    
+                    /// something went wrong
+                    if tourRequestError != nil
                     {
-                        /// create a JSON object and get at the shows
-                        let tourResults = try NSJSONSerialization.JSONObjectWithData(tourRequestData!, options: []) as! [String : AnyObject]
-                        let tourData = tourResults["data"] as! [String : AnyObject]
-                        let shows = tourData["shows"] as! [[String : AnyObject]]
-                        
-                        /// request show data for each show
-                        var showIDs = [Int]()
-                        for show in shows
+                        completionHandler(showsRequestError: tourRequestError)
+                    }
+                    else
+                    {
+                        do
                         {
-                            let showID = show["id"] as! Int
-                            showIDs.append(showID)
-                        }
-                        
-                        self.requestShowsForIDs(showIDs, andTour: tour)
-                        {
-                            showRequestsError in
+                            /// create a JSON object and get at the shows
+                            let tourResults = try NSJSONSerialization.JSONObjectWithData(tourRequestData!, options: []) as! [String : AnyObject]
+                            let tourData = tourResults["data"] as! [String : AnyObject]
+                            let shows = tourData["shows"] as! [[String : AnyObject]]
                             
-                            if showRequestsError != nil
+                            /// request show data for each show
+                            var showIDs = [Int]()
+                            for show in shows
                             {
-                                completionHandler(showsRequestError: showRequestsError)
+                                let showID = show["id"] as! Int
+                                showIDs.append(showID)
                             }
-                            else
+                            
+                            self.requestShowsForIDs(showIDs, andTour: tour)
                             {
-                                completionHandler(showsRequestError: nil)
+                                showRequestsError in
+                                
+                                if showRequestsError != nil
+                                {
+                                    completionHandler(showsRequestError: showRequestsError)
+                                }
+                                else
+                                {
+                                    completionHandler(showsRequestError: nil)
+                                }
                             }
                         }
-                    }
-                    catch
-                    {
-                        print("There was an error with the data received for \(tour.name)")
+                        catch
+                        {
+                            print("There was an error with the data received for \(tour.name)")
+                        }
                     }
                 }
+                tourRequestTask.resume()
             }
-            tourRequestTask.resume()
         }
     }
     
@@ -525,46 +554,49 @@ class PhishinClient: NSObject
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            /// construct a URL to the setlist and start a task
-            let setlistRequestString = self.endpoint + Routes.Shows + "/\(show.showID)"
-            let setlistRequestURL = NSURL(string: setlistRequestString)!
-            let setlistRequestTask = self.session.dataTaskWithURL(setlistRequestURL)
+            self.context.performBlockAndWait()
             {
-                setlistData, setlistResponse, setlistError in
-                
-                /// an error occurred
-                if setlistError != nil
+                /// construct a URL to the setlist and start a task
+                let setlistRequestString = self.endpoint + Routes.Shows + "/\(show.showID)"
+                let setlistRequestURL = NSURL(string: setlistRequestString)!
+                let setlistRequestTask = self.session.dataTaskWithURL(setlistRequestURL)
                 {
-                    completionHandler(setlistError: setlistError, setlist: nil)
-                }
-                else
-                {
-                    do
+                    setlistData, setlistResponse, setlistError in
+                    
+                    /// an error occurred
+                    if setlistError != nil
                     {
-                        /// turn the received data into a JSON object
-                        let setlistResults = try NSJSONSerialization.JSONObjectWithData(setlistData!, options: []) as! [String : AnyObject]
-                        
-                        /// get the songs
-                        let resultsData = setlistResults["data"] as! [String : AnyObject]
-                        let tracks = resultsData["tracks"] as! [[String : AnyObject]]
-                        
-                        /// the progress bar will update as each song is added to the setlist
-                        var currentProgress: Float?
-                        var progressBump: Float?
-                        if let setlistProgressBar = self.setlistProgressBar
+                        completionHandler(setlistError: setlistError, setlist: nil)
+                    }
+                    else
+                    {
+                        do
                         {
-                            currentProgress = setlistProgressBar.progress
-                            progressBump = 0.2 / Float(tracks.count)
-                        }
-                        
-                        self.context.performBlockAndWait()
-                        {
+                            /// turn the received data into a JSON object
+                            let setlistResults = try NSJSONSerialization.JSONObjectWithData(setlistData!, options: []) as! [String : AnyObject]
+                            
+                            /// get the songs
+                            let resultsData = setlistResults["data"] as! [String : AnyObject]
+                            let tracks = resultsData["tracks"] as! [[String : AnyObject]]
+                            
+                            /// the progress bar will update as each song is added to the setlist
+                            var currentProgress: Float?
+                            var progressBump: Float?
+                            if let setlistProgressBar = self.setlistProgressBar
+                            {
+                                currentProgress = setlistProgressBar.progress
+                                progressBump = 0.2 / Float(tracks.count)
+                            }
+                            
                             /// create each song and update the progress bar
                             for track in tracks
                             {
-                                let newSong = NSEntityDescription.insertNewObjectForEntityForName("PhishSong", inManagedObjectContext: self.context) as! PhishSong
-                                newSong.updateProperties(track)
-                                newSong.show = show
+                                self.context.performBlockAndWait()
+                                {
+                                    let newSong = NSEntityDescription.insertNewObjectForEntityForName("PhishSong", inManagedObjectContext: self.context) as! PhishSong
+                                    newSong.updateProperties(track)
+                                    newSong.show = show
+                                }
                                 
                                 if currentProgress != nil
                                 {
@@ -575,24 +607,24 @@ class PhishinClient: NSObject
                                     }
                                 }
                             }
+                            
+                            /// save new and updated objects to the context
+                            self.context.performBlockAndWait()
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
+                            
+                            /// return the setlist through the completion handler
+                            completionHandler(setlistError: nil, setlist: show.setlist!)
                         }
-                        
-                        /// save new and updated objects to the context
-                        self.context.performBlockAndWait()
+                        catch
                         {
-                            CoreDataStack.sharedInstance().saveContext()
+                            print("There was an error parsing the setlist data for \(show.date) \(show.year)")
                         }
-                        
-                        /// return the setlist through the completion handler
-                        completionHandler(setlistError: nil, setlist: show.setlist!)
-                    }
-                    catch
-                    {
-                        print("There was an error parsing the setlist data for \(show.date) \(show.year)")
                     }
                 }
+                setlistRequestTask.resume()  
             }
-            setlistRequestTask.resume()
         }
     }
     
@@ -606,80 +638,83 @@ class PhishinClient: NSObject
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            /// construct the request URL and start a task
-            let songHistoryRequestString = self.endpoint + Routes.Songs + "/\(song.songID)"
-            let songHistoryRequestURL = NSURL(string: songHistoryRequestString)!
-            let songHistoryRequestTask = self.session.dataTaskWithURL(songHistoryRequestURL)
+            self.context.performBlockAndWait()
             {
-                songHistoryData, songHistoryResponse, songHistoryError in
-                
-                /// something went wrong
-                if songHistoryError != nil
+                /// construct the request URL and start a task
+                let songHistoryRequestString = self.endpoint + Routes.Songs + "/\(song.songID)"
+                let songHistoryRequestURL = NSURL(string: songHistoryRequestString)!
+                let songHistoryRequestTask = self.session.dataTaskWithURL(songHistoryRequestURL)
                 {
-                    completionHandler(songHistoryError: songHistoryError!)
-                }
-                else
-                {
-                    do
+                    songHistoryData, songHistoryResponse, songHistoryError in
+                    
+                    /// something went wrong
+                    if songHistoryError != nil
                     {
-                        /// turn the received data into a JSON object
-                        let songHistoryResults = try NSJSONSerialization.JSONObjectWithData(songHistoryData!, options: []) as! [String : AnyObject]
-                        
-                        /// get the info for every instance of the song being played
-                        let resultsData = songHistoryResults["data"] as! [String : AnyObject]
-                        let tracks = resultsData["tracks"] as! [[String : AnyObject]]
-                        
-                        self.context.performBlockAndWait()
+                        completionHandler(songHistoryError: songHistoryError!)
+                    }
+                    else
+                    {
+                        do
                         {
-                            /// construct the history as arrays of performances keyed by year
-                            for track in tracks
+                            /// turn the received data into a JSON object
+                            let songHistoryResults = try NSJSONSerialization.JSONObjectWithData(songHistoryData!, options: []) as! [String : AnyObject]
+                            
+                            /// get the info for every instance of the song being played
+                            let resultsData = songHistoryResults["data"] as! [String : AnyObject]
+                            let tracks = resultsData["tracks"] as! [[String : AnyObject]]
+                            
+                            self.context.performBlockAndWait()
                             {
-                                /// get the show ID
-                                let showID = track["show_id"] as! Int
-                                
-                                /// get a nicely formatted date
-                                let date = track["show_date"] as! String
-                                let dateFormatter = NSDateFormatter()
-                                dateFormatter.dateFormat = "yyyy-MM-dd"
-                                let formattedDate = dateFormatter.dateFromString(date)!
-                                dateFormatter.dateFormat = "MMM dd,"
-                                let formattedString = dateFormatter.stringFromDate(formattedDate)
-                                
-                                /// get the year
-                                let datePieces = date.componentsSeparatedByString("-")
-                                let year = Int(datePieces[0])!
-                                
-                                let performanceDate = formattedString + " \(year)"
-                                
-                                /// create a new PhishShowPerformance
-                                let newPerformance = NSEntityDescription.insertNewObjectForEntityForName("PhishSongPerformance", inManagedObjectContext: self.context) as! PhishSongPerformance
-                                newPerformance.song = song
-                                newPerformance.showID = showID
-                                newPerformance.date = performanceDate
-                                newPerformance.year = NSNumber(integer: year)
+                                /// construct the history as arrays of performances keyed by year
+                                for track in tracks
+                                {
+                                    /// get the show ID
+                                    let showID = track["show_id"] as! Int
+                                    
+                                    /// get a nicely formatted date
+                                    let date = track["show_date"] as! String
+                                    let dateFormatter = NSDateFormatter()
+                                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                                    let formattedDate = dateFormatter.dateFromString(date)!
+                                    dateFormatter.dateFormat = "MMM dd,"
+                                    let formattedString = dateFormatter.stringFromDate(formattedDate)
+                                    
+                                    /// get the year
+                                    let datePieces = date.componentsSeparatedByString("-")
+                                    let year = Int(datePieces[0])!
+                                    
+                                    let performanceDate = formattedString + " \(year)"
+                                    
+                                    /// create a new PhishShowPerformance
+                                    let newPerformance = NSEntityDescription.insertNewObjectForEntityForName("PhishSongPerformance", inManagedObjectContext: self.context) as! PhishSongPerformance
+                                    newPerformance.song = song
+                                    newPerformance.showID = showID
+                                    newPerformance.date = performanceDate
+                                    newPerformance.year = NSNumber(integer: year)
+                                }
                             }
+                            
+                            self.context.performBlockAndWait()
+                            {
+                                CoreDataStack.sharedInstance().saveContext()
+                            }
+                            
+                            /// update the progress bar
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                self.historyProgressBar.setProgress(1.0, animated: true)
+                            }
+                            
+                            completionHandler(songHistoryError: nil)
                         }
-                        
-                        self.context.performBlockAndWait()
+                        catch
                         {
-                            CoreDataStack.sharedInstance().saveContext()
+                            print("There was an error requesting the history for \(song.name)")
                         }
-                        
-                        /// update the progress bar
-                        dispatch_async(dispatch_get_main_queue())
-                        {
-                            self.historyProgressBar.setProgress(1.0, animated: true)
-                        }
-                        
-                        completionHandler(songHistoryError: nil)
-                    }
-                    catch
-                    {
-                        print("There was an error requesting the history for \(song.name)")
                     }
                 }
+                songHistoryRequestTask.resume()
             }
-            songHistoryRequestTask.resume()
         }
     }
     

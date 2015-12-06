@@ -101,9 +101,12 @@ class PhishModel: NSObject,
                             var year: Int = 1987
                             repeat
                             {
-                                let newYear = PhishYear(year: year)
-                                
-                                self.years?.append(newYear)
+                                self.context.performBlockAndWait()
+                                {
+                                    let newYear = PhishYear(year: year)
+                                    
+                                    self.years?.append(newYear)
+                                }
                             }
                             while --year >= 1983
                         }

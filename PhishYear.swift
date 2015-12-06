@@ -20,21 +20,29 @@ class PhishYear: NSManagedObject
     /// the IDs of the year's tours
     var tourIDs: [Int]?
     {
-        if self.tours == nil
+        var tourIDs: [Int]?
+        
+        CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
         {
-            return nil
-        }
-        else
-        {
-            var tourIDs = [Int]()
-            
-            for tour in self.tours!
+            if self.tours == nil
             {
-                tourIDs.append(tour.tourID.integerValue)
+                // return nil
+                tourIDs = nil
             }
-            
-            return tourIDs
+            else
+            {
+                tourIDs = [Int]()
+                
+                for tour in self.tours!
+                {
+                    tourIDs!.append(tour.tourID.integerValue)
+                }
+                
+                // return tourIDs
+            }
         }
+        
+        return tourIDs
     }
     
     @NSManaged var didRequestAllTours: Bool
