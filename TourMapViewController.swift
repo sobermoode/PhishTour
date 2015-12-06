@@ -41,6 +41,8 @@ class TourMapViewController: UIViewController,
     /// prevent the reset button from being active on app-re-launch
     var didReset: Bool = false
     
+    var isReseting: Bool = false
+    
     // MARK: Setup methods
     
     override func viewDidLoad()
@@ -386,20 +388,26 @@ class TourMapViewController: UIViewController,
             self.didPressListButton()
         }
         
-        /// reset the map;
-        /// remove any annotations and dismiss the current callout
-        if tourMap.annotations.count > 0
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
         {
-            tourMap.removeAnnotations(tourMap.annotations)
-            tourMap.removeOverlays(tourMap.overlays)
-        }
-        if self.currentCallout != nil
-        {
-            self.currentCallout = nil
+            dispatch_async(dispatch_get_main_queue())
+            {
+                /// reset the map;
+                /// remove any annotations and dismiss the current callout
+                if self.tourMap.annotations.count > 0
+                {
+                    self.tourMap.removeAnnotations(self.tourMap.annotations)
+                    self.tourMap.removeOverlays(self.tourMap.overlays)
+                }
+                if self.currentCallout != nil
+                {
+                    self.currentCallout = nil
+                }
+            }
         }
         
         /// put the map back at the default region
-        tourMap.setRegion(self.defaultRegion, animated: true)
+        self.tourMap.setRegion(self.defaultRegion, animated: true)
     }
     
     /// display the shows for the selected tour on the map
@@ -826,6 +834,25 @@ class TourMapViewController: UIViewController,
         
         /// set the selected show
         let selectedLocation = view.annotation as! PhishShow
+        
+        /// if the previous tour wasn't cleared correctly, an alert will pop up and the previous annotations and overlays will be removed
+        if !PhishModel.sharedInstance().selectedTour!.shows.contains(selectedLocation)
+        {
+            let alert = UIAlertController(title: "Whoops!", message: "Fixing a problem with the map pins...", preferredStyle: .Alert)
+            let alertAction = UIAlertAction(title: "OK", style: .Default)
+            {
+                action in
+            }
+            alert.addAction(alertAction)
+            self.presentViewController(alert, animated: true, completion: nil)
+            
+            self.tourMap.removeAnnotations(self.tourMap.annotations)
+            self.tourMap.removeOverlays(self.tourMap.overlays)
+            self.tourMap.addAnnotations(PhishModel.sharedInstance().selectedTour!.uniqueLocations!)
+            
+            return
+        }
+        
         PhishModel.sharedInstance().currentShow = selectedLocation
         
         /// create a container view to hold the callout cells
