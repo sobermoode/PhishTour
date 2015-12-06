@@ -132,7 +132,6 @@ class PhishTour: NSManagedObject
         {
             /// make a fetch request for the year, if it has been saved to Core Data
             let yearFetchRequest = NSFetchRequest(entityName: "PhishYear")
-            // let yearFetchPredicate = NSPredicate(format: "%K == %@", "year", year)
             let yearFetchPredicate = NSPredicate(format: "year = %@", year)
             yearFetchRequest.predicate = yearFetchPredicate
             

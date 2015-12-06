@@ -78,7 +78,6 @@ class PhishinClient: NSObject
                         self.context.performBlockAndWait()
                         {
                             /// create PhishYear objects for every year and bump the progress bar
-                            // var phishYears = [PhishYear]()
                             let progressBump: Float = 1.0 / 20.0
                             var totalProgress: Float = 0
                             self.context.performBlockAndWait()
@@ -180,25 +179,22 @@ class PhishinClient: NSObject
                                 }
                             }
                             
-                            self.context.performBlockAndWait()
+                            /// get the names of each tour
+                            self.requestTourNamesForIDs(tourIDs, year: year)
                             {
-                                /// get the names of each tour
-                                self.requestTourNamesForIDs(tourIDs, year: year)
+                                tourNamesRequestError, tours in
+                                
+                                /// something went wrong
+                                if tourNamesRequestError != nil
                                 {
-                                    tourNamesRequestError, tours in
-                                    
-                                    /// something went wrong
-                                    if tourNamesRequestError != nil
+                                    completionHandler(toursRequestError: tourNamesRequestError, tours: nil)
+                                }
+                                else
+                                {
+                                    self.context.performBlockAndWait()
                                     {
-                                        completionHandler(toursRequestError: tourNamesRequestError, tours: nil)
-                                    }
-                                    else
-                                    {
-                                        self.context.performBlockAndWait()
-                                        {
-                                            /// send the tours back through the completion handler
-                                            completionHandler(toursRequestError: nil, tours: year.tours!)
-                                        }
+                                        /// send the tours back through the completion handler
+                                        completionHandler(toursRequestError: nil, tours: year.tours!)
                                     }
                                 }
                             }

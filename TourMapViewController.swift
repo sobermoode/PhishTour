@@ -386,28 +386,48 @@ class TourMapViewController: UIViewController,
             self.didPressListButton()
         }
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+        /// reset the map;
+        /// remove any annotations and dismiss the current callout
+        if self.tourMap.annotations.count > 0
         {
-            dispatch_async(dispatch_get_main_queue())
-            {
-                /// reset the map;
-                /// remove any annotations and dismiss the current callout
-                if self.tourMap.annotations.count > 0
-                {
-                    self.tourMap.removeAnnotations(self.tourMap.annotations)
-                    self.tourMap.removeOverlays(self.tourMap.overlays)
-                }
-                if self.currentCallout != nil
-                {
-                    self.currentCallout = nil
-                }
-            }
+            self.tourMap.removeAnnotations(self.tourMap.annotations)
+            self.tourMap.removeOverlays(self.tourMap.overlays)
+        }
+        if self.currentCallout != nil
+        {
+            self.currentCallout = nil
         }
         
+        /// remove any progress bars
         if self.progressBar != nil
         {
             self.progressBar?.removeFromSuperview()
             self.progressBar = nil
+        }
+        if PhishModel.sharedInstance().progressBar != nil
+        {
+            PhishModel.sharedInstance().progressBar!.removeFromSuperview()
+            PhishModel.sharedInstance().progressBar = nil
+        }
+        if PhishinClient.sharedInstance().tourSelecterProgressBar != nil
+        {
+            PhishinClient.sharedInstance().tourSelecterProgressBar!.removeFromSuperview()
+            PhishinClient.sharedInstance().tourSelecterProgressBar = nil
+        }
+        if PhishinClient.sharedInstance().setlistProgressBar != nil
+        {
+            PhishinClient.sharedInstance().setlistProgressBar!.removeFromSuperview()
+            PhishinClient.sharedInstance().setlistProgressBar = nil
+        }
+        if PhishinClient.sharedInstance().historyProgressBar != nil
+        {
+            PhishinClient.sharedInstance().historyProgressBar!.removeFromSuperview()
+            PhishinClient.sharedInstance().historyProgressBar = nil
+        }
+        if MapquestClient.sharedInstance().tourMapProgressBar != nil
+        {
+            MapquestClient.sharedInstance().tourMapProgressBar!.removeFromSuperview()
+            MapquestClient.sharedInstance().tourMapProgressBar = nil
         }
         
         /// put the map back at the default region
@@ -439,7 +459,6 @@ class TourMapViewController: UIViewController,
         progressBar.trackTintColor = UIColor.lightGrayColor()
         progressBar.transform = CGAffineTransformMakeScale(1, 2.5)
         self.progressBar = progressBar
-        // MapquestClient.sharedInstance().tourMapProgressBar = self.progressBar
         PhishinClient.sharedInstance().tourSelecterProgressBar = self.progressBar
         self.view.addSubview(progressBar)
         

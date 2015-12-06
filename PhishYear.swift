@@ -26,7 +26,6 @@ class PhishYear: NSManagedObject
         {
             if self.tours == nil
             {
-                // return nil
                 tourIDs = nil
             }
             else
@@ -37,8 +36,6 @@ class PhishYear: NSManagedObject
                 {
                     tourIDs!.append(tour.tourID.integerValue)
                 }
-                
-                // return tourIDs
             }
         }
         

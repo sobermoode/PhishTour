@@ -49,7 +49,6 @@ class PhishShow: NSManagedObject,
         {
             if self.songs?.count == 0
             {
-                // return nil
                 setlist = nil
             }
             else
@@ -117,8 +116,6 @@ class PhishShow: NSManagedObject,
                         }
                     }
                 }
-                
-                // return setlist
             }  
         }
         

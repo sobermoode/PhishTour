@@ -29,7 +29,6 @@ class PhishSong: NSManagedObject
         {
             if self.performances?.count == 0
             {
-                //  return nil
                 history = nil
             }
             else
@@ -85,8 +84,6 @@ class PhishSong: NSManagedObject
                         continue
                     }
                 }
-                
-                // return history
             }
         }
         

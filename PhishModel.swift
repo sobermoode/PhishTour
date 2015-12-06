@@ -40,7 +40,7 @@ class PhishModel: NSObject,
     var tourPicker: UIPickerView?
     
     /// a progress bar to display on the TourMapViewController as certain requests are in-progress
-    var progressBar: UIProgressView!
+    var progressBar: UIProgressView?
     
     class func sharedInstance() -> PhishModel
     {
