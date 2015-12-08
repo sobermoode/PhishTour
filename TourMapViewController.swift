@@ -463,9 +463,11 @@ class TourMapViewController: UIViewController,
         // self.reset(true)
         self.reset(true, map: false)
         
+        /*
         /// enable the "reset" button
         self.resetButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
         self.resetButton.enabled = true
+        */
         
         /// make sure we've got a tour selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour
@@ -748,6 +750,14 @@ class TourMapViewController: UIViewController,
             /// draw the trail between every coordinate
             let tourTrail = MKPolyline(coordinates: &showCoordinates, count: showCoordinates.count)
             self.tourMap.addOverlay(tourTrail)
+        }
+        
+        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
+        dispatch_after(delayTime, dispatch_get_main_queue())
+        {
+            /// enable the "reset" button
+            self.resetButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+            self.resetButton.enabled = true
         }
     }
     
