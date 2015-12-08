@@ -79,7 +79,7 @@ class TourMapViewController: UIViewController,
         resetButton.setTitleColor(resetButtonColor, forState: .Normal)
         resetButton.setTitle("Reset", forState: .Normal)
         resetButton.sizeToFit()
-        resetButton.addTarget(self, action: "reset:", forControlEvents: .TouchUpInside)
+        resetButton.addTarget(self, action: "reset:map:", forControlEvents: .TouchUpInside)
         resetButton.enabled = (PhishModel.sharedInstance().selectedTour == nil) ? false : true
         let navResetButton = UIBarButtonItem(customView: resetButton)
         
@@ -363,7 +363,7 @@ class TourMapViewController: UIViewController,
     // MARK: Map methods
     
     /// reset the map state
-    func reset(saveTour: Bool = false)
+    func reset(saveTour: Bool = false, map: Bool = true)
     {
         /// disable the "reset" button
         self.resetButton.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
@@ -446,8 +446,11 @@ class TourMapViewController: UIViewController,
             MapquestClient.sharedInstance().tourMapProgressBar = nil
         }
         
-        /// put the map back at the default region
-        self.tourMap.setRegion(self.defaultRegion, animated: true)
+        if map
+        {
+            /// put the map back at the default region
+            self.tourMap.setRegion(self.defaultRegion, animated: true)
+        }
     }
     
     /// display the shows for the selected tour on the map
@@ -457,7 +460,8 @@ class TourMapViewController: UIViewController,
         PhishModel.sharedInstance().initialTour = nil
         
         /// reset everything
-        self.reset(true)
+        // self.reset(true)
+        self.reset(true, map: false)
         
         /// enable the "reset" button
         self.resetButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
