@@ -133,6 +133,12 @@ class TourMapViewController: UIViewController,
         /// then request the years and tours to populate the pickers with
         if self.tourSelecter == nil
         {
+            /// remember what tours to show in the list if the selecter is canceled
+            if let selectedTour = PhishModel.sharedInstance().selectedTour
+            {
+                PhishModel.sharedInstance().initialTour = selectedTour
+            }
+            
             self.tourSelecter = UIVisualEffectView(effect: UIBlurEffect(style: .Light))
             self.tourSelecter?.frame = CGRect(x: CGRectGetMinX(self.view.bounds), y: self.navigationController!.navigationBar.bounds.height, width: self.view.bounds.width, height: self.view.bounds.height)
             
@@ -277,10 +283,12 @@ class TourMapViewController: UIViewController,
                                         if tourIndex != NSNotFound
                                         {
                                             tourPicker.selectRow(tourIndex, inComponent: 0, animated: false)
+                                            PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours![tourIndex]
                                         }
                                         else
                                         {
                                             tourPicker.selectRow(0, inComponent: 0, animated: false)
+                                            PhishModel.sharedInstance().selectedTour = PhishModel.sharedInstance().currentTours!.first!
                                         }
                                     }
                                     else
@@ -314,6 +322,14 @@ class TourMapViewController: UIViewController,
         /// dismiss the tour selecter
         else
         {
+            /// if year(s) or tour(s) were picked but not selected,
+            /// reset the current tour so the correct shows appear in the list
+            if let initialTour = PhishModel.sharedInstance().initialTour
+            {
+                PhishModel.sharedInstance().selectedTour = initialTour
+                PhishModel.sharedInstance().initialTour = nil
+            }
+            
             /// revert the "select tour" button
             self.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
             self.selectTourButton.setTitle("Select Tour", forState: .Normal)
@@ -437,6 +453,9 @@ class TourMapViewController: UIViewController,
     /// display the shows for the selected tour on the map
     func followTour()
     {
+        /// reset this flag so it doesn't set the wrong tour info the next time the selecter appears
+        PhishModel.sharedInstance().initialTour = nil
+        
         /// reset everything
         self.reset(true)
         

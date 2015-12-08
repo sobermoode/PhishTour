@@ -22,6 +22,9 @@ class PhishModel: NSObject,
     /// the available years
     var years: [PhishYear]?
     
+    /// to save the currently selected tour if the selecter is canceled
+    var initialTour: PhishTour?
+    
     /// previous selections
     var previousYear: Int?
     var previousTour: Int?
