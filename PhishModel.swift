@@ -56,7 +56,7 @@ class PhishModel: NSObject,
     }
     
     /// fetch the saved years or request them
-    func getYears(completionHandler: (yearsError: ErrorType?) -> Void)
+    func getYears(completionHandler: (yearsError: NSError?) -> Void)
     {
         /// create a fetch request with sort descriptor to sort them in descending order
         let yearsFetchRequest = NSFetchRequest(entityName: "PhishYear")
@@ -92,6 +92,8 @@ class PhishModel: NSObject,
                         if yearsRequestError != nil
                         {
                             completionHandler(yearsError: yearsRequestError)
+                            
+                            return
                         }
                         else
                         {
@@ -126,7 +128,8 @@ class PhishModel: NSObject,
             }
             catch
             {
-                completionHandler(yearsError: error)
+                let nsError = error as NSError
+                completionHandler(yearsError: nsError)
             }
         }
     }
@@ -296,7 +299,7 @@ class PhishModel: NSObject,
                             /// something went wrong
                             if setlistError != nil
                             {
-                                completionHandler(setlistError: setlistError!, setlist: setlist!)
+                                completionHandler(setlistError: setlistError!, setlist: nil)
                             }
                             /// return the setlist
                             else

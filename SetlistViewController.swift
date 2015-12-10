@@ -134,19 +134,22 @@ class SetlistViewController: UIViewController,
                 /// something went wrong
                 if setlistError != nil
                 {
-                    /// create an alert for the problem and unwind back to the map
-                    let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the setlist for \(self.show.date) \(self.show.year): \(setlistError!.localizedDescription)", preferredStyle: .Alert)
-                    let alertAction = UIAlertAction(title: "OK", style: .Default)
+                    CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
                     {
-                        action in
+                        /// create an alert for the problem and unwind back to the map
+                        let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the setlist for \(self.show.date) \(self.show.year): \(setlistError!.localizedDescription)", preferredStyle: .Alert)
+                        let alertAction = UIAlertAction(title: "OK", style: .Default)
+                        {
+                            action in
+                            
+                            self.backToMap()
+                        }
+                        alert.addAction(alertAction)
                         
-                        self.backToMap()
-                    }
-                    alert.addAction(alertAction)
-                    
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.presentViewController(alert, animated: true, completion: nil)
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.presentViewController(alert, animated: true, completion: nil)
+                        }
                     }
                 }
                 else

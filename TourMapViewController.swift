@@ -190,7 +190,7 @@ class TourMapViewController: UIViewController,
                 if yearsError != nil
                 {
                     /// create an alert for the problem and dismiss the tour selecter
-                    let alert = UIAlertController(title: "Whoops!", message: "\(yearsError!)", preferredStyle: .Alert)
+                    let alert = UIAlertController(title: "Whoops!", message: "There was a problem getting the years Phish toured in: \(yearsError!.localizedDescription)", preferredStyle: .Alert)
                     let alertAction = UIAlertAction(title: "OK", style: .Default)
                     {
                         action in

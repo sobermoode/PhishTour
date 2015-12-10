@@ -131,19 +131,22 @@ class SongHistoryViewController: UIViewController,
                 
                 if historyError != nil
                 {
-                    /// create an alert for the problem and unwind back to the setlist
-                    let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the history for \(self.song.name): \(historyError!.localizedDescription)", preferredStyle: .Alert)
-                    let alertAction = UIAlertAction(title: "OK", style: .Default)
+                    CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
                     {
-                        action in
+                        /// create an alert for the problem and unwind back to the setlist
+                        let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the history for \(self.song.name): \(historyError!.localizedDescription)", preferredStyle: .Alert)
+                        let alertAction = UIAlertAction(title: "OK", style: .Default)
+                        {
+                            action in
+                            
+                            self.backToSetlist()
+                        }
+                        alert.addAction(alertAction)
                         
-                        self.backToSetlist()
-                    }
-                    alert.addAction(alertAction)
-                    
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.presentViewController(alert, animated: true, completion: nil)
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.presentViewController(alert, animated: true, completion: nil)
+                        }
                     }
                 }
                 else
