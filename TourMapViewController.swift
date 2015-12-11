@@ -460,14 +460,7 @@ class TourMapViewController: UIViewController,
         PhishModel.sharedInstance().initialTour = nil
         
         /// reset everything
-        // self.reset(true)
         self.reset(true, map: false)
-        
-        /*
-        /// enable the "reset" button
-        self.resetButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
-        self.resetButton.enabled = true
-        */
         
         /// make sure we've got a tour selected
         guard let selectedTour = PhishModel.sharedInstance().selectedTour

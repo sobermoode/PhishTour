@@ -58,7 +58,6 @@ class MapquestClient: NSObject
     /// any shows that don't have lat/long info will get geocoded by Mapquest
     func geocodeShows(shows: [PhishShow], withType type: Services.Geocoding.GeocodingType, completionHandler: (geocodingError: NSError!) -> Void)
     {
-        print("About to geocode shows...")
         /// construct the request URL, starting with the base
         var mapquestRequestString = mapquestBaseURL + Services.Geocoding.GeocodingURL + Versions.Version1 + type.rawValue
         mapquestRequestString += "key=\(apiKey)"
