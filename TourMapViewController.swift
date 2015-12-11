@@ -494,41 +494,44 @@ class TourMapViewController: UIViewController,
             /// something went wrong
             if showRequestError != nil
             {
-                /// create an alert for the problem
-                let alert = UIAlertController(title: "Whoops!", message: "There was an error getting info for the \(selectedTour.name): \(showRequestError!.localizedDescription)", preferredStyle: .Alert)
-                let alertAction = UIAlertAction(title: "OK", style: .Default)
+                CoreDataStack.sharedInstance().managedObjectContext.performBlockAndWait()
                 {
-                    action in
-                    
-                    /// set the tour selecter to display the previous successfully requested year and its tours
-                    if let previousYear = PhishModel.sharedInstance().previousYear
+                    /// create an alert for the problem
+                    let alert = UIAlertController(title: "Whoops!", message: "There was an error getting info for the \(selectedTour.name): \(showRequestError!.localizedDescription)", preferredStyle: .Alert)
+                    let alertAction = UIAlertAction(title: "OK", style: .Default)
                     {
-                        PhishModel.sharedInstance().selectedYear = PhishModel.sharedInstance().years![previousYear]
-                    }
-                    PhishModel.sharedInstance().currentTours = PhishModel.sharedInstance().selectedYear!.tours
-                    
-                    /// reset the flag
-                    self.didComeFromSongHistory = false
-                    
-                    /// reset the map, flash the progress bar red, then, remove it after a short delay
-                    dispatch_async(dispatch_get_main_queue())
-                    {
-                        self.reset()
+                        action in
                         
-                        self.progressBar?.progressTintColor = UIColor.redColor()
-                        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
-                        dispatch_after(delayTime, dispatch_get_main_queue())
+                        /// set the tour selecter to display the previous successfully requested year and its tours
+                        if let previousYear = PhishModel.sharedInstance().previousYear
                         {
-                            self.progressBar?.removeFromSuperview()
-                            self.progressBar = nil
+                            PhishModel.sharedInstance().selectedYear = PhishModel.sharedInstance().years![previousYear]
+                        }
+                        PhishModel.sharedInstance().currentTours = PhishModel.sharedInstance().selectedYear!.tours
+                        
+                        /// reset the flag
+                        self.didComeFromSongHistory = false
+                        
+                        /// reset the map, flash the progress bar red, then, remove it after a short delay
+                        dispatch_async(dispatch_get_main_queue())
+                        {
+                            self.reset()
+                            
+                            self.progressBar?.progressTintColor = UIColor.redColor()
+                            let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+                            dispatch_after(delayTime, dispatch_get_main_queue())
+                            {
+                                self.progressBar?.removeFromSuperview()
+                                self.progressBar = nil
+                            }
                         }
                     }
-                }
-                alert.addAction(alertAction)
-                
-                dispatch_async(dispatch_get_main_queue())
-                {
-                    self.presentViewController(alert, animated: true, completion: nil)
+                    alert.addAction(alertAction)
+                    
+                    dispatch_async(dispatch_get_main_queue())
+                    {
+                        self.presentViewController(alert, animated: true, completion: nil)
+                    }
                 }
             }
             else

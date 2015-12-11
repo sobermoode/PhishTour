@@ -135,7 +135,7 @@ class PhishModel: NSObject,
     }
     
     /// fetch the saved tours for a given year or request them
-    func getToursForYear(year: PhishYear, completionHandler: (toursError: ErrorType?, tours: [PhishTour]?) -> Void)
+    func getToursForYear(year: PhishYear, completionHandler: (toursError: NSError?, tours: [PhishTour]?) -> Void)
     {
         /// create a fetch request with a predicate to match the year being requested
         let toursFetchRequest = NSFetchRequest(entityName: "PhishTour")
@@ -163,16 +163,18 @@ class PhishModel: NSObject,
                     
                     /// set the flag for the year
                     year.didRequestAllTours = true
+                    
+                    /// save the new tours to the context
+                    self.context.performBlockAndWait()
+                    {
+                        CoreDataStack.sharedInstance().saveContext()
+                    }
+                    
+                    /// return the tours
+                    completionHandler(toursError: nil, tours: requestedTours!)
+                    
+                    return
                 }
-                
-                /// save the new tours to the context
-                self.context.performBlockAndWait()
-                {
-                    CoreDataStack.sharedInstance().saveContext()
-                }
-                
-                /// return the tours
-                completionHandler(toursError: nil, tours: requestedTours!)
             }
         }
         /// we've got all the tours, so fetch them from core data
@@ -199,7 +201,8 @@ class PhishModel: NSObject,
                 }
                 catch
                 {
-                    completionHandler(toursError: error, tours: nil)
+                    let nsError = error as NSError
+                    completionHandler(toursError: nsError, tours: nil)
                 }
             }
         }
@@ -630,27 +633,65 @@ class PhishModel: NSObject,
                     if toursError != nil
                     {
                         /// set the tour selecter to display the previous successfully requested year and its tours
-                        self.selectedYear = self.years![self.previousYear!]
-                        self.currentTours = self.selectedYear!.tours
-                        
-                        /// create an alert for the problem and dismiss the tour selecter
-                        let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(year.year): \(toursError!)", preferredStyle: .Alert)
-                        let alertAction = UIAlertAction(title: "OK", style: .Default)
+                        self.context.performBlockAndWait()
                         {
-                            action in
-                            
-                            /// revert the "select tour" button
-                            self.tourMapVC!.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
-                            self.tourMapVC!.selectTourButton.setTitle("Select Tour", forState: .Normal)
-                            
-                            self.tourMapVC!.tourSelecter?.removeFromSuperview()
-                            self.tourMapVC!.tourSelecter = nil
+                            if let previousYear = self.previousYear, theYear = self.years?[previousYear], theTours = theYear.tours
+                            {
+                                self.selectedYear = theYear
+                                self.currentTours = theTours
+                            }
+                            else
+                            {
+                                self.selectedYear = self.years!.first!
+                                self.currentTours = self.selectedYear!.tours
+                            }
                         }
-                        alert.addAction(alertAction)
                         
-                        dispatch_async(dispatch_get_main_queue())
+                        /*
+                        if let previousYear = self.previousYear
                         {
-                            self.tourMapVC!.presentViewController(alert, animated: true, completion: nil)
+                            if let theYear = self.years?[previousYear]
+                            {
+                                if let theTours = theYear.tours
+                                {
+                                    // self.selectedYear = self.years![previousYear]
+                                    self.selectedYear = theYear
+                                    // print("selectedYear: \(self.selectedYear?.year.integerValue)")
+                                    // self.currentTours = self.selectedYear!.tours
+                                    self.currentTours = theTours
+                                }
+                            }
+                        }
+                        */
+                            /*
+                        else
+                        {
+                            self.selectedYear = self.years!.first!
+                            self.currentTours = self.selectedYear!.tours
+                        }
+                        */
+                        
+                        self.context.performBlockAndWait()
+                        {
+                            /// create an alert for the problem and dismiss the tour selecter
+                            let alert = UIAlertController(title: "Whoops!", message: "There was an error requesting the tours for \(year.year): \(toursError!.localizedDescription)", preferredStyle: .Alert)
+                            let alertAction = UIAlertAction(title: "OK", style: .Default)
+                            {
+                                action in
+                                
+                                /// revert the "select tour" button
+                                self.tourMapVC!.selectTourButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+                                self.tourMapVC!.selectTourButton.setTitle("Select Tour", forState: .Normal)
+                                
+                                self.tourMapVC!.tourSelecter?.removeFromSuperview()
+                                self.tourMapVC!.tourSelecter = nil
+                            }
+                            alert.addAction(alertAction)
+                            
+                            dispatch_async(dispatch_get_main_queue())
+                            {
+                                self.tourMapVC!.presentViewController(alert, animated: true, completion: nil)
+                            }
                         }
                     }
                     /// the request was successful
